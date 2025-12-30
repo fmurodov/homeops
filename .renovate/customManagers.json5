@@ -1,0 +1,51 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  customManagers: [
+    {
+      customType: "regex",
+      description: "Process annotated dependencies",
+      managerFilePatterns: [
+        "/\\.env(?:\\.j2)?$/",
+        "/\\.sh(?:\\.j2)?$/",
+        "/\\.yaml(?:\\.j2)?$/",
+      ],
+      matchStrings: [
+        // # renovate: datasource=github-releases depName=foo/bar
+        // foobar_version: v1.0.0
+        // # renovate: datasource=docker depName=ghcr.io/foo/bar
+        // FOOBAR_VERSION=v1.0.0
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+(:\\s|=)(&\\S+\\s)?(?<currentValue>\\S+)",
+      ],
+      datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
+    },
+    {
+      customType: "regex",
+      description: "Process OCI dependencies",
+      managerFilePatterns: [
+        "/\\.yaml(?:\\.j2)?$/",
+      ],
+      matchStrings: [
+        "oci://(?<depName>[^:]+):(?<currentValue>\\S+)",
+      ],
+      datasourceTemplate: "docker",
+    },
+    {
+      customType: "regex",
+      description: "Match Talos factory installer images with version tags in YAML files",
+      managerFilePatterns: ["/\\.ya?ml$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s+image: factory\\.talos\\.dev/installer/[a-f0-9]+:(?<currentValue>v\\S+)",
+      ],
+      datasourceTemplate: "github-releases",
+    },
+    {
+      customType: "regex",
+      description: "Match Talos factory installer images with version tags in Markdown files",
+      managerFilePatterns: ["/\\.md$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*factory\\.talos\\.dev/installer/[a-f0-9]+:(?<currentValue>v\\S+)",
+      ],
+      datasourceTemplate: "github-releases",
+    },
+  ],
+}
