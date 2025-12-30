@@ -2,12 +2,6 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   packageRules: [
     {
-      description: "Disable regex manager for Talos (use override instead)",
-      matchManagers: ["regex"],
-      matchPackageNames: ["siderolabs/talos"],
-      enabled: false,
-    },
-    {
       description: "Override Talos Installer Package Name",
       matchDatasources: ["docker"],
       matchPackageNames: ["/factory\\.talos\\.dev/"],
