@@ -210,7 +210,7 @@ machine:
   install:
     disk: /dev/nvme0n1 # The disk used for installations.
     # renovate: datasource=github-releases depName=siderolabs/talos
-    image: factory.talos.dev/installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:v1.11.6 # Allows for supplying the image used to perform the installation.
+    image: factory.talos.dev/installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:v1.12.0 # Allows for supplying the image used to perform the installation.
     wipe: true # Indicates if the installation disk should be wiped at installation time.
 
     # # Look up disk using disk attributes like model, size, serial and others.
