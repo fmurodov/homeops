@@ -1,0 +1,63 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: bds
+    app.kubernetes.io/name: bds
+  annotations:
+    reloader.stakater.com/auto: "true"
+  name: bds
+spec:
+  # never more than 1 since BDS is not horizontally scalable
+  replicas: 1
+  serviceName: bds
+  selector:
+    matchLabels:
+      app: bds
+  template:
+    metadata:
+      labels:
+        app: bds
+        app.kubernetes.io/name: bds
+    spec:
+      containers:
+        - name: main
+          image: "itzg/minecraft-bedrock-server:2025.12.1"
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: minecraft-bedrock
+          volumeMounts:
+            - mountPath: /data
+              name: data
+          ports:
+            - name: bds-ipv4
+              containerPort: 19132
+              protocol: UDP
+            - name: bds-ipv6
+              containerPort: 19133
+              protocol: UDP
+          resources:
+            limits:
+              cpu: "2"
+              memory: "1500Mi"
+            requests:
+              cpu: "0.5"
+              memory: "500Mi"
+          readinessProbe: &probe
+            exec:
+              command:
+                - mc-monitor
+                - status-bedrock
+                - --host
+                # force health check against IPv4 port
+                - 127.0.0.1
+            initialDelaySeconds: 60
+          livenessProbe: *probe
+          tty: true
+          stdin: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: bds-data

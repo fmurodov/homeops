@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bricktracker
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - "bricktracker.${CLUSTER_DOMAIN}"
+      secretName: bricktracker-tls
+  rules:
+    - host: "bricktracker.${CLUSTER_DOMAIN}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bricktracker-http
+                port:
+                  number: 3333

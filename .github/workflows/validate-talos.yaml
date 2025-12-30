@@ -1,0 +1,33 @@
+---
+name: Validate Talos Configs
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "talos/**/*.yaml"
+      - ".github/workflows/validate-talos.yaml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "talos/**/*.yaml"
+      - ".github/workflows/validate-talos.yaml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Talos Node Configurations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Talos CLI
+        run: |
+          curl -sL https://talos.dev/install | sh
+          talosctl version --client
+
+      - name: Validate Talos configurations
+        run: ./scripts/validate.sh talos

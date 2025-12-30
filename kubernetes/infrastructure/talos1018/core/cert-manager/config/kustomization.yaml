@@ -1,0 +1,9 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./cloudflare-api-secret.sops.yaml
+  - ./clusterissuer-staging.yaml
+  - ./clusterissuer.yaml
+
+namespace: cert-manager

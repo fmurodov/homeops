@@ -1,0 +1,26 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ingress-nginx-release
+spec:
+  chart:
+    spec:
+      chart: ingress-nginx
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx-repo
+      version: 4.14.1
+  interval: 1m0s
+  values:
+    controller:
+      service:
+        labels:
+          service.kubernetes.io/topology: external
+        annotations:
+          io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:2000:0:6:10,10.18.6.10"
+        ipFamilyPolicy: PreferDualStack
+        ipFamilies:
+          - IPv6
+          - IPv4

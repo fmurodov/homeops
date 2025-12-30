@@ -1,0 +1,12 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: internal-pool
+spec:
+  blocks:
+    - cidr: "fd00:1018:2000::/96"
+    - cidr: "10.96.0.0/12"
+  serviceSelector:
+    matchLabels:
+      service.kubernetes.io/topology: internal

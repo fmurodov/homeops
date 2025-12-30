@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: netbootxyz
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - "netbootxyz.${CLUSTER_DOMAIN}"
+      secretName: netbootxyz-tls
+  rules:
+    - host: "netbootxyz.${CLUSTER_DOMAIN}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: netbootxyz
+                port:
+                  number: 3000

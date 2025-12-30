@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bricktracker
+  labels:
+    app.kubernetes.io/name: bricktracker
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bricktracker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bricktracker
+    spec:
+      containers:
+        - name: bricktracker
+          image: "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.2.4"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3333
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: bricktracker-config
+            - secretRef:
+                name: bricktracker-secret
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /app/static/instructions
+              subPath: instructions
+              name: static
+            - mountPath: /app/static/minifigs
+              subPath: minifigs
+              name: static
+            - mountPath: /app/static/parts
+              subPath: parts
+              name: static
+            - mountPath: /app/static/sets
+              subPath: sets
+              name: static
+          resources:
+            limits:
+              cpu: "2"
+              memory: "1000Mi"
+            requests:
+              cpu: "0.1"
+              memory: "200Mi"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: bricktracker-data
+        - name: static
+          persistentVolumeClaim:
+            claimName: bricktracker-static
