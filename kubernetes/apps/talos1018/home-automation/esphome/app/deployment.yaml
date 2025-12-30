@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: esphome
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: esphome
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: esphome
+    spec:
+      containers:
+        - name: esphome
+          image: "ghcr.io/esphome/esphome:2025.11.5"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 6052
+              protocol: TCP
+          env:
+            - name: TZ
+              value: "Europe/Amsterdam"
+            - name: BASE_URL
+              value: "https://esphome.${CLUSTER_DOMAIN}"
+            - name: ESPHOME_DASHBOARD_USE_PING
+              value: "true"
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: esphome-secret
+                  key: USERNAME
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: esphome-secret
+                  key: PASSWORD
+          volumeMounts:
+            - mountPath: /config
+              name: data
+            - mountPath: /cache
+              name: cache
+            - mountPath: /config/.esphome
+              name: build-cache
+            - name: esphome-secret
+              mountPath: /config/secrets.yaml
+              subPath: secrets.yaml
+            - name: font
+              mountPath: /config/fonts/MatrixLight8X.ttf
+              subPath: MatrixLight8X.ttf
+          resources:
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+            requests:
+              cpu: "0.02"
+              memory: "50Mi"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: esphome-data
+        - name: cache
+          emptyDir:
+            sizeLimit: 5Gi
+        - name: build-cache
+          emptyDir:
+            sizeLimit: 5Gi
+        - name: esphome-secret
+          secret:
+            secretName: esphome-secret
+        - name: font
+          configMap:
+            name: esphome-font

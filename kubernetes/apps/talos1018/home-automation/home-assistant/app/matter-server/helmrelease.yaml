@@ -1,0 +1,51 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: matter-server
+spec:
+  chart:
+    spec:
+      chart: app-template
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+      version: 4.5.0
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      matter-server:
+        type: statefulset
+        containers:
+          app:
+            image:
+              repository: ghcr.io/home-assistant-libs/python-matter-server
+              tag: 8.1.0@sha256:170aa093ce91c76cde4cc390918307590f0f5558fcec93f913af3cb019e6562a
+            env:
+              TZ: Europe/Amsterdam
+              MATTER_SERVER__INSTANCE_NAME: "{{ .Release.Name }}"
+              MATTER_SERVER__LOG_LEVEL: info
+    defaultPodOptions:
+      hostNetwork: true
+    service:
+      app:
+        controller: matter-server
+        ports:
+          websocket:
+            enabled: true
+            port: 5580
+    persistence:
+      config:
+        enabled: true
+        existingClaim: matter-server-data
+        globalMounts:
+          - path: /data

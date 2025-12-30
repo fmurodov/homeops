@@ -1,0 +1,62 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spoolman
+  labels:
+    app.kubernetes.io/name: spoolman
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: spoolman
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: spoolman
+    spec:
+      containers:
+        - name: spoolman
+          image: "ghcr.io/donkie/spoolman:0.22.1"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: SPOOLMAN_PORT
+              value: "8000"
+            - name: SPOOLMAN_HOST
+              value: "::"
+          volumeMounts:
+            - mountPath: /home/app/.local/share/spoolman
+              name: data
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          resources:
+            limits:
+              cpu: "1"
+              memory: "400Mi"
+            requests:
+              cpu: "0.012"
+              memory: "200Mi"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: spoolman-data

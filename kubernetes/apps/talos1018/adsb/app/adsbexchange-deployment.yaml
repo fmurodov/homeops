@@ -1,0 +1,64 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adsbexchange
+  namespace: adsb
+  labels:
+    app.kubernetes.io/name: adsbexchange
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: adsbexchange
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: adsbexchange
+    spec:
+      containers:
+        - name: adsbexchange
+          image: ghcr.io/sdr-enthusiasts/docker-adsbexchange:20250210.1909
+          envFrom:
+            - secretRef:
+                name: adsb-config
+          env:
+            - name: LAT
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LAT
+            - name: LONG
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LONG
+            - name: ALT
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_ALT
+            - name: TZ
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_TZ
+            - name: UUID
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_UUID
+            - name: SITENAME
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_SITENAME
+          resources:
+            limits:
+              cpu: "0.1"
+              memory: "120Mi"
+            requests:
+              cpu: "0.05"
+              memory: "60Mi"

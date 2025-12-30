@@ -1,0 +1,40 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: longhorn-release
+  # namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: longhorn
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn-repo
+      version: 1.10.1
+  install:
+    createNamespace: true
+  interval: 1m0s
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Service
+            patch: |
+              - op: add
+                path: /spec/ipFamilies
+                value: ["IPv6", "IPv4"]
+              - op: add
+                path: /spec/ipFamilyPolicy
+                value: PreferDualStack
+  values:
+    defaultSettings:
+      backupTarget: s3://longhorn-backup@auto/1018
+      backupTargetCredentialSecret: longhorn-r2-backups
+      defaultReplicaCount: "3"
+      createDefaultDiskLabeledNodes: true
+      # systemManagedComponentsNodeSelector: "node.longhorn.io/create-default-disk:true"
+    longhornManager:
+      nodeSelector:
+        node.longhorn.io/create-default-disk: "true"

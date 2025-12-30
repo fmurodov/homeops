@@ -1,0 +1,16 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: external-pool
+spec:
+  blocks:
+    - cidr: "${IPV6_PREFIX_GUA}:2000::/96"
+    - start: "10.18.6.10"
+      stop: "10.18.6.29"
+    - start: "10.18.6.40"
+      stop: "10.18.6.49"
+
+  serviceSelector:
+    matchLabels:
+      service.kubernetes.io/topology: external

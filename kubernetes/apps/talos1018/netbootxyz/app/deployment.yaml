@@ -1,0 +1,67 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbootxyz
+  labels:
+    app.kubernetes.io/name: netbootxyz
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: netbootxyz
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: netbootxyz
+    spec:
+      containers:
+        - name: netbootxyz
+          image: ghcr.io/netbootxyz/netbootxyz:0.7.6-nbxyz10
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: "Etc/UTC"
+            - name: MENU_VERSION
+              # renovate: datasource=github-releases depName=netbootxyz/netboot.xyz
+              value: "2.0.84"
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+            - name: http-assets
+              containerPort: 80
+              protocol: TCP
+            - name: tftp
+              containerPort: 69
+              protocol: UDP
+          # livenessProbe:
+          #   failureThreshold: 3
+          #   initialDelaySeconds: 0
+          #   periodSeconds: 10
+          #   tcpSocket:
+          #     port: 3000
+          #   timeoutSeconds: 1
+          # readinessProbe:
+          #   failureThreshold: 3
+          #   initialDelaySeconds: 0
+          #   periodSeconds: 10
+          #   tcpSocket:
+          #     port: 3000
+          #   timeoutSeconds: 1
+          # startupProbe:
+          #   failureThreshold: 30
+          #   initialDelaySeconds: 0
+          #   periodSeconds: 5
+          #   tcpSocket:
+          #     port: 3000
+          #   timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: "0.2"
+              memory: "512Mi"
+            requests:
+              cpu: "0.002"
+              memory: "128Mi"

@@ -1,0 +1,142 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: paperless-backup
+spec:
+  # Run daily at 2 AM
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: paperless-backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: exporter
+              image: ghcr.io/paperless-ngx/paperless-ngx:2.20.3
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  echo "Starting Paperless export at $(date)"
+
+                  # Run the export command (document_exporter only reads data)
+                  python3 manage.py document_exporter --no-thumbnail --no-archive --delete /export
+
+                  echo "Export completed at $(date)"
+                  touch /shared/export-done
+              env:
+                - name: PAPERLESS_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: paperless-secret
+                      key: PAPERLESS_SECRET_KEY
+                - name: PAPERLESS_REDIS
+                  value: "redis://paperless-redis:6379"
+                - name: PAPERLESS_DATA_DIR
+                  value: "/data/local/data"
+                - name: PAPERLESS_MEDIA_ROOT
+                  value: "/data/local/media"
+                - name: PAPERLESS_LOGGING_DIR
+                  value: "/tmp/log"
+              volumeMounts:
+                # Note: mounted read-write because Paperless checks write access on startup
+                # The document_exporter command only reads data, no writes occur
+                - name: data
+                  mountPath: /data/local
+                - name: export
+                  mountPath: /export
+                - name: shared
+                  mountPath: /shared
+                - name: tmp-logs
+                  mountPath: /tmp/log
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 512Mi
+                limits:
+                  cpu: 1000m
+                  memory: 2Gi
+
+            - name: uploader
+              image: rclone/rclone:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+
+                  # Wait for export to complete
+                  echo "Waiting for export to complete..."
+                  while [ ! -f /shared/export-done ]; do
+                    sleep 5
+                  done
+
+                  echo "Export done, starting upload at $(date)"
+
+                  # Count files
+                  FILE_COUNT=$(find /export -type f 2>/dev/null | wc -l)
+                  echo "Total files to upload: $FILE_COUNT"
+
+                  if [ "$FILE_COUNT" -eq 0 ]; then
+                    echo "No files to upload, exiting"
+                    exit 0
+                  fi
+
+                  # Sync to Google Drive - single directory, always current
+                  echo "Syncing to gdrive:docs-export..."
+
+                  rclone sync /export "gdrive:docs-export" \
+                    --config /config/rclone.conf \
+                    --progress \
+                    --transfers 8 \
+                    --checkers 16 \
+                    --fast-list \
+                    --use-mmap \
+                    --stats 1m \
+                    --log-level INFO
+
+                  echo "Upload completed successfully at $(date)"
+                  echo "Files synced: $FILE_COUNT to docs-export/"
+                  echo "Backup job completed successfully"
+              volumeMounts:
+                - name: export
+                  mountPath: /export
+                  readOnly: true
+                - name: rclone-config
+                  mountPath: /config
+                  readOnly: true
+                - name: shared
+                  mountPath: /shared
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: paperless-data
+            - name: export
+              emptyDir:
+                sizeLimit: 20Gi # Adjust based on your export size
+            - name: rclone-config
+              secret:
+                secretName: paperless-secret
+                items:
+                  - key: rclone.conf
+                    path: rclone.conf
+            - name: shared
+              emptyDir: {}
+            - name: tmp-logs
+              emptyDir: {}

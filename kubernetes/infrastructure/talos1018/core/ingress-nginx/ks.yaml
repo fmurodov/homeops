@@ -1,0 +1,43 @@
+---
+# Ingress NGINX - Controller (Helm deployment)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-ingress-nginx-app
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-cilium-config
+    - name: infra-cert-manager-config
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/infrastructure/talos1018/core/ingress-nginx/app
+  prune: true
+  wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
+---
+# Ingress NGINX - Config (Additional configuration if needed)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-ingress-nginx-config
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-ingress-nginx-app
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/infrastructure/talos1018/core/ingress-nginx/config
+  prune: true
+  wait: true

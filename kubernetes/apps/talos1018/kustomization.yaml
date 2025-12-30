@@ -1,0 +1,40 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./kube-system
+
+  # Monitoring and Observability
+  - ./kube-prometheus-stack/ks.yaml
+
+  # Network and Infrastructure
+  - ./cloudflared/ks.yaml
+  - ./chrony/ks.yaml
+
+  # Home Automation
+  - ./home-automation
+
+  # Self Hosted
+  - ./self-hosted
+
+  # Web Services and Apps
+  - ./homepage/ks.yaml
+  - ./mealie/ks.yaml
+  - ./homebox/ks.yaml
+  - ./bricktracker/ks.yaml
+
+  # Media and Entertainment
+  - ./media
+  - ./minecraft-bedrock/ks.yaml
+
+  # 3D Printing
+  - ./spoolman/ks.yaml
+
+  # Networking and Utilities
+  - ./adsb/ks.yaml
+  - ./netbootxyz/ks.yaml
+  - ./openspeedtest/ks.yaml
+  - ./capacitor/ks.yaml
+
+  # Development and Testing
+  - ./podinfo/ks.yaml
