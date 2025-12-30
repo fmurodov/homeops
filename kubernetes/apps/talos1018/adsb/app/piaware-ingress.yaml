@@ -1,0 +1,26 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-piaware
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt"
+
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - "piaware.adsb.${CLUSTER_DOMAIN}"
+      secretName: piaware-tls
+  rules:
+    - host: piaware.adsb.${CLUSTER_DOMAIN}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: piaware
+                port:
+                  name: http

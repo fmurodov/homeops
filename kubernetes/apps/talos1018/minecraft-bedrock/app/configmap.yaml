@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: minecraft-bedrock
+  labels:
+    role: service-config
+    app.kubernetes.io/name: bds
+data:
+  # Find more options at https://github.com/itzg/docker-minecraft-bedrock-server#server-properties
+  # Remove # from in front of line if changing from default values.
+  # renovate: datasource=github-releases depName=LomotHo/minecraft-bedrock
+  VERSION: 1.21.131.1
+  EULA: "TRUE" # Must accept EULA to use this minecraft server
+  GAMEMODE: "creative" # Options: survival, creative, adventure
+  #DIFFICULTY: "easy" # Options: peaceful, easy, normal, hard
+  #DEFAULT_PLAYER_PERMISSION_LEVEL: "member" # Options: visitor, member, operator
+  #LEVEL_NAME: "my_minecraft_world"
+  #LEVEL_SEED: "33480944"
+  SERVER_NAME: "obshi"
+  #SERVER_PORT: "19132"
+  #LEVEL_TYPE: "DEFAULT" # Options: FLAT, LEGACY, DEFAULT
+  #ALLOW_CHEATS: "false" # Options: true, false
+  #MAX_PLAYERS: "10"
+  #PLAYER_IDLE_TIMEOUT: "30"
+  #TEXTUREPACK_REQUIRED: "false" # Options: true, false
+  #
+  ## Changing these will have a security impact
+  #ONLINE_MODE: "true" # Options: true, false (removes Xbox Live account requirements)
+  #WHITE_LIST: "false" # If enabled, need to provide a whitelist.json by your own means.
+  #
+  ## Changing these will have a performance impact
+  #VIEW_DISTANCE: "10"
+  #TICK_DISTANCE: "4"
+  #MAX_THREADS: "8"
+  OPS: "2535463860242144,2535442747126241,2535459909665364" # fmurodov,Akram7983,Robiya1830

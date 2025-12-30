@@ -1,0 +1,82 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: home-assistant
+spec:
+  chart:
+    spec:
+      chart: app-template
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+      version: "4.5.0"
+  interval: 1h0m0s
+  values:
+    controllers:
+      home-assistant:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/home-assistant/home-assistant
+              tag: "2025.12.3"
+            env:
+              TZ: Europe/Amsterdam
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              limits:
+                memory: 2Gi
+              requests:
+                cpu: 100m
+                memory: 512Mi
+
+    service:
+      app:
+        controller: home-assistant
+        ipFamilyPolicy: PreferDualStack
+        ports:
+          http:
+            port: 8123
+
+    ingress:
+      app:
+        enabled: true
+        className: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt
+        hosts:
+          - host: hass.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: app
+                  port: http
+          - host: hass.${DOMAIN}
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - secretName: home-assistant-tls
+            hosts:
+              - hass.${CLUSTER_DOMAIN}
+              - hass.${DOMAIN}
+
+    persistence:
+      config:
+        enabled: true
+        existingClaim: home-assistant-config
+        globalMounts:
+          - path: /config

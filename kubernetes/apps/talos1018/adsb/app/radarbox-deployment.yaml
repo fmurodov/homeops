@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarbox
+  namespace: adsb
+  labels:
+    app.kubernetes.io/name: radarbox
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radarbox
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radarbox
+    spec:
+      containers:
+        - name: radarbox
+          image: ghcr.io/sdr-enthusiasts/docker-radarbox:latest-build-715
+          envFrom:
+            - secretRef:
+                name: adsb-config
+          env:
+            - name: LAT
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LAT
+            - name: LONG
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LONG
+            - name: ALT
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_ALT
+            - name: TZ
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_TZ
+            - name: SHARING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: RADARBOX_SHARING_KEY
+            - name: ENABLE_MLAT
+              value: "true"
+          resources:
+            limits:
+              cpu: "0.02"
+              memory: "50Mi"
+            requests:
+              cpu: "0.002"
+              memory: "10Mi"

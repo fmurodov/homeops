@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: planefinder
+  namespace: adsb
+spec:
+  selector:
+    app.kubernetes.io/name: planefinder
+  ports:
+    - port: 30053
+      targetPort: 30053
+      protocol: TCP
+      name: http
+  ipFamilyPolicy: PreferDualStack

@@ -1,0 +1,37 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Talos
+talosconfig
+secrets.yaml
+*.secret
+*.secrets
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+.*.sw?
+
+# Editor directories and files
+.vscode/
+.idea/
+*.iml
+*.code-workspace
+
+# Local environment
+.env
+.env.local
+*.local
+
+# Logs
+*.log

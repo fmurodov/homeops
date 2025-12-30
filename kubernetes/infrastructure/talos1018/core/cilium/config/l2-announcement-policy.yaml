@@ -1,0 +1,12 @@
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: default-policy
+spec:
+  serviceSelector:
+    matchLabels: {} # Match all LoadBalancer services
+  nodeSelector:
+    matchLabels: {} # All nodes can announce
+  externalIPs: true
+  loadBalancerIPs: true

@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mealie
+  labels:
+    app.kubernetes.io/name: mealie
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mealie
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mealie
+    spec:
+      containers:
+        - name: mealie
+          image: "ghcr.io/mealie-recipes/mealie:v3.7.0"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: mealie-config
+            - secretRef:
+                name: mealie-secret
+          volumeMounts:
+            - mountPath: /app/data
+              name: data
+          resources:
+            limits:
+              cpu: "0.1"
+              memory: "1000Mi"
+            requests:
+              cpu: "0.001"
+              memory: "200Mi"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mealie-data

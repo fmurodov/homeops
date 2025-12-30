@@ -1,0 +1,69 @@
+# cilium-values.yaml
+ipam:
+  mode: kubernetes
+
+l2announcements:
+  enabled: true
+
+kubeProxyReplacement: false
+
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+
+cgroup:
+  autoMount:
+    enabled: true
+  hostRoot: /sys/fs/cgroup
+
+# Dual-stack configuration
+ipv4:
+  enabled: true
+ipv6:
+  enabled: true
+
+# Use Encapsulation mode (tunnel)
+routingMode: "tunnel"
+tunnelProtocol: "vxlan"
+
+autoDirectNodeRoutes: false # Explicitly disable the native routing flag
+
+# Masquerade is essential for ULA pods to reach the Internet
+enableIPv6Masquerade: true
+enableIPv4Masquerade: true
+# bpf:
+#   masquerade: true
+
+# Hubble observability
+hubble:
+  enabled: true
+
+  relay:
+    enabled: true
+
+  ui:
+    enabled: true
+
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - icmp
+      - http

@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bricktracker-http
+  labels:
+    app.kubernetes.io/name: bricktracker
+spec:
+  ipFamilyPolicy: PreferDualStack
+  ports:
+    - port: 3333
+      targetPort: 3333
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: bricktracker

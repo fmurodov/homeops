@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: changedetection
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      changedetection:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/dgtlmoon/changedetection.io
+              tag: 0.51.4
+            env:
+              TZ: "Europe/Amsterdam"
+              LISTEN_HOST: "::"
+              PORT: &port 5000
+              USE_X_SETTINGS: 1
+              PLAYWRIGHT_DRIVER_URL: ws://localhost:3000/chrome
+          browser:
+            image:
+              repository: ghcr.io/browserless/chrome
+              tag: v2.38.2
+              pullPolicy: IfNotPresent
+            env:
+              - { name: HOST, value: "::" }
+              - { name: SCREEN_WIDTH, value: "1920" }
+              - { name: SCREEN_HEIGHT, value: "1024" }
+              - { name: SCREEN_DEPTH, value: "16" }
+              - { name: ENABLE_DEBUGGER, value: "false" }
+              - { name: PREBOOT_CHROME, value: "true" }
+              - { name: CONNECTION_TIMEOUT, value: "300000" }
+              - { name: MAX_CONCURRENT_SESSIONS, value: "2" }
+              - { name: CHROME_REFRESH_TIME, value: "600000" }
+              - { name: DEFAULT_BLOCK_ADS, value: "true" }
+              - { name: DEFAULT_STEALTH, value: "true" }
+    service:
+      app:
+        controller: changedetection
+        ports:
+          http:
+            port: *port
+    ingress:
+      app:
+        className: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt
+        enabled: true
+        hosts:
+          - host: changedetection.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: *port
+        tls:
+          - hosts:
+              - changedetection.${CLUSTER_DOMAIN}
+            secretName: changedetection-tls
+
+    persistence:
+      config:
+        enabled: true
+        existingClaim: changedetection-data
+        globalMounts:
+          - path: /datastore

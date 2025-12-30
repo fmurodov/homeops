@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homebox
+  labels:
+    app.kubernetes.io/name: homebox
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homebox
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: homebox
+    spec:
+      containers:
+        - name: homebox
+          image: "ghcr.io/sysadminsmedia/homebox:0.22.3-rootless"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 7745
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: homebox-config
+          volumeMounts:
+            - mountPath: /data
+              name: data
+          resources:
+            limits:
+              cpu: "0.1"
+              memory: "200Mi"
+            requests:
+              cpu: "0.001"
+              memory: "50Mi"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: homebox-data

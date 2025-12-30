@@ -1,0 +1,240 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  bookmarks.yaml: |
+    - IaC:
+      - HomeOps:
+        - icon: sh-github.svg
+          description: HomeOps repo
+          href: https://github.com/fmurodov/homeops
+      - fmurodov-tf:
+        - icon: sh-gitlab.svg
+          description: OpenTofu pipeline
+          href: https://gitlab.com/fmurodov/fmurodov-tf
+  docker.yaml: ""
+  kubernetes.yaml: |
+    mode: cluster
+    ingress: true
+  services.yaml: |
+    - Main:
+      - Printer:
+          description: HP Printer and Scanner
+          href: http://printer-hp-1.home./
+          icon: hp
+          ping: printer-hp-1.home.
+
+      - Minecraft:
+          description: Obshi Server
+          icon: minecraft
+          app: bds
+          namespace: minecraft
+          widget:
+            type: gamedig
+            serverType: mbe
+            url: udp://bds.minecraft-bedrock.svc.cluster.local:19132
+            fields: ["name", "players", "status"]
+      - Spoolman:
+          description: "Keep track of 3D-printer filament spools."
+          href: https://spoolman.${CLUSTER_DOMAIN}
+          icon: sh-spoolman.svg
+          app: spoolman
+          namespace: spoolman
+          widget:
+            type: spoolman
+            url: http://spoolman-http.spoolman.svc.cluster.local:8000
+      # - actual:
+      #     description: "Personal finance"
+      #     href: https://actual.${CLUSTER_DOMAIN}
+      #     icon: sh-actual-budget.svg
+      #     app: actual
+      #     namespace: actual
+      # - Wallos:
+      #     description: "Subscription Tracker"
+      #     href: https://wallos.${CLUSTER_DOMAIN}
+      #     icon: sh-wallos.png
+      #     app: wallos
+      #     namespace: wallos
+      - Paperless-ngx:
+          description: "Document management system"
+          href: https://paperless.${CLUSTER_DOMAIN}
+          icon: sh-paperless-ngx.svg
+          app: paperless
+          namespace: self-hosted
+          widget:
+            type: paperlessngx
+            url: http://paperless-http.self-hosted.svc.cluster.local:8000
+            key: "{{HOMEPAGE_VAR_PAPERLESS_APIKEY}}"
+      - Mealie:
+          description: "Recipe manager"
+          href: https://recipe.${DOMAIN}
+          icon: sh-mealie.svg
+          app: mealie
+          namespace: mealie
+          widget:
+            type: mealie
+            url: http://mealie-http.mealie.svc.cluster.local:9000
+            key: "{{HOMEPAGE_VAR_MEALIE_APIKEY}}"
+            version: 2
+      - Homebox:
+          description: "Home inventory management"
+          href: https://homebox.${CLUSTER_DOMAIN}
+          icon: sh-homebox.svg
+          app: homebox
+          namespace: homebox
+          widget:
+            type: homebox
+            url: http://homebox-http.homebox.svc.cluster.local:7745
+            username: "{{HOMEPAGE_VAR_HOMEBOX_USERNAME}}"
+            password: "{{HOMEPAGE_VAR_HOMEBOX_PASSWORD}}"
+      - BrickTracker:
+          description: "LEGO sets tracker"
+          href: https://bricktracker.${CLUSTER_DOMAIN}
+          icon: sh-bricktracker.png
+          app: bricktracker
+          namespace: bricktracker
+    - Infra:
+      - pikvm:
+          description: rock64 PiKVM
+          href: https://pikvm.home.
+          icon: sh-pikvm.svg
+          ping: pikvm.home.
+      - Capacitor:
+          description: Flux UI
+          href: https://flux.${CLUSTER_DOMAIN}
+          icon: flux-cd.svg
+          name: Capacitor
+          app: onechart
+          namespace: flux-system
+      - Longhorn:
+          description: "Cloud native distributed block storage for Kubernetes"
+          href: https://longhorn.${CLUSTER_DOMAIN}
+          icon: sh-rancher-longhorn.svg
+          app: longhorn
+          namespace: longhorn-system
+      - netbootxyz:
+          description: "iPXE netboot"
+          href: https://netbootxyz.${CLUSTER_DOMAIN}
+          icon: sh-netboot-xyz.svg
+          app: netbootxyz
+          namespace: netbootxyz
+
+    - Monitoring:
+      - changedetection:
+          description: "web page change detection"
+          href: https://changedetection.${CLUSTER_DOMAIN}
+          icon: sh-changedetection.svg
+          name: changedetection
+          app: changedetection
+          namespace: self-hosted
+          widget:
+            type: changedetectionio
+            url: http://changedetection-http.self-hosted.svc.cluster.local:5000
+            key: "{{HOMEPAGE_VAR_CHANGEDETECTION_APIKEY}}"
+      - Grafana:
+          description: "Monitoring dashboard"
+          href: https://grafana.${CLUSTER_DOMAIN}
+          icon: sh-grafana.svg
+          app: grafana
+          namespace: monitoring
+      - Prometheus:
+          description: prometheus
+          href: https://prometheus.${CLUSTER_DOMAIN}
+          icon: sh-prometheus.svg
+          app: prometheus
+          namespace: monitoring
+
+    - Network:
+      - Unifi Controller:
+          description: Unifi Console
+          href: https://unifi.ui.com
+          icon: https://upload.wikimedia.org/wikipedia/commons/4/4d/Ubiquiti_Logo_2023.svg
+          siteMonitor: http://1018LC-GW-U-1.home.:8080/status
+      - Speedtest:
+          description: "HTML5 Internet Speed Test."
+          href: https://speedtest.${CLUSTER_DOMAIN}
+          icon: sh-openspeedtest.svg
+          name: Speedtest
+          app: openspeedtest
+          namespace: network
+
+    - Smart Home:
+      - Home Assistant:
+          description: Home automation platform
+          href: https://hass.${CLUSTER_DOMAIN}
+          icon: home-assistant.svg
+          app: home-assistant
+          namespace: home-automation
+      - Energy meter:
+          description: p1-dongle-pro
+          href: http://p1-dongle-pro.home./
+          ping: p1-dongle-pro.home.
+      - ESPHOME:
+          description: esphome
+          href: https://esphome.${CLUSTER_DOMAIN}
+          icon: sh-esphome.svg
+          app: esphome
+          namespace: home-automation
+    - ADSB:
+      - Adsb feeder:
+          description: ADSB feeder statuspage
+          href: http://adsb-feeder.home.
+          ping: adsb-feeder.home.
+          icon: http://adsb-feeder.home:8080/images/tar1090-favicon.png
+          siteMonitor: http://adsb-feeder.home./api/base_info
+      - Adsb feeder map:
+          description: ADSB feeder map
+          href: http://adsb-feeder.home.:8080
+          icon: http://adsb-feeder.home.:8080/images/tar1090-favicon.png
+      - planefinder:
+          description: "planefinder feeder statuspage"
+          href: https://planefinder.adsb.${CLUSTER_DOMAIN}
+          icon: https://upload.wikimedia.org/wikipedia/commons/2/2e/Plane-finder.svg
+          app: planefinder
+          namespace: adsb
+      - FlightAware:
+          description: "FlightAware feeder statuspage"
+          href: https://piaware.adsb.${CLUSTER_DOMAIN}
+          icon: https://www.flightaware.com/images/favicon-32x32.png
+          app: piaware
+          namespace: adsb
+      - Flightradar24:
+          description: "Flightrada24 feeder statuspage"
+          href: https://fr24.adsb.${CLUSTER_DOMAIN}
+          icon: https://www.flightradar24.com/static/favicons/favicon.svg
+          app: flightradar24
+          namespace: adsb
+
+  settings.yaml: |
+    providers:
+      longhorn:
+        url: http://longhorn-frontend.longhorn-system.svc.cluster.local
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          cpu: true
+          label: cluster
+          memory: true
+          show: true
+          showLabel: true
+        nodes:
+          cpu: true
+          memory: true
+          show: true
+          showLabel: true
+    - search:
+        provider: duckduckgo
+        target: _blank
+    - longhorn:
+        # Show the expanded view
+        expanded: true
+        # Shows a node representing the aggregate values
+        total: true
+        # Shows the node names as labels
+        labels: true
+        # Show the nodes
+        nodes: true

@@ -1,0 +1,37 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mealie
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt"
+
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - "mealie.${CLUSTER_DOMAIN}"
+        - "recipe.${DOMAIN}"
+      secretName: mealie-tls
+  rules:
+    - host: "mealie.${CLUSTER_DOMAIN}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mealie-http
+                port:
+                  number: 9000
+    - host: "recipe.${DOMAIN}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mealie-http
+                port:
+                  number: 9000

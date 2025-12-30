@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bricktracker-config
+  labels:
+    app: bricktracker
+data:
+  TZ: "Europe/Amsterdam"
+  BK_TIMEZONE: "Europe/Amsterdam"
+  BK_DATABASE_PATH: /data/app.db
+  BK_RETIRED_SETS_PATH: /data/retired_sets.csv
+  BK_THEMES_PATH: /data/themes.csv

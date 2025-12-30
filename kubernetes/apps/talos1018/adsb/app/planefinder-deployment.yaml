@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planefinder
+  namespace: adsb
+  labels:
+    app.kubernetes.io/name: planefinder
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: planefinder
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: planefinder
+    spec:
+      containers:
+        - name: planefinder
+          image: ghcr.io/sdr-enthusiasts/docker-planefinder:latest-build-427
+          envFrom:
+            - secretRef:
+                name: adsb-config
+          env:
+            - name: LAT
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LAT
+            - name: LONG
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LONG
+            - name: TZ
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_TZ
+            - name: SHARECODE
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: PLANEFINDER_SHARECODE
+          ports:
+            - containerPort: 30053
+          resources:
+            limits:
+              cpu: "0.02"
+              memory: "50Mi"
+            requests:
+              cpu: "0.004"
+              memory: "10Mi"

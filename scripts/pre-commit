@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# Pre-commit hook for homeops repository
+# This hook runs validation checks before allowing a commit
+
+set -e
+
+echo "Running pre-commit validation..."
+
+# Move to repository root
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# Run the unified validation script
+if ! ./scripts/validate.sh; then
+    echo ""
+    echo "❌ Validation failed. Please fix the issues before committing."
+    echo ""
+    exit 1
+fi
+
+echo ""
+echo "✅ All validations passed!"
+exit 0
