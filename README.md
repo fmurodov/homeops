@@ -9,44 +9,23 @@ Infrastructure as Code repository for home infrastructure management.
 ```
 homeops/
 ├── talos/              # Talos Kubernetes cluster configurations
-│   └── talos1018/      # talos1018 cluster configuration
-├── kubernetes/         # Flux CD GitOps manifests for cluster management
+│   └── talos1018/      # Cluster-specific config and patches
+├── kubernetes/         # Flux CD GitOps manifests
 │   ├── apps/           # Application deployments
-│   │   └── talos1018/  # Applications for talos1018 cluster
-│   │       ├── adsb/                  # ADS-B flight tracking
-│   │       ├── bricktracker/          # Brick collection tracker
-│   │       ├── changedetection/       # Website change detection
-│   │       ├── esphome/               # ESP device management
-│   │       ├── home-assistant/        # Home automation hub
-│   │       ├── homebox/               # Home inventory
-│   │       ├── homepage/              # Dashboard
-│   │       ├── kube-prometheus-stack/ # Monitoring & alerting
-│   │       ├── mealie/                # Recipe manager
-│   │       ├── minecraft-bedrock/     # Game server
-│   │       ├── mosquitto/             # MQTT broker
-│   │       ├── paperless/             # Document management
-│   │       └── ...                    # More applications
+│   │   └── talos1018/  # Cluster applications
 │   ├── infrastructure/ # Infrastructure components
 │   │   └── talos1018/
-│   │       ├── core/       # Core cluster components (depend first)
-│   │       │   ├── cilium/        # CNI networking + L2 config
-│   │       │   ├── cert-manager/  # TLS cert management + issuers
-│   │       │   └── ingress-nginx/ # Ingress controller
-│   │       └── storage/    # Storage layer (optional dependency)
-│   │           └── longhorn/      # Distributed block storage + backups
-│   └── clusters/       # Cluster-specific Flux configurations
-│       └── talos1018/
-│           ├── flux-system/       # Flux controllers
-│           ├── infrastructure.yaml # Infrastructure Kustomizations
-│           └── apps.yaml          # Apps Kustomization
-├── scripts/        # Automation and validation scripts
-│   ├── validate.sh       # Master validation script
-│   └── validate-flux.sh  # Flux-specific validation
-├── docs/           # Documentation and assets
-└── .github/        # CI/CD workflows
-    └── workflows/
-        ├── validate-flux.yaml  # Kubernetes manifest validation
-        └── validate-talos.yaml # Talos config validation
+│   │       ├── core/   # Core components (CNI, ingress, cert-manager)
+│   │       └── storage/ # Storage layer (Longhorn)
+│   ├── clusters/       # Flux configurations
+│   │   └── talos1018/
+│   │       ├── flux-system/
+│   │       ├── infrastructure.yaml
+│   │       └── apps.yaml
+│   └── components/     # Shared Kustomize components
+├── scripts/            # Automation and validation scripts
+├── docs/               # Documentation and assets
+└── .github/            # CI/CD workflows
 ```
 
 ## Projects
