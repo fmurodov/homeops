@@ -40,35 +40,27 @@ A 3-node Kubernetes cluster running on Talos Linux. For detailed setup and confi
 
 ### Infrastructure Architecture
 
-The infrastructure is organized into layers with minimal dependencies for better resilience:
+Layered architecture with minimal dependencies:
 
-**Core Components** (`infra-core` - no dependencies):
-- **Cilium**: CNI networking with L2 announcements for LoadBalancer support
-- **cert-manager**: Automated TLS certificate management via Let's Encrypt
-- **ingress-nginx**: HTTP/HTTPS ingress controller
+**Core** (no dependencies):
+- Cilium CNI with L2 announcements
+- cert-manager with Let's Encrypt
+- ingress-nginx
 
-**Storage Layer** (`infra-storage` - depends on core):
-- **Longhorn**: Distributed block storage with S3 backups to Cloudflare R2
+**Storage** (depends on core):
+- Longhorn with S3 backups to Cloudflare R2
 
-**Applications** (`apps` - depends on core):
-- All applications deploy in parallel
-- Apps with PVCs automatically wait for Longhorn (via Kubernetes)
-- Apps without PVCs start immediately once core is ready
-
-This architecture ensures:
-- ✅ Core networking/ingress always deploys first
-- ✅ Storage failures don't block stateless applications
-- ✅ Each component includes both controller and configuration together
-- ✅ Internal ordering within components (controller → config)
+**Applications** (depends on core):
+- Deploy in parallel
+- Storage-dependent apps wait automatically via Kubernetes
 
 ### Kubernetes GitOps
 
-GitOps-based cluster management using Flux CD. For detailed information, see [kubernetes/README.md](kubernetes/README.md).
+GitOps with Flux CD. See [kubernetes/README.md](kubernetes/README.md) for details.
 
-- Flux CD for continuous deployment
-- SOPS with age for secret management
+- Continuous deployment via Flux CD
+- Secret management with SOPS + age
 - Automated validation via GitHub Actions
-- Parallel reconciliation with smart dependency handling
 
 ## Prerequisites
 
