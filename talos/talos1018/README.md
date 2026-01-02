@@ -1,42 +1,56 @@
-# Talos Kubernetes Cluster Setup
+# Talos Kubernetes Cluster (talos1018)
 
-This guide describes the setup process for a Talos-based Kubernetes cluster with Cilium networking.
+This directory contains the Talos configuration for the `talos1018` Kubernetes cluster, managed using **talhelper**.
+
+Talos machine configs are generated from a single `talconfig.yaml`. Secrets are stored encrypted with SOPS.
 
 ## Prerequisites
 
-- talosctl CLI tool installed
-- kubectl installed
-- Helm installed
-- 3 VMs/nodes for control plane (fd00:1018:0:5:10:18:6:91-93)
-- Load balancer endpoint at fd00:1018:0:5:10:18:6:90
+- talosctl
+- kubectl
+- talhelper
+- helm
+- sops + age key
+- 3 control-plane nodes (fd00:1018:0:5:10:18:6:91-93)
+- Control-plane VIP: fd00:1018:0:5:10:18:6:90
 
 ## Installation Steps
 
-### 1. Generate Talos Configuration
+### Generate Talos configs
+All machine configs are generated from `talconfig.yaml`.
 
 ```bash
-talosctl gen config talos1018 https://[fd00:1018:0:5:10:18:6:90]:6443
+talhelper genconfig
 ```
 
-### 2. Apply Configurations to Nodes
+This generates files in `clusterconfig/`.
+These files are **generated** and should not be edited manually.
+
+### Apply Configurations to Nodes
 
 Apply the generated configurations to each control plane node:
 
 ```bash
-talosctl apply-config --insecure -n 10.18.6.91 --file controlplane-talos-1018-1.yaml --talosconfig ./talosconfig
-talosctl apply-config --insecure -n 10.18.6.92 --file controlplane-talos-1018-2.yaml --talosconfig ./talosconfig
-talosctl apply-config --insecure -n 10.18.6.93 --file controlplane-talos-1018-3.yaml --talosconfig ./talosconfig
+talosctl apply-config --insecure -n 10.18.6.91 --file clusterconfig/talos1018-talos-1018-1.yaml
+talosctl apply-config --insecure -n 10.18.6.92 --file clusterconfig/talos1018-talos-1018-2.yaml
+talosctl apply-config --insecure -n 10.18.6.93 --file clusterconfig/talos1018-talos-1018-3.yaml
 ```
 
-### 3. Bootstrap the Cluster
+### Bootstrap the Cluster
 
-Initialize the first control plane node:
+Run this **once**, on a single control-plane node:
 
 ```bash
 talosctl bootstrap -n fd00:1018:0:5:10:18:6:91
 ```
 
-### 4. Network Configuration with Cilium
+### Get kubeconfig
+
+```bash
+talosctl kubeconfig --nodes fd00:1018:0:5:10:18:6:90
+```
+
+### Network Configuration with Cilium
 
 > **⚠️ IMPORTANT - Bootstrap Preparation**
 >
@@ -95,20 +109,44 @@ kubectl get nodes
 kubectl -n kube-system get pods
 ```
 
-## Network Architecture
+## Updating Talos configuration
 
-- Control Plane VIP: fd00:1018:0:5:10:18:6:90
-- Control Plane Node 1: fd00:1018:0:5:10:18:6:91
-- Control Plane Node 2: fd00:1018:0:5:10:18:6:92
-- Control Plane Node 3: fd00:1018:0:5:10:18:6:93
-
-
-## Talos upgrade
+1. Edit talconfig.yaml
+2. Regenerate configs:
 
 ```bash
-talosctl apply-config -n <node> --file controlplane-<node>.yaml
-# renovate: datasource=github-releases depName=siderolabs/talos
-talosctl upgrade -n <node> --image factory.talos.dev/installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:v1.11.6 --wait
+talhelper genconfig
+```
+
+3. Apply the generated configurations to each control plane node:
+
+```bash
+talosctl apply-config -n fd00:1018:0:5:10:18:6:91 --file clusterconfig/talos1018-talos-1018-1.yaml
+talosctl apply-config -n fd00:1018:0:5:10:18:6:92 --file clusterconfig/talos1018-talos-1018-2.yaml
+talosctl apply-config -n fd00:1018:0:5:10:18:6:93 --file clusterconfig/talos1018-talos-1018-3.yaml
+```
+
+## Talos upgrade
+Update versions in `talconfig.yaml`:
+
+```yaml
+talosVersion: v1.11.6
+kubernetesVersion: v1.34.3
+```
+
+Then regenerate and upgrade:
+
+```bash
+talhelper genconfig
+
+talosctl upgrade -n fd00:1018:0:5:10:18:6:91 \
+  --image factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:v1.11.6 --wait
+
+talosctl upgrade -n fd00:1018:0:5:10:18:6:92 \
+  --image factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:v1.11.6 --wait
+
+talosctl upgrade -n fd00:1018:0:5:10:18:6:93 \
+  --image factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:v1.11.6 --wait
 ```
 
 ## Cilium upgrade
@@ -126,18 +164,12 @@ helm upgrade cilium cilium/cilium \
     --reuse-values
 ```
 
-## Development
-
-### Git Pre-Commit Hook
-
-To automatically validate configs before committing:
-
-```bash
-cp scripts/pre-commit .git/hooks/pre-commit
-```
-
-This will run `./scripts/validate.sh` before each commit. To bypass: `git commit --no-verify`
-
 ## Maintenance
 
 For cluster maintenance, refer to the [Talos documentation](https://www.talos.dev/latest/introduction/what-is-talos/).
+
+## Notes
+- Secrets are stored in `talsecret.sops.yaml`
+- CNI is set to `none` (installed later via Kubernetes tooling)
+- All control-plane nodes are schedulable
+- IPv4 + IPv6 dual-stack is enabled

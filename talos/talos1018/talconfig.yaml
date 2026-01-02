@@ -1,0 +1,192 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
+---
+clusterName: talos1018
+# renovate: datasource=github-releases depName=siderolabs/talos
+talosVersion: v1.11.6
+# renovate: datasource=github-releases depName=siderolabs/kubelet
+kubernetesVersion: v1.34.3
+endpoint: https://[fd00:1018:0:5:10:18:6:90]:6443
+
+# Cluster-wide configuration
+clusterPodNets:
+  - fd00:1018:1000::/56
+  - 10.244.0.0/16
+
+clusterSvcNets:
+  - fd00:1018:2000::/96
+  - 10.96.0.0/12
+
+cniConfig:
+  name: none
+
+additionalApiServerCertSans:
+  - ::1
+  - fd00:1018:0:5:10:18:6:91
+  - fd00:1018:0:5:10:18:6:92
+  - fd00:1018:0:5:10:18:6:93
+  - 10.18.6.91
+  - 10.18.6.92
+  - 10.18.6.93
+  - 127.0.0.1
+
+additionalMachineCertSans:
+  - ::1
+  - fd00:1018:0:5:10:18:6:91
+  - fd00:1018:0:5:10:18:6:92
+  - fd00:1018:0:5:10:18:6:93
+  - 10.18.6.91
+  - 10.18.6.92
+  - 10.18.6.93
+  - 127.0.0.1
+
+# Node definitions
+nodes:
+  - hostname: talos-1018-1
+    ipAddress: fd00:1018:0:5:10:18:6:91
+    controlPlane: true
+    installDisk: /dev/nvme0n1
+    installDiskSelector:
+      size: ">=500GB"
+    networkInterfaces:
+      - interface: enp0s31f6
+        dhcp: false
+        addresses:
+          - fd00:1018:0:5:10:18:6:91/64
+          - 10.18.6.91/24
+        routes:
+          - network: ::/0
+            gateway: fd00:1018:0:5::1
+          - network: 0.0.0.0/0
+            gateway: 10.18.6.1
+        mtu: 9000
+        vip:
+          ip: fd00:1018:0:5:10:18:6:90
+    nodeLabels:
+      node.kubernetes.io/exclude-from-external-load-balancers: ""
+      node.longhorn.io/create-default-disk: "true"
+
+  - hostname: talos-1018-2
+    ipAddress: fd00:1018:0:5:10:18:6:92
+    controlPlane: true
+    installDisk: /dev/nvme0n1
+    installDiskSelector:
+      size: ">=500GB"
+    networkInterfaces:
+      - interface: enp1s0
+        dhcp: false
+        addresses:
+          - fd00:1018:0:5:10:18:6:92/64
+          - 10.18.6.92/24
+        routes:
+          - network: ::/0
+            gateway: fd00:1018:0:5::1
+          - network: 0.0.0.0/0
+            gateway: 10.18.6.1
+        mtu: 9000
+        vip:
+          ip: fd00:1018:0:5:10:18:6:90
+    nodeLabels:
+      node.kubernetes.io/exclude-from-external-load-balancers: ""
+      node.longhorn.io/create-default-disk: "true"
+
+  - hostname: talos-1018-3
+    ipAddress: fd00:1018:0:5:10:18:6:93
+    controlPlane: true
+    installDisk: /dev/nvme0n1
+    installDiskSelector:
+      size: ">=500GB"
+    networkInterfaces:
+      - interface: enp1s0
+        dhcp: false
+        addresses:
+          - fd00:1018:0:5:10:18:6:93/64
+          - 10.18.6.93/24
+        routes:
+          - network: ::/0
+            gateway: fd00:1018:0:5::1
+          - network: 0.0.0.0/0
+            gateway: 10.18.6.1
+        mtu: 9000
+        vip:
+          ip: fd00:1018:0:5:10:18:6:90
+    nodeLabels:
+      node.kubernetes.io/exclude-from-external-load-balancers: ""
+      node.longhorn.io/create-default-disk: "true"
+
+# Shared machine configuration for all control plane nodes
+controlPlane:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/intel-ucode
+          - siderolabs/iscsi-tools
+          - siderolabs/util-linux-tools
+
+  patches:
+    # Common networking configuration
+    - |-
+      machine:
+        network:
+          nameservers:
+            - fd00:1018:0:5::1
+            - 10.18.6.1
+          searchDomains:
+            - cluster.local
+
+    # Kubelet configuration
+    - |-
+      machine:
+        kubelet:
+          extraArgs:
+            rotate-server-certificates: "true"
+          extraMounts:
+            - destination: /var/lib/longhorn
+              type: bind
+              source: /var/lib/longhorn
+              options:
+                - bind
+                - rshared
+                - rw
+          nodeIP:
+            validSubnets:
+              - fd00:1018:0:5::/64
+              - 10.18.6.0/24
+
+    # Time configuration
+    - |-
+      machine:
+        time:
+          disabled: false
+          servers:
+            - time.cloudflare.com
+            - 10.18.6.13
+            - ntp1.time.nl
+            - time1.google.com
+          bootTimeout: 2m0s
+
+    # Install configuration
+    - |-
+      machine:
+        install:
+          wipe: true
+
+    # Etcd configuration
+    - |-
+      cluster:
+        etcd:
+          advertisedSubnets:
+            - fd00:1018:0:5::/64
+            - 10.18.6.0/24
+
+    # Extra manifests
+    - |-
+      cluster:
+        extraManifests:
+          - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+          - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+    # Allow scheduling on control plane
+    - |-
+      cluster:
+        allowSchedulingOnControlPlanes: true
