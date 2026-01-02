@@ -4,7 +4,7 @@ clusterName: talos1018
 # renovate: datasource=github-releases depName=siderolabs/talos
 talosVersion: v1.11.6
 # renovate: datasource=github-releases depName=siderolabs/kubelet
-kubernetesVersion: v1.34.3
+kubernetesVersion: v1.35.0
 endpoint: https://[fd00:1018:0:5:10:18:6:90]:6443
 
 # Cluster-wide configuration
