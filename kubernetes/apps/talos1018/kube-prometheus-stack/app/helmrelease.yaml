@@ -10,7 +10,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: prometheus
-      version: "80.9.2"
+      version: "80.10.0"
   interval: 1h0m0s
   values:
     grafana:
