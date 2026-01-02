@@ -79,3 +79,15 @@ cd homeops
 ```
 
 2. Navigate to the desired project directory and follow the project-specific README instructions.
+
+## Development
+
+### Git Pre-Commit Hook
+
+To automatically validate configs before committing:
+
+```bash
+cp scripts/pre-commit .git/hooks/pre-commit
+```
+
+This will run `./scripts/validate.sh` before each commit. To bypass: `git commit --no-verify`
