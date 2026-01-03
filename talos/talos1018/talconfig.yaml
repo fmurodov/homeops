@@ -171,6 +171,20 @@ controlPlane:
         install:
           wipe: true
 
+    # Feature gates
+    - |-
+      machine:
+        features:
+          rbac: true
+          apidCheckExtKeyUsage: true
+          diskQuotaSupport: true
+          kubePrism:
+            enabled: true
+            port: 7445
+          hostDNS:
+            enabled: true
+            forwardKubeDNSToHost: true
+
     # Etcd configuration
     - |-
       cluster:
