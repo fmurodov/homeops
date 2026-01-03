@@ -40,6 +40,17 @@ spec:
             requests:
               cpu: "0.001"
               memory: "50Mi"
+          livenessProbe: &probes
+            httpGet:
+              path: /api/v1/status
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe: *probes
+          startupProbe: *probes
+
       volumes:
         - name: data
           persistentVolumeClaim:
