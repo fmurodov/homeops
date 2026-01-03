@@ -8,6 +8,7 @@
         "/\\.env(?:\\.j2)?$/",
         "/\\.sh(?:\\.j2)?$/",
         "/\\.yaml(?:\\.j2)?$/",
+        "/\\.md$/",
       ],
       matchStrings: [
         // # renovate: datasource=github-releases depName=foo/bar
