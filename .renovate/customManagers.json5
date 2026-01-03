@@ -43,7 +43,7 @@
       description: "Match Talos factory installer images with version tags in Markdown files",
       managerFilePatterns: ["/\\.md$/"],
       matchStrings: [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*factory\\.talos\\.dev/installer/[a-f0-9]+:(?<currentValue>v\\S+)",
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*factory\\.talos\\.dev/(installer|metal-installer)/[a-f0-9]+:(?<currentValue>v\\S+)",
       ],
       datasourceTemplate: "github-releases",
     },
