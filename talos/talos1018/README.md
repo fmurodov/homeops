@@ -127,26 +127,20 @@ talosctl apply-config -n fd00:1018:0:5:10:18:6:93 --file clusterconfig/talos1018
 ```
 
 ## Talos upgrade
-Update versions in `talconfig.yaml`:
-
-```yaml
-talosVersion: v1.11.6
-kubernetesVersion: v1.34.3
-```
+Update versions (`talosVersion`/`kubernetesVersion`) in `talconfig.yaml`:
 
 Then regenerate and upgrade:
 
 ```bash
 talhelper genconfig
 
-talosctl upgrade -n fd00:1018:0:5:10:18:6:91 \
-  --image factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:v1.11.6 --wait
+# renovate: datasource=github-releases depName=siderolabs/talos
+TALOS_VERSION=v1.11.6
+TALOS_IMAGE="factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:${TALOS_VERSION}"
 
-talosctl upgrade -n fd00:1018:0:5:10:18:6:92 \
-  --image factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:v1.11.6 --wait
-
-talosctl upgrade -n fd00:1018:0:5:10:18:6:93 \
-  --image factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:v1.11.6 --wait
+talosctl upgrade -n fd00:1018:0:5:10:18:6:91 --image "${TALOS_IMAGE}" --wait
+talosctl upgrade -n fd00:1018:0:5:10:18:6:92 --image "${TALOS_IMAGE}" --wait
+talosctl upgrade -n fd00:1018:0:5:10:18:6:93 --image "${TALOS_IMAGE}" --wait
 ```
 
 ## Cilium upgrade
