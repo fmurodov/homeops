@@ -1,0 +1,107 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: multus
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: multus
+
+  values:
+    controllers:
+      multus:
+        type: daemonset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: multus
+        pod:
+          hostNetwork: true
+        initContainers:
+          cni-plugins:
+            image:
+              repository: ghcr.io/home-operations/cni-plugins
+              tag: 1.9.0
+            resources:
+              requests:
+                cpu: "10m"
+                memory: "15Mi"
+        containers:
+          multus:
+            image:
+              repository: ghcr.io/k8snetworkplumbingwg/multus-cni
+              tag: v4.2.3
+            args:
+              - --cleanup-config-on-exit=true
+              - --multus-cni-conf-dir=/tmp
+            resources:
+              requests:
+                cpu: "10m"
+                memory: "96Mi"
+              limits:
+                memory: "512Mi"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                add:
+                  - NET_ADMIN
+                drop:
+                  - ALL
+
+    persistence:
+      etc-cni-net-d:
+        type: hostPath
+        hostPath: /etc/cni/net.d
+        globalMounts:
+          - path: /host/etc/cni/net.d
+      opt-cni-bin:
+        type: hostPath
+        hostPath: /opt/cni/bin
+        globalMounts:
+          - path: /host/opt/cni/bin
+      tmp:
+        type: emptyDir
+
+    rbac:
+      roles:
+        multus:
+          type: ClusterRole
+          rules:
+            - apiGroups:
+                - "k8s.cni.cncf.io"
+              resources:
+                - "*"
+              verbs:
+                - "*"
+            - apiGroups:
+                - ""
+              resources:
+                - "pods"
+                - "pods/status"
+              verbs:
+                - "get"
+                - "update"
+            - apiGroups:
+                - ""
+                - "events.k8s.io"
+              resources:
+                - "events"
+              verbs:
+                - "create"
+                - "patch"
+                - "update"
+      bindings:
+        multus:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: multus
+          subjects:
+            - identifier: multus
+
+    serviceAccount:
+      multus:
+        enabled: true
