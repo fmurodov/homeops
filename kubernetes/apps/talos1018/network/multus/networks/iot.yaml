@@ -15,11 +15,11 @@ spec:
           "master": "enp1s0.3",
           "mode": "l2",
           "ipam": {
-            "type": "static",
-            "addresses": [
-              {
-                "address": "fe80::1/64"
-              }
+            "type": "host-local",
+            "ranges": [
+              [{
+                "subnet": "fd00:1018:0:2::/64"
+              }]
             ]
           }
         },
