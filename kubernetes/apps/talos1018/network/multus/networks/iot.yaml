@@ -12,8 +12,5 @@ spec:
       "type": "ipvlan",
       "mode": "l2",
       "master": "enp1s0.3",
-      "ipam": {
-        "type": "static",
-        "addresses": []
-      }
+      "ipam": {}
     }
