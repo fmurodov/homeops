@@ -11,6 +11,5 @@ spec:
       "name": "multus-iot",
       "type": "ipvlan",
       "mode": "l2",
-      "master": "enp1s0.3",
-      "ipam": {}
+      "master": "enp1s0.3"
     }
