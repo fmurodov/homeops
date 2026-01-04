@@ -44,14 +44,13 @@ spec:
               limits:
                 memory: "512Mi"
             securityContext:
-              # allowPrivilegeEscalation: false
-              # readOnlyRootFilesystem: true
-              # capabilities:
-              #   add:
-              #     - NET_ADMIN
-              #   drop:
-              #     - ALL
-              privileged: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                add:
+                  - NET_ADMIN
+                drop:
+                  - ALL
 
     persistence:
       etc-cni-net-d:
