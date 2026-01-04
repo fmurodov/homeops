@@ -31,6 +31,9 @@ cgroup:
     enabled: true
   hostRoot: /sys/fs/cgroup
 
+cni:
+  exclusive: false
+
 # Dual-stack configuration
 ipv4:
   enabled: true

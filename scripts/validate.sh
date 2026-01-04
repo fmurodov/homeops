@@ -44,7 +44,7 @@ if [ "$VALIDATE_TALOS" = true ]; then
 
         # Find all Talos config files
         echo "🔎 Finding Talos configuration files..."
-        CONFIG_FILES=$(find talos -name "controlplane-*.yaml" -o -name "worker-*.yaml" 2>/dev/null | sort)
+        CONFIG_FILES=$(find talos -name "talos*.yaml" -o -name "worker-*.yaml" 2>/dev/null | sort)
 
         if [ -z "$CONFIG_FILES" ]; then
             echo "⚠️  No Talos configuration files found in talos/"
