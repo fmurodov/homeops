@@ -14,7 +14,19 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: esphome
+      annotations:
+        k8s.v1.cni.cncf.io/networks: network/multus-iot
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - talos-1018-2
+                      - talos-1018-3
       containers:
         - name: esphome
           image: "ghcr.io/esphome/esphome:2025.12.4"
