@@ -15,8 +15,12 @@ spec:
           "master": "enp1s0.3",
           "mode": "l2",
           "ipam": {
-            "type": "host-local",
-            "ranges": []
+            "type": "static",
+            "addresses": [
+              {
+                "address": "fe80::1/64"
+              }
+            ]
           }
         },
         {
