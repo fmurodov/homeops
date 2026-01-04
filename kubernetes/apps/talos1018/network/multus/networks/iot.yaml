@@ -15,7 +15,8 @@ spec:
           "master": "enp1s0.3",
           "mode": "l2",
           "ipam": {
-            "type": "static"
+            "type": "host-local",
+            "ranges": []
           }
         },
         {
