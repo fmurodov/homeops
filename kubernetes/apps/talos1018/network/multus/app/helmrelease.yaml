@@ -36,7 +36,7 @@ spec:
               tag: v4.2.3
             args:
               - --cleanup-config-on-exit=true
-              # - --multus-cni-conf-dir=/tmp
+              - --multus-cni-conf-dir=/tmp
             resources:
               requests:
                 cpu: "10m"
@@ -44,14 +44,13 @@ spec:
               limits:
                 memory: "512Mi"
             securityContext:
-              privileged: true
-              # allowPrivilegeEscalation: false
-              # readOnlyRootFilesystem: false
-              # capabilities:
-              #   add:
-              #     - NET_ADMIN
-              #   drop:
-              #     - ALL
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                add:
+                  - NET_ADMIN
+                drop:
+                  - ALL
 
     persistence:
       etc-cni-net-d:
@@ -64,8 +63,8 @@ spec:
         hostPath: /opt/cni/bin
         globalMounts:
           - path: /host/opt/cni/bin
-      # tmp:
-      #   type: emptyDir
+      tmp:
+        type: emptyDir
 
     rbac:
       roles:
