@@ -36,7 +36,6 @@ spec:
               tag: v4.2.3
             args:
               - --cleanup-config-on-exit=true
-              - --multus-cni-conf-dir=/tmp
             resources:
               requests:
                 cpu: "10m"
