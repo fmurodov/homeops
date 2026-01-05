@@ -135,12 +135,12 @@ Then regenerate and upgrade:
 talhelper genconfig
 
 # renovate: datasource=github-releases depName=siderolabs/talos
-TALOS_VERSION=v1.12.1
-TALOS_IMAGE="factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:${TALOS_VERSION}"
+set TALOS_VERSION v1.12.1
+set TALOS_IMAGE "factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:$TALOS_VERSION"
 
-talosctl upgrade -n fd00:1018:0:5:10:18:6:91 --image "${TALOS_IMAGE}" --wait
-talosctl upgrade -n fd00:1018:0:5:10:18:6:92 --image "${TALOS_IMAGE}" --wait
-talosctl upgrade -n fd00:1018:0:5:10:18:6:93 --image "${TALOS_IMAGE}" --wait
+talosctl upgrade -n fd00:1018:0:5:10:18:6:91 --image "$TALOS_IMAGE" --wait
+talosctl upgrade -n fd00:1018:0:5:10:18:6:92 --image "$TALOS_IMAGE" --wait
+talosctl upgrade -n fd00:1018:0:5:10:18:6:93 --image "$TALOS_IMAGE" --wait
 ```
 
 ## Cilium upgrade
