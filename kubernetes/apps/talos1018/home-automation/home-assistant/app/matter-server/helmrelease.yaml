@@ -37,6 +37,16 @@ spec:
     defaultPodOptions:
       annotations:
         k8s.v1.cni.cncf.io/networks: network/multus-iot
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - talos-1018-2
+                      - talos-1018-3
     service:
       app:
         controller: matter-server
