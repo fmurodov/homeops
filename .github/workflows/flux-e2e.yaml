@@ -8,6 +8,9 @@ on:
   #   branches: ["*"]
   #   tags-ignore: ["*"]
 
+permissions:
+  contents: read
+
 jobs:
   kubernetes:
     runs-on: ubuntu-latest
