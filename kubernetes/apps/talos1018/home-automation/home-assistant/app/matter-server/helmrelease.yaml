@@ -35,7 +35,8 @@ spec:
               MATTER_SERVER__INSTANCE_NAME: "{{ .Release.Name }}"
               MATTER_SERVER__LOG_LEVEL: info
     defaultPodOptions:
-      hostNetwork: true
+      annotations:
+        k8s.v1.cni.cncf.io/networks: network/multus-iot
     service:
       app:
         controller: matter-server
