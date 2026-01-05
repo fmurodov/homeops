@@ -20,7 +20,8 @@ spec:
           "sysctl": {
             "net.ipv6.conf.IFNAME.accept_ra": "2",
             "net.ipv6.conf.IFNAME.accept_ra_rt_info_max_plen": "128",
-            "net.ipv6.conf.IFNAME.forwarding": "0"
+            "net.ipv6.conf.IFNAME.forwarding": "0",
+            "net.ipv6.conf.IFNAME.accept_ra_defrtr": "0"
           }
         }
       ]
