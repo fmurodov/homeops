@@ -39,6 +39,10 @@ spec:
                 cpu: 100m
                 memory: 512Mi
 
+    defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: network/multus-iot
+
     service:
       app:
         controller: home-assistant
