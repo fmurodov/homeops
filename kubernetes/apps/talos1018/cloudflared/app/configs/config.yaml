@@ -1,0 +1,10 @@
+---
+ingress:
+  - hostname: "*.${DOMAIN}"
+    originRequest:
+      http2Origin: true
+      httpHostHeader: ""
+      noTLSVerify: true
+      originServerName: ""
+    service: https://ingress-nginx-release-controller.ingress-nginx.svc.cluster.local
+  - service: http_status:404
