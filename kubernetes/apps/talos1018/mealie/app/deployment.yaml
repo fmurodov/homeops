@@ -27,11 +27,50 @@ spec:
             - name: http
               containerPort: 9000
               protocol: TCP
-          envFrom:
-            - configMapRef:
-                name: mealie-config
-            - secretRef:
-                name: mealie-secret
+          env:
+            - name: ALLOW_SIGNUP
+              value: "false"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: API_HOST
+              value: ""
+            - name: TZ
+              value: ${TIMEZONE}
+            - name: BASE_URL
+              value: "https://mealie.${CLUSTER_DOMAIN}"
+            - name: OIDC_AUTH_ENABLED
+              value: "true"
+            - name: OIDC_PROVIDER_NAME
+              value: "Pocket ID"
+            - name: OIDC_REMEMBER_ME
+              value: "true"
+            - name: OIDC_SIGNUP_ENABLED
+              value: "true"
+            - name: OIDC_CONFIGURATION_URL
+              value: https://pid.${DOMAIN}/.well-known/openid-configuration
+            - name: OIDC_GROUPS_CLAIM
+              value: groups
+            - name: OIDC_ADMIN_GROUP
+              value: "mealie_admins"
+            - name: OIDC_AUTO_REDIRECT
+              value: "true"
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mealie-secrets
+                  key: OIDC_CLIENT_ID
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mealie-secrets
+                  key: OIDC_CLIENT_SECRET
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mealie-secrets
+                  key: OPENAI_API_KEY
           volumeMounts:
             - mountPath: /app/data
               name: data
