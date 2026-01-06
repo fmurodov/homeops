@@ -66,6 +66,36 @@ spec:
                   secretKeyRef:
                     name: paperless-secret
                     key: PAPERLESS_ADMIN_PASSWORD
+              # OIDC Configuration
+              PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
+              PAPERLESS_ACCOUNT_ALLOW_SIGNUPS: "false"
+              PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS: "false"
+              PAPERLESS_SOCIALACCOUNT_PROVIDERS: |
+                {
+                  "openid_connect": {
+                    "APPS": [
+                      {
+                        "provider_id": "pocket-id",
+                        "name": "Pocket ID",
+                        "client_id": "$(PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_ID)",
+                        "secret": "$(PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_SECRET)",
+                        "settings": {
+                          "server_url": "https://pid.${CLUSTER_DOMAIN}/.well-known/openid-configuration"
+                        }
+                      }
+                    ]
+                  }
+                }
+              PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: paperless-secret
+                    key: PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_ID
+              PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: paperless-secret
+                    key: PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_SECRET
             probes:
               liveness:
                 enabled: true
