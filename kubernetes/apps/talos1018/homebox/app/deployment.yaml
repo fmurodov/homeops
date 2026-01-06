@@ -27,9 +27,33 @@ spec:
             - name: http
               containerPort: 7745
               protocol: TCP
-          envFrom:
-            - configMapRef:
-                name: homebox-config
+          env:
+            - name: TZ
+              value: ${TIMEZONE}
+            - name: HBOX_WEB_MAX_FILE_UPLOAD
+              value: "10"
+            - name: HBOX_OPTIONS_ALLOW_ANALYTICS
+              value: "false"
+            - name: HBOX_OPTIONS_ALLOW_REGISTRATION
+              value: "false"
+            - name: HBOX_OPTIONS_TRUST_PROXY
+              value: "true"
+            - name: HBOX_OPTIONS_HOSTNAME
+              value: "homebox.${CLUSTER_DOMAIN}"
+            - name: HBOX_OIDC_ENABLED
+              value: "true"
+            - name: HBOX_OIDC_ISSUER_URL
+              value: https://pid.${DOMAIN}
+            - name: HBOX_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: homebox-secret
+                  key: HBOX_OIDC_CLIENT_ID
+            - name: HBOX_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: homebox-secret
+                  key: HBOX_OIDC_CLIENT_SECRET
           volumeMounts:
             - mountPath: /data
               name: data

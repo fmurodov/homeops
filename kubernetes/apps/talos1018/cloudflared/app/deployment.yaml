@@ -23,13 +23,15 @@ spec:
           image: cloudflare/cloudflared:2025.11.1
           args:
             - tunnel
-            # Points cloudflared to the config file, which configures what
-            # cloudflared will actually do. This file is created by a ConfigMap
-            # below.
-            - --config
-            - /etc/cloudflared/config/config.yaml
+            - --no-autoupdate
             - run
           env:
+            - name: TUNNEL_EDGE_IP_VERSION
+              value: "6"
+            - name: TUNNEL_LOGLEVEL
+              value: "info"
+            - name: TUNNEL_METRICS
+              value: "0.0.0.0:2000"
             - name: TUNNEL_TOKEN
               valueFrom:
                 secretKeyRef:
