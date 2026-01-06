@@ -5,7 +5,7 @@ namespace: homebox
 resources:
   - namespace.yaml
   - pvc.yaml
+  - homebox-secret.sops.yaml
   - deployment.yaml
   - service.yaml
-  - configmap.yaml
   - ingress.yaml

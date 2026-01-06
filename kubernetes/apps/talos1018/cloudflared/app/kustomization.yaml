@@ -6,4 +6,3 @@ resources:
   - namespace.yaml
   - deployment.yaml
   - cloudflared-secret.sops.yaml
-  - configmap.yaml
