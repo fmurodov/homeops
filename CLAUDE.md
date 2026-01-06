@@ -12,7 +12,11 @@ This document provides comprehensive guidance for AI assistants (like Claude) wo
 
 **Repository URL**: https://github.com/fmurodov/homeops
 **Main Branch**: master
-**Current Cluster**: talos1018 (Kubernetes v1.35.0, Talos v1.12.1)
+**Current Cluster**: talos1018
+
+> **Note**: For current version information, check:
+> - Kubernetes/Talos versions: `talos/talos1018/talconfig.yaml`
+> - Application versions: HelmRelease files in `kubernetes/apps/` and `kubernetes/infrastructure/`
 
 ## Directory Structure
 
@@ -78,14 +82,14 @@ homeops/
 - `kubeconform` - Kubernetes manifest validator
 
 ### Technology Stack
-- **OS**: Talos Linux v1.12.1
-- **Kubernetes**: v1.35.0
-- **CNI**: Cilium v1.18.5 (L2 announcements for LoadBalancer)
+- **OS**: Talos Linux (version in `talos/talos1018/talconfig.yaml`)
+- **Kubernetes**: (version in `talos/talos1018/talconfig.yaml`)
+- **CNI**: Cilium (L2 announcements for LoadBalancer)
 - **GitOps**: Flux CD v2
 - **Ingress**: ingress-nginx
 - **Certificates**: cert-manager with Let's Encrypt (Cloudflare DNS)
-- **Storage**: Longhorn v1.10.1 with S3 backups to Cloudflare R2
-- **Monitoring**: kube-prometheus-stack v80.12.0
+- **Storage**: Longhorn with S3 backups to Cloudflare R2
+- **Monitoring**: kube-prometheus-stack (Prometheus + Grafana)
 
 ## GitOps Architecture
 
@@ -338,12 +342,15 @@ talosctl kubeconfig --nodes fd00:1018:0:5:10:18:6:90
 
 **Upgrade Talos**:
 ```bash
-# Update talconfig.yaml first
+# 1. Update talosVersion in talconfig.yaml to desired version
+# 2. Regenerate configs
 talhelper genconfig
 
-TALOS_VERSION=v1.12.1
-TALOS_IMAGE="factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:$TALOS_VERSION"
+# 3. Set version and factory image (check talos/talos1018/README.md for current factory image)
+TALOS_VERSION=<desired-version>  # e.g., v1.12.1
+TALOS_IMAGE="factory.talos.dev/metal-installer/<factory-id>:$TALOS_VERSION"
 
+# 4. Upgrade each node
 talosctl upgrade -n fd00:1018:0:5:10:18:6:91 --image "$TALOS_IMAGE" --wait
 talosctl upgrade -n fd00:1018:0:5:10:18:6:92 --image "$TALOS_IMAGE" --wait
 talosctl upgrade -n fd00:1018:0:5:10:18:6:93 --image "$TALOS_IMAGE" --wait
@@ -634,13 +641,14 @@ Renovate automatically updates:
 - **Main Branch**: master
 - **Flux Path**: kubernetes/clusters/talos1018
 - **Cluster Name**: talos1018
-- **Kubernetes Version**: v1.35.0
-- **Talos Version**: v1.12.1
-- **Cilium Version**: v1.18.5
+
+**For current versions**, see:
+- Kubernetes & Talos: `talos/talos1018/talconfig.yaml`
+- Infrastructure components: `kubernetes/infrastructure/talos1018/*/app/helmrelease.yaml`
+- Applications: `kubernetes/apps/talos1018/*/helmrelease.yaml`
 
 ---
 
-**Last Updated**: 2026-01-06
 **Maintainer**: fmurodov
 
 This document should be updated when significant architectural changes are made to the repository.
