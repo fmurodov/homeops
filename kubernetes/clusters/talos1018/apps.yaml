@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Applications layer
 # Depends on core infrastructure (networking, ingress, TLS)
 # Apps with PVCs will naturally wait for storage via Kubernetes
