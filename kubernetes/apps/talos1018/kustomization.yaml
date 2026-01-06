@@ -11,6 +11,8 @@ resources:
   - ./netbootxyz/ks.yaml
   - ./openspeedtest/ks.yaml
 
+  - ./security
+
   # Monitoring and Observability
   - ./kube-prometheus-stack/ks.yaml
 
