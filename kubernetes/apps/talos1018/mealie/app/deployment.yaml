@@ -59,17 +59,17 @@ spec:
             - name: OIDC_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: mealie-secrets
+                  name: mealie-secret
                   key: OIDC_CLIENT_ID
             - name: OIDC_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: mealie-secrets
+                  name: mealie-secret
                   key: OIDC_CLIENT_SECRET
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: mealie-secrets
+                  name: mealie-secret
                   key: OPENAI_API_KEY
           volumeMounts:
             - mountPath: /app/data
