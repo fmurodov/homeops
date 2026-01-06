@@ -40,8 +40,12 @@ spec:
               value: "true"
             - name: HBOX_OPTIONS_HOSTNAME
               value: "homebox.${CLUSTER_DOMAIN}"
+            - name: HBOX_OPTIONS_ALLOW_LOCAL_LOGIN
+              value: "false"
             - name: HBOX_OIDC_ENABLED
               value: "true"
+            - name: HBOX_OIDC_BUTTON_TEXT
+              value: "Sign in with Pocket ID"
             - name: HBOX_OIDC_ISSUER_URL
               value: https://pid.${DOMAIN}
             - name: HBOX_OIDC_CLIENT_ID
