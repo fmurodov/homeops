@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
 # Source: reloader/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment

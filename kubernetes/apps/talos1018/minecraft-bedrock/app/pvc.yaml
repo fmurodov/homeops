@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:

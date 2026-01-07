@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/sops
 creation_rules:
   - path_regex: .+\.sops\.yaml
     encrypted_regex: ^(data|stringData)$
