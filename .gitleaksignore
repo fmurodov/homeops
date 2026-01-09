@@ -1,7 +1,0 @@
-# Gitleaks ignore file
-# Suppress false positives for known safe content
-
-# Age public key used for SOPS encryption (public by design)
-# This key appears in .sops.yaml configs and documentation
-# The private key (AGE-SECRET-KEY-*) is the actual secret
-***REMOVED***

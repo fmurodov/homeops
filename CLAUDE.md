@@ -69,7 +69,7 @@ All secrets use **SOPS + age** encryption.
 **Encryption rules** (`kubernetes/.sops.yaml`, `talos/talos1018/.sops.yaml`):
 - Files must end with `.sops.yaml`
 - Only `data` and `stringData` fields are encrypted
-- Age key: `***REMOVED***`
+- Age public key is defined in `.sops.yaml` files (see those files for the key)
 
 **Variable substitution** - Secrets become cluster-wide variables:
 ```yaml
@@ -156,9 +156,8 @@ kubernetes/apps/talos1018/<category>/<app-name>/
 ├── secret.sops.yaml (if needed)
 └── kustomization.yaml
 
-# 2. Encrypt secrets
-sops --age=***REMOVED*** \
-     --encrypt --encrypted-regex '^(data|stringData)$' \
+# 2. Encrypt secrets (SOPS will use age key from .sops.yaml)
+sops --encrypt --encrypted-regex '^(data|stringData)$' \
      --in-place secret.sops.yaml
 
 # 3. Add to kubernetes/apps/talos1018/kustomization.yaml
