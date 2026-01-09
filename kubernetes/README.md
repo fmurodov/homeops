@@ -72,7 +72,7 @@ This directory uses Mozilla SOPS with age encryption for managing secrets.
 2. Create your secret file with the encoded data
 3. Encrypt the secret file:
    ```bash
-   sops --age=***REMOVED*** \
+   sops --age=age1kesma5f5dadlzdl5lzgrtxl6e8z8frf7njsfnlnprzan0lmzgdmstnd39u \
         --encrypt \
         --encrypted-regex '^(data|stringData)$' \
         --in-place path/to/your/secret.sops.yaml
