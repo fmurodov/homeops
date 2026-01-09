@@ -4,6 +4,9 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: bds-data
+  labels:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job.longhorn.io/daily-backup: enabled
 spec:
   storageClassName: longhorn
   accessModes:
