@@ -1,22 +1,31 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# openspeedtest - Speed testing
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: openspeedtest-app
+  name: chrony
   namespace: flux-system
 spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   interval: 1h
-  retryInterval: 1m
   timeout: 5m
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/apps/talos1018/openspeedtest/app
+    namespace: flux-system
+  path: "./kubernetes/apps/talos1018/network/chrony/app"
+  targetNamespace: network
   prune: true
   wait: true
   postBuild:
     substituteFrom:
       - kind: Secret
         name: cluster-secrets
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: DaemonSet
+      name: chrony
+      namespace: network

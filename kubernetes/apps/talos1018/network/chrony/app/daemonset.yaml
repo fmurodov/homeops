@@ -4,7 +4,6 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: chrony
-  namespace: network
   labels:
     app.kubernetes.io/name: chrony
   annotations:
