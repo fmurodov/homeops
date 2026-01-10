@@ -7,10 +7,6 @@ resources:
 
   # Network and Infrastructure
   - ./network
-  - ./cloudflared/ks.yaml
-  - ./chrony/ks.yaml
-  - ./netbootxyz/ks.yaml
-  - ./openspeedtest/ks.yaml
 
   - ./security
 
