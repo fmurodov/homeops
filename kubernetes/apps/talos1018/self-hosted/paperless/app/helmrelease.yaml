@@ -82,7 +82,7 @@ spec:
                         "client_id": "$(PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_ID)",
                         "secret": "$(PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_SECRET)",
                         "settings": {
-                          "server_url": "https://pid.${CLUSTER_DOMAIN}/.well-known/openid-configuration"
+                          "server_url": "http://pocket-id.security.svc.cluster.local:1411/.well-known/openid-configuration"
                         }
                       }
                     ]
