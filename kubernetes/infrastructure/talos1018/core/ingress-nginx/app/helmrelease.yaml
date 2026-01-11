@@ -25,3 +25,8 @@ spec:
         ipFamilies:
           - IPv6
           - IPv4
+      config:
+        use-forwarded-headers: "true"
+        compute-full-forwarded-for: "true"
+        # trust cloudflared from podCIDR
+        proxy-real-ip-cidr: "fd00:1018:1000::/56,10.244.0.0/16"
