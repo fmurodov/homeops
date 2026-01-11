@@ -50,7 +50,7 @@ spec:
             - name: OIDC_SIGNUP_ENABLED
               value: "true"
             - name: OIDC_CONFIGURATION_URL
-              value: http://pocket-id.security.svc.cluster.local:1411/.well-known/openid-configuration
+              value: https://pid.${DOMAIN}/.well-known/openid-configuration
             - name: OIDC_GROUPS_CLAIM
               value: groups
             - name: OIDC_ADMIN_GROUP
