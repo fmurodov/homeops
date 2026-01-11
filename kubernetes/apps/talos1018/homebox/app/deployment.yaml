@@ -48,7 +48,7 @@ spec:
             - name: HBOX_OIDC_BUTTON_TEXT
               value: "Sign in with Pocket ID"
             - name: HBOX_OIDC_ISSUER_URL
-              value: https://pid.${CLUSTER_DOMAIN}
+              value: https://pid.${DOMAIN}
             - name: HBOX_OIDC_CLIENT_ID
               valueFrom:
                 secretKeyRef:
