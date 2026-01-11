@@ -25,7 +25,7 @@ spec:
             env:
               DB_CONNECTION_STRING: file:/app/data/pocket-id.db?_journal_mode=WAL&_busy_timeout=2500&_txlock=immediate
               APP_URL: https://pid.${DOMAIN}
-              INTERNAL_APP_URL: "https://pid.${CLUSTER_DOMAIN}"
+              INTERNAL_APP_URL: https://pid.${CLUSTER_DOMAIN}
               TRUST_PROXY: true
               TZ: ${TIMEZONE}
               UPLOAD_PATH: /app/data/uploads
