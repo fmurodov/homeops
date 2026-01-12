@@ -42,7 +42,7 @@ spec:
 
     defaultPodOptions:
       annotations:
-        k8s.v1.cni.cncf.io/networks: network/multus-lan
+        k8s.v1.cni.cncf.io/networks: network/multus-macvlan2, network/multus-macvlan3
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
