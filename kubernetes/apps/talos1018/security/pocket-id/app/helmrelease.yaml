@@ -34,6 +34,11 @@ spec:
                   secretKeyRef:
                     name: pocket-id-secret
                     key: ENCRYPTION_KEY
+              MAXMIND_LICENSE_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: pocket-id-secret
+                    key: MAXMIND_LICENSE_KEY
             probes:
               liveness:
                 enabled: true
