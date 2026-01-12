@@ -16,7 +16,7 @@ spec:
       labels:
         app.kubernetes.io/name: esphome
       annotations:
-        k8s.v1.cni.cncf.io/networks: network/multus-iot
+        k8s.v1.cni.cncf.io/networks: network/multus-lan
     spec:
       affinity:
         nodeAffinity:

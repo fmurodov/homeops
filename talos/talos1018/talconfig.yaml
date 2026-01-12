@@ -63,6 +63,8 @@ nodes:
         vip:
           ip: fd00:1018:0:5:10:18:6:90
         vlans:
+          - vlanId: 2
+            dhcp: false
           - vlanId: 3
             dhcp: false
     nodeLabels:
@@ -90,6 +92,8 @@ nodes:
         vip:
           ip: fd00:1018:0:5:10:18:6:90
         vlans:
+          - vlanId: 2
+            dhcp: false
           - vlanId: 3
             dhcp: false
     nodeLabels:
@@ -117,6 +121,8 @@ nodes:
         vip:
           ip: fd00:1018:0:5:10:18:6:90
         vlans:
+          - vlanId: 2
+            dhcp: false
           - vlanId: 3
             dhcp: false
     nodeLabels:
