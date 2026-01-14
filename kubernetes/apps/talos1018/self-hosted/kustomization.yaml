@@ -7,5 +7,6 @@ resources:
   - ./ocirepository.yaml
   - ./changedetection/ks.yaml
   - ./paperless/ks.yaml
+  - ./n8n/ks.yaml
 # components:
 #   - ../../../components/common
