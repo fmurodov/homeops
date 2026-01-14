@@ -31,8 +31,8 @@ spec:
                 value: PreferDualStack
   values:
     defaultSettings:
-      backupTarget: s3://longhorn-backup@auto/1018
-      backupTargetCredentialSecret: longhorn-r2-backups
+      backupTarget: s3://talos1018-longhorn@auto/1018/
+      backupTargetCredentialSecret: longhorn-b2-backups
       defaultReplicaCount: "3"
       createDefaultDiskLabeledNodes: true
       # systemManagedComponentsNodeSelector: "node.longhorn.io/create-default-disk:true"
