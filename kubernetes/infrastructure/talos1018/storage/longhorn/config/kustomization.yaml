@@ -5,6 +5,7 @@ kind: Kustomization
 namespace: longhorn-system
 resources:
   - ./backup-secret.sops.yaml
+  - ./backup-b2-secret.sops.yaml
   - ./daily-backup.yaml
   - ./longhorn-ingress.secret.sops.yaml
   - ./longhorn-ingress.yaml
