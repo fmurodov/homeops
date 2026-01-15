@@ -20,7 +20,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: exporter
-              image: ghcr.io/paperless-ngx/paperless-ngx:2.20.3
+              image: ghcr.io/paperless-ngx/paperless-ngx:2.20.4
               command:
                 - /bin/bash
                 - -c
