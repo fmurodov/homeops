@@ -16,7 +16,7 @@ spec:
           app:
             image:
               repository: ghcr.io/dgtlmoon/changedetection.io
-              tag: 0.51.4
+              tag: 0.52.5
             env:
               TZ: "Europe/Amsterdam"
               LISTEN_HOST: "::"
