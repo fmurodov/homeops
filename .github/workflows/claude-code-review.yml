@@ -13,7 +13,7 @@ on:
 jobs:
   claude-review:
     # Skip Renovate PRs - use @claude mention workflow for manual reviews
-    if: github.event.pull_request.user.login != 'renovate[bot]'
+    if: github.event.pull_request.user.type != 'Bot'
 
     runs-on: ubuntu-latest
     permissions:
