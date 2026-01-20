@@ -1,5 +1,5 @@
-version: "3.8"
-
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-go/master/schema/compose-spec.json
 services:
   esphome:
     image: ghcr.io/esphome/esphome:2025.12.7
