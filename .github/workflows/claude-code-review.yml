@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write  # Changed from 'read' to 'write' to allow posting review comments
       issues: read
       id-token: write
 
