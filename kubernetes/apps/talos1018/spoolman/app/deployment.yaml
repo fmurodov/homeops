@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: spoolman
-          image: "ghcr.io/donkie/spoolman:0.22.1"
+          image: "ghcr.io/donkie/spoolman:0.23.0"
           imagePullPolicy: Always
           ports:
             - name: http
