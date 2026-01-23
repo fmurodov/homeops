@@ -11,7 +11,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: prometheus
-      version: "81.2.1"
+      version: "81.2.2"
   interval: 1h0m0s
   values:
     grafana:
