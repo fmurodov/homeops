@@ -30,7 +30,7 @@ spec:
                       - talos-1018-3
       containers:
         - name: esphome
-          image: "ghcr.io/esphome/esphome:2026.1.0"
+          image: "ghcr.io/esphome/esphome:2026.1.1"
           imagePullPolicy: Always
           ports:
             - name: http
