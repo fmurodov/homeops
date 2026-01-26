@@ -26,6 +26,8 @@ spec:
               EXECUTIONS_DATA_MAX_AGE: 7
               EXECUTIONS_DATA_PRUNE_MAX_COUNT: 50000
               GENERIC_TIMEZONE: "${TIMEZONE}"
+              WEBHOOK_URL: "https://n8n-webhook.${DOMAIN}/"
+              N8N_PROXY_HOPS: 1
               N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: false
               N8N_PROTOCOL: "https"
               N8N_PORT: &port 8080
@@ -68,7 +70,7 @@ spec:
                 service:
                   identifier: app
                   port: *port
-          - host: &webhook n8n-webhook.${CLUSTER_DOMAIN}
+          - host: &webhook n8n-webhook.${DOMAIN}
             paths:
               - path: /webhook
                 service:
