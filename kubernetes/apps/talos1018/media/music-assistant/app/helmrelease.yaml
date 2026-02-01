@@ -85,7 +85,7 @@ spec:
         tls:
           - secretName: music-assistant-tls
             hosts:
-              - hass.${CLUSTER_DOMAIN}
+              - mass.${CLUSTER_DOMAIN}
 
     persistence:
       data:
