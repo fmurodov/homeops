@@ -29,7 +29,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/matter-js/matterjs-server:0.3.1
+              repository: ghcr.io/matter-js/matterjs-server
               tag: 0.3.1
             env:
               TZ: Europe/Amsterdam
