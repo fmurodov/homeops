@@ -1,0 +1,95 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: music-assistant
+spec:
+  chart:
+    spec:
+      chart: app-template
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+      version: "4.6.2"
+  interval: 1h0m0s
+  values:
+    controllers:
+      music-assistant:
+        type: statefulset
+        containers:
+          app:
+            image:
+              repository: ghcr.io/music-assistant/server
+              tag: "2.7.6"
+            env:
+              TZ: ${TIMEZONE}
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 15m
+                memory: 512Mi
+
+    defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: network/multus-macvlan2, network/multus-macvlan3
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - talos-1018-2
+                      - talos-1018-3
+
+    service:
+      app:
+        controller: music-assistant
+        ipFamilyPolicy: PreferDualStack
+        ports:
+          http:
+            port: 8095
+
+    ingress:
+      app:
+        enabled: true
+        className: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: sh-music-assistant.svg
+          gethomepage.dev/name: Music Assistant
+          gethomepage.dev/app: music-assistant
+        hosts:
+          - host: mass.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - secretName: music-assistant-tls
+            hosts:
+              - hass.${CLUSTER_DOMAIN}
+
+    persistence:
+      data:
+        enabled: true
+        existingClaim: music-assistant-data
+        globalMounts:
+          - path: /data
