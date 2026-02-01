@@ -18,16 +18,6 @@ spec:
       annotations:
         k8s.v1.cni.cncf.io/networks: network/multus-macvlan2, network/multus-macvlan3
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - talos-1018-2
-                      - talos-1018-3
       containers:
         - name: esphome
           image: "ghcr.io/esphome/esphome:2026.1.1"
