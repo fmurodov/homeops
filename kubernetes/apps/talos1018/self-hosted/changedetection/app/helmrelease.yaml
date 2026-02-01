@@ -18,7 +18,7 @@ spec:
               repository: ghcr.io/dgtlmoon/changedetection.io
               tag: 0.52.9
             env:
-              TZ: "Europe/Amsterdam"
+              TZ: "${TIMEZONE}"
               LISTEN_HOST: "::"
               PORT: &port 5000
               USE_X_SETTINGS: 1

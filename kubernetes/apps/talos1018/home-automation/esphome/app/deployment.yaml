@@ -38,7 +38,7 @@ spec:
               protocol: TCP
           env:
             - name: TZ
-              value: "Europe/Amsterdam"
+              value: "${TIMEZONE}"
             - name: BASE_URL
               value: "https://esphome.${CLUSTER_DOMAIN}"
             - name: ESPHOME_DASHBOARD_USE_PING

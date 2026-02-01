@@ -32,7 +32,7 @@ spec:
               repository: ghcr.io/matter-js/matterjs-server
               tag: 0.3.1
             env:
-              TZ: Europe/Amsterdam
+              TZ: ${TIMEZONE}
               MATTER_SERVER__INSTANCE_NAME: "{{ .Release.Name }}"
               DISABLE_DASHBOARD: false
     defaultPodOptions:
