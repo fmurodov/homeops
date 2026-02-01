@@ -29,12 +29,12 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/home-assistant-libs/python-matter-server
-              tag: 8.1.0@sha256:170aa093ce91c76cde4cc390918307590f0f5558fcec93f913af3cb019e6562a
+              repository: ghcr.io/matter-js/matterjs-server:0.3.1
+              tag: 0.3.1
             env:
               TZ: Europe/Amsterdam
               MATTER_SERVER__INSTANCE_NAME: "{{ .Release.Name }}"
-              MATTER_SERVER__LOG_LEVEL: info
+              DISABLE_DASHBOARD: false
     defaultPodOptions:
       annotations:
         k8s.v1.cni.cncf.io/networks: network/multus-macvlan2, network/multus-macvlan3
