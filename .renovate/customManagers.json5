@@ -21,6 +21,20 @@
     },
     {
       customType: "regex",
+      description: "Process fish shell 'set VAR value' syntax",
+      managerFilePatterns: [
+        "/\\.md$/",
+        "/\\.sh$/",
+      ],
+      matchStrings: [
+        // # renovate: datasource=github-releases depName=foo/bar
+        // set FOO_VERSION v1.0.0
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s*set\\s+\\S+\\s+(?<currentValue>\\S+)",
+      ],
+      datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
+    },
+    {
+      customType: "regex",
       description: "Process OCI dependencies",
       managerFilePatterns: [
         "/\\.yaml(?:\\.j2)?$/",
