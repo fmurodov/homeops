@@ -13,4 +13,3 @@ spec:
       targetPort: 8754
       protocol: TCP
       name: http
-  ipFamilyPolicy: PreferDualStack

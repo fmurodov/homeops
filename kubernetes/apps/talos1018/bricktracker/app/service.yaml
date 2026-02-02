@@ -7,7 +7,6 @@ metadata:
   labels:
     app.kubernetes.io/name: bricktracker
 spec:
-  ipFamilyPolicy: PreferDualStack
   ports:
     - port: 3333
       targetPort: 3333

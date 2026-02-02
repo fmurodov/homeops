@@ -7,7 +7,6 @@ metadata:
   labels:
     app.kubernetes.io/name: spoolman
 spec:
-  ipFamilyPolicy: PreferDualStack
   ports:
     - port: 8000
       targetPort: 8000

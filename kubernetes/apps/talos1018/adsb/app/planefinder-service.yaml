@@ -13,4 +13,3 @@ spec:
       targetPort: 30053
       protocol: TCP
       name: http
-  ipFamilyPolicy: PreferDualStack
