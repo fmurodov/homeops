@@ -157,7 +157,7 @@ spec:
             command:
               - /bin/sh
               - -c
-              - 'exec java -cp "/grobid:/tika-server-standard-${TIKA_VERSION}.jar:/tika-extras/*" org.apache.tika.server.core.TikaServerCli -h :: "$@"'
+              - exec java -cp "/tika-server-standard-${TIKA_VERSION}.jar:/tika-extras/*" org.apache.tika.server.core.TikaServerCli -h :: $0 $@
             resources:
               requests:
                 cpu: "0.002"
