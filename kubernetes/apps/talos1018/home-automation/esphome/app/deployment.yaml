@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: esphome
-          image: "ghcr.io/esphome/esphome:2026.1.1"
+          image: "ghcr.io/esphome/esphome:2026.1.2"
           imagePullPolicy: Always
           ports:
             - name: http
