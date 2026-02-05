@@ -7,38 +7,39 @@ metadata:
 spec:
   chart:
     spec:
-      chart: victoria-logs
+      chart: victoria-logs-single
       sourceRef:
         kind: HelmRepository
         name: vm
   interval: 1h0m0s
   values:
-    retentionPeriod: "7d"
-    persistentVolume:
-      enabled: true
-      existingClaim: victoria-logs-data
-    resources:
-      requests:
-        cpu: 100m
-        memory: 256Mi
-      limits:
-        memory: 512Mi
-    ingress:
-      enabled: true
-      className: nginx
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Observability
-        gethomepage.dev/icon: si-victoriametrics
-        gethomepage.dev/name: VictoriaLogs
-        gethomepage.dev/app: victoria-logs
-      hosts:
-        - host: vlogs.${CLUSTER_DOMAIN}
-          paths:
-            - path: /
-              pathType: Prefix
-      tls:
-        - secretName: victoria-logs-tls
-          hosts:
-            - vlogs.${CLUSTER_DOMAIN}
+    server:
+      retentionPeriod: "7d"
+      persistentVolume:
+        enabled: true
+        existingClaim: victoria-logs-data
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+      ingress:
+        enabled: true
+        className: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Observability
+          gethomepage.dev/icon: si-victoriametrics
+          gethomepage.dev/name: VictoriaLogs
+          gethomepage.dev/app: victoria-logs
+        hosts:
+          - host: vlogs.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - secretName: victoria-logs-tls
+            hosts:
+              - vlogs.${CLUSTER_DOMAIN}
