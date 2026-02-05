@@ -35,13 +35,12 @@ spec:
             DB.Sync       Strict
       inputs: |
         [INPUT]
-            Name          tail
-            Path          /var/log/containers/*.log
-            Exclude_Path  /var/log/containers/*fluent-bit*.log,/var/log/containers/*victoria-logs*.log
-            Tag           kube.*
-            Parser        cri
-            Multiline     On
-            Multiline.parser docker, cri
+            Name              tail
+            Path              /var/log/containers/*.log
+            Exclude_Path      /var/log/containers/*fluent-bit*.log,/var/log/containers/*victoria-logs*.log
+            Tag               kube.*
+            Parser            cri
+            multiline.parser  cri
       filters: |
         [FILTER]
             Name                kubernetes
