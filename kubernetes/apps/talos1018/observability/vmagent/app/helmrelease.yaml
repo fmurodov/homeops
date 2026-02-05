@@ -15,6 +15,7 @@ spec:
   values:
     extraArgs:
       httpListenAddr: "[::]:8429"
+      enableTCP6: "true"
     remoteWrite:
       - url: http://victoria-metrics.observability.svc.cluster.local:8428/api/v1/write
     rbac:

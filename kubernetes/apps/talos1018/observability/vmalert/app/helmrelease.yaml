@@ -16,6 +16,7 @@ spec:
     server:
       extraArgs:
         httpListenAddr: "[::]:8880"
+        enableTCP6: "true"
       datasource:
         url: http://victoria-metrics.observability.svc.cluster.local:8428
       remote:
