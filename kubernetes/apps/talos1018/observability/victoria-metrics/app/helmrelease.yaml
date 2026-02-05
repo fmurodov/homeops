@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics
+spec:
+  chart:
+    spec:
+      chart: victoria-metrics
+      sourceRef:
+        kind: HelmRepository
+        name: vm
+  interval: 1h0m0s
+  values:
+    server:
+      enabled: true
+      retentionPeriod: "7d"
+      persistentVolume:
+        enabled: true
+        existingClaim: victoria-metrics-data
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+      ingress:
+        enabled: true
+        className: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Observability
+          gethomepage.dev/icon: si-victoriametrics
+          gethomepage.dev/name: VictoriaMetrics
+          gethomepage.dev/app: victoria-metrics
+        hosts:
+          - host: vm.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - secretName: victoria-metrics-tls
+            hosts:
+              - vm.${CLUSTER_DOMAIN}
+    # Standalone charts are used for these — disable the bundled ones
+    vmagent:
+      enabled: false
+    vmalert:
+      enabled: false
+    vmauth:
+      enabled: false

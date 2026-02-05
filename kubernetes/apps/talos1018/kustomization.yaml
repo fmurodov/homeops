@@ -11,7 +11,7 @@ resources:
   - ./security
 
   # Monitoring and Observability
-  - ./kube-prometheus-stack/ks.yaml
+  - ./observability
 
   # Home Automation
   - ./home-automation

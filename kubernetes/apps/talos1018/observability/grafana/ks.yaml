@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# grafana - Visualization and dashboards
+# Owns the 'grafana' HelmRepository
+# PREREQUISITE: Register a Grafana OIDC app in Pocket ID before deploying.
+#   Redirect URI: https://grafana.<CLUSTER_DOMAIN>/login/generic_oauth
+#   Then fill OIDC_CLIENT_ID and OIDC_CLIENT_SECRET into grafana-secret.sops.yaml
+#   and encrypt it with: sops --encrypt --in-place grafana/app/grafana-secret.sops.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: grafana
+  namespace: flux-system
+spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  dependsOn:
+    - name: victoria-metrics
+    - name: victoria-logs
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/talos1018/observability/grafana/app
+  prune: true
+  wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: grafana
+      namespace: observability

@@ -1,0 +1,128 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana
+spec:
+  chart:
+    spec:
+      chart: grafana
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+  interval: 1h0m0s
+  values:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+    # Admin credentials — "breaking glass" password login
+    admin:
+      existingSecret: grafana-secret
+      userKey: admin-user
+      passwordKey: admin-password
+
+    # Persistence via pre-created PVC
+    persistence:
+      enabled: true
+      existingClaim: grafana-data
+
+    # OIDC secrets injected as env vars; referenced in grafana.ini via $${...} escaping.
+    # Flux postBuild converts $${ → ${, then Grafana resolves ${VAR} from the pod env at runtime.
+    envValueFrom:
+      GF_OIDC_CLIENT_ID:
+        secretKeyRef:
+          name: grafana-secret
+          key: OIDC_CLIENT_ID
+      GF_OIDC_CLIENT_SECRET:
+        secretKeyRef:
+          name: grafana-secret
+          key: OIDC_CLIENT_SECRET
+
+    grafana.ini:
+      server:
+        root_url: https://grafana.${CLUSTER_DOMAIN}
+      auth:
+        login_maximum_inactive_lifetime_duration: 1d
+        login_maximum_duration: 30d
+      auth.generic_oauth:
+        enabled: true
+        name: Pocket ID
+        client_id: $${GF_OIDC_CLIENT_ID}
+        client_secret: $${GF_OIDC_CLIENT_SECRET}
+        scopes: openid profile email
+        auth_url: https://pid.${CLUSTER_DOMAIN}/authorize
+        token_url: https://pid.${CLUSTER_DOMAIN}/oauth2/token
+        api_url: https://pid.${CLUSTER_DOMAIN}/userinfo
+        auto_sign_up: true
+        default_role: Admin
+
+    # Datasources
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: VictoriaMetrics
+            type: prometheus
+            url: http://victoria-metrics.observability.svc.cluster.local:8428
+            isDefault: true
+            jsonData:
+              timeInterval: "60s"
+          - name: VictoriaLogs
+            type: loki
+            url: http://victoria-logs.observability.svc.cluster.local:8428
+            jsonData:
+              maxLines: 1000
+
+    # Dashboards — downloaded from Grafana Panel Library (gnetId)
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: "default"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+    dashboards:
+      default:
+        node-exporter-full:
+          gnetId: 1860
+          revision: 36
+          datasource: VictoriaMetrics
+        kubernetes-cluster-overview:
+          gnetId: 3119
+          revision: 4
+          datasource: VictoriaMetrics
+        kubernetes-pod-overview:
+          gnetId: 13550
+          revision: 2
+          datasource: VictoriaMetrics
+
+    # Ingress
+    ingress:
+      enabled: true
+      className: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Observability
+        gethomepage.dev/icon: sh-grafana.svg
+        gethomepage.dev/name: Grafana
+        gethomepage.dev/app: grafana
+      hosts:
+        - host: grafana.${CLUSTER_DOMAIN}
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: grafana-tls
+          hosts:
+            - grafana.${CLUSTER_DOMAIN}

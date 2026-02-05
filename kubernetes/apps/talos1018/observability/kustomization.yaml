@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./namespace.yaml
+
+  # Storage backends (no deps — own their HelmRepositories)
+  - ./victoria-metrics/ks.yaml
+  - ./victoria-logs/ks.yaml
+  - ./kube-state-metrics/ks.yaml
+
+  # Exporters (depend on HelmRepo owners above)
+  - ./node-exporter/ks.yaml
+  - ./alertmanager/ks.yaml
+
+  # Collection & alerting (depend on storage backends)
+  - ./vmagent/ks.yaml
+  - ./vmalert/ks.yaml
+  - ./fluent-bit/ks.yaml
+
+  # Visualization
+  - ./grafana/ks.yaml
