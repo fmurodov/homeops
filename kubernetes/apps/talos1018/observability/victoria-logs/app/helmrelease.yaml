@@ -16,6 +16,7 @@ spec:
     server:
       extraArgs:
         httpListenAddr: "[::]:9428"
+        enableTCP6: "true"
       retentionPeriod: "7d"
       persistentVolume:
         enabled: true
