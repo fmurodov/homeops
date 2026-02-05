@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: fluent-bit
+spec:
+  chart:
+    spec:
+      chart: fluent-bit
+      sourceRef:
+        kind: HelmRepository
+        name: fluent
+  interval: 1h0m0s
+  values:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+    # Fluent Bit configuration
+    # NOTE: The Loki output plugin sends to /loki/api/v1/push by default.
+    # VictoriaLogs accepts Loki-compatible push at /insert/loki/api/v1/push.
+    # If logs do not appear, verify the victoria-logs chart supports the
+    # standard Loki path, or adjust the victoria-logs extraArgs accordingly.
+    config:
+      service: |
+        [SERVICE]
+            Flush         30
+            Daemon        Off
+            Log_Level     info
+            Parsers_File  parsers.conf
+            DB            /var/lib/fluentbit/tail_inputs.db
+            DB.Sync       Strict
+      inputs: |
+        [INPUT]
+            Name          tail
+            Path          /var/log/containers/*.log
+            Exclude_Path  /var/log/containers/*fluent-bit*.log
+            Exclude_Path  /var/log/containers/*victoria-logs*.log
+            Tag           kube.*
+            Parser        cri
+            Multiline     On
+            Multiline.parser docker, cri
+      filters: |
+        [FILTER]
+            Name                kubernetes
+            Match               kube.*
+            Kube_URL            https://kubernetes.default.svc:443
+            Kube_CA_Path        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            Kube_Token_Path     /var/run/secrets/kubernetes.io/serviceaccount/token
+            Kube_Meta_Cache_TTL 300
+            K8S_Filter_Tags     On
+            Merge_Log           On
+            Keep_Original_Log   Off
+      outputs: |
+        [OUTPUT]
+            Name        loki
+            Match       *
+            Host        victoria-logs.observability.svc.cluster.local
+            Port        8428
+            URI         /insert/loki/api/v1/push
+            Labels      job=fluent-bit
+            Label_Keys  namespace, pod, container
+            LogNameKey  log
