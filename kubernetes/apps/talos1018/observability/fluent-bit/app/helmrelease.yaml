@@ -37,8 +37,7 @@ spec:
         [INPUT]
             Name          tail
             Path          /var/log/containers/*.log
-            Exclude_Path  /var/log/containers/*fluent-bit*.log
-            Exclude_Path  /var/log/containers/*victoria-logs*.log
+            Exclude_Path  /var/log/containers/*fluent-bit*.log,/var/log/containers/*victoria-logs*.log
             Tag           kube.*
             Parser        cri
             Multiline     On

@@ -117,11 +117,9 @@ spec:
         gethomepage.dev/icon: sh-grafana.svg
         gethomepage.dev/name: Grafana
         gethomepage.dev/app: grafana
+      path: /
       hosts:
-        - host: grafana.${CLUSTER_DOMAIN}
-          paths:
-            - path: /
-              pathType: Prefix
+        - grafana.${CLUSTER_DOMAIN}
       tls:
         - secretName: grafana-tls
           hosts:
