@@ -13,7 +13,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: cert-manager
-      version: v1.19.2
+      version: v1.19.3
   interval: 1m0s
   values:
     crds:
