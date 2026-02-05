@@ -13,6 +13,8 @@ spec:
         name: vm
   interval: 1h0m0s
   values:
+    extraArgs:
+      httpListenAddr: "[::]:8429"
     remoteWrite:
       - url: http://victoria-metrics.observability.svc.cluster.local:8428/api/v1/write
     rbac:
