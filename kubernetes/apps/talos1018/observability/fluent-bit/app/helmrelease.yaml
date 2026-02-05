@@ -46,12 +46,10 @@ spec:
             Name                kubernetes
             Match               kube.*
             Kube_URL            https://kubernetes.default.svc:443
-            Kube_CA_Path        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-            Kube_Token_Path     /var/run/secrets/kubernetes.io/serviceaccount/token
+            Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
             Kube_Meta_Cache_TTL 300
-            K8S_Filter_Tags     On
             Merge_Log           On
-            Keep_Original_Log   Off
       outputs: |
         [OUTPUT]
             Name        loki
