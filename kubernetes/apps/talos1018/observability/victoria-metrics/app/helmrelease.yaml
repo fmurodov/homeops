@@ -36,10 +36,10 @@ spec:
           gethomepage.dev/name: VictoriaMetrics
           gethomepage.dev/app: victoria-metrics
         hosts:
-          - host: vm.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                pathType: Prefix
+          - name: vm.${CLUSTER_DOMAIN}
+            path:
+              - /
+            port: http
         tls:
           - secretName: victoria-metrics-tls
             hosts:
