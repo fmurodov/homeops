@@ -6,4 +6,4 @@ metadata:
   name: fluent
 spec:
   interval: 1h
-  url: https://charts.fluent.co/
+  url: https://fluent.github.io/helm-charts/

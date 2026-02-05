@@ -28,7 +28,10 @@ spec:
         memory: 512Mi
     # NOTE: Prometheus relabel replacement patterns use ${1}, ${2} etc.
     # These are escaped as $${1} to prevent Flux postBuild substitution.
-    extraScrapeConfigs:
+    config:
+      global:
+        scrape_interval: 30s
+      scrape_configs:
       # Kubernetes API server
       - job_name: kubernetes-api-server
         kubernetes_sd_configs:

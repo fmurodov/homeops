@@ -109,7 +109,7 @@ spec:
     # Ingress
     ingress:
       enabled: true
-      className: nginx
+      ingressClassName: nginx
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt
         gethomepage.dev/enabled: "true"
