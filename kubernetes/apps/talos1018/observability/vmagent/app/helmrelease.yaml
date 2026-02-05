@@ -7,14 +7,14 @@ metadata:
 spec:
   chart:
     spec:
-      chart: vmagent
+      chart: victoria-metrics-agent
       sourceRef:
         kind: HelmRepository
         name: vm
   interval: 1h0m0s
   values:
-    remoteWriteURLs:
-      - http://victoria-metrics.observability.svc.cluster.local:8428/api/v1/write
+    remoteWrite:
+      - url: http://victoria-metrics.observability.svc.cluster.local:8428/api/v1/write
     rbac:
       create: true
     resources:

@@ -7,70 +7,74 @@ metadata:
 spec:
   chart:
     spec:
-      chart: vmalert
+      chart: victoria-metrics-alert
       sourceRef:
         kind: HelmRepository
         name: vm
   interval: 1h0m0s
   values:
-    datasource:
-      url: http://victoria-metrics.observability.svc.cluster.local:8428
-    remoteWrite:
-      url: http://victoria-metrics.observability.svc.cluster.local:8428
-    alertmanager:
-      addr: http://alertmanager.observability.svc.cluster.local:9093
-    resources:
-      requests:
-        cpu: 50m
-        memory: 128Mi
-      limits:
-        memory: 256Mi
-    # Alert rules evaluated by vmalert
-    config:
-      groups:
-        - name: basic
-          rules:
-            # A node has not reported in for 5 minutes
-            - alert: NodeDown
-              expr: 'absent(up{job="kubernetes-kubelet"}) or up{job="kubernetes-kubelet"} == 0'
-              for: 5m
-              labels:
-                severity: critical
-              annotations:
-                summary: "Node {{ $labels.instance }} is down"
+    server:
+      datasource:
+        url: http://victoria-metrics.observability.svc.cluster.local:8428
+      remote:
+        write:
+          url: http://victoria-metrics.observability.svc.cluster.local:8428
+      notifier:
+        alertmanager:
+          url: http://alertmanager.observability.svc.cluster.local:9093
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+      # Alert rules evaluated by vmalert
+      config:
+        alerts:
+          groups:
+            - name: basic
+              rules:
+                # A node has not reported in for 5 minutes
+                - alert: NodeDown
+                  expr: 'absent(up{job="kubernetes-kubelet"}) or up{job="kubernetes-kubelet"} == 0'
+                  for: 5m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Node {{ $labels.instance }} is down"
 
-            # A container has restarted more than 3 times in the last hour
-            - alert: PodCrashLooping
-              expr: 'increase(kube_pod_container_status_restarts_total[1h]) > 3'
-              for: 15m
-              labels:
-                severity: warning
-              annotations:
-                summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} container {{ $labels.container }} is CrashLooping"
+                # A container has restarted more than 3 times in the last hour
+                - alert: PodCrashLooping
+                  expr: 'increase(kube_pod_container_status_restarts_total[1h]) > 3'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} container {{ $labels.container }} is CrashLooping"
 
-            # Node CPU usage above 85%
-            - alert: NodeHighCPU
-              expr: '1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) > 0.85'
-              for: 10m
-              labels:
-                severity: warning
-              annotations:
-                summary: "Node {{ $labels.instance }} CPU usage above 85%"
+                # Node CPU usage above 85%
+                - alert: NodeHighCPU
+                  expr: '1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) > 0.85'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Node {{ $labels.instance }} CPU usage above 85%"
 
-            # Node memory usage above 85%
-            - alert: NodeHighMemory
-              expr: '(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.85'
-              for: 10m
-              labels:
-                severity: warning
-              annotations:
-                summary: "Node {{ $labels.instance }} memory usage above 85%"
+                # Node memory usage above 85%
+                - alert: NodeHighMemory
+                  expr: '(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.85'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Node {{ $labels.instance }} memory usage above 85%"
 
-            # Any filesystem above 85% (excluding tmpfs/overlay)
-            - alert: NodeDiskSpaceLow
-              expr: '(node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} - node_filesystem_free_bytes{fstype!~"tmpfs|overlay"}) / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} > 0.85'
-              for: 10m
-              labels:
-                severity: warning
-              annotations:
-                summary: "Node {{ $labels.instance }} disk {{ $labels.mountpoint }} usage above 85%"
+                # Any filesystem above 85% (excluding tmpfs/overlay)
+                - alert: NodeDiskSpaceLow
+                  expr: '(node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} - node_filesystem_free_bytes{fstype!~"tmpfs|overlay"}) / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} > 0.85'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Node {{ $labels.instance }} disk {{ $labels.mountpoint }} usage above 85%"
