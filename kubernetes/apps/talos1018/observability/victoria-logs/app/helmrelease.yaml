@@ -14,6 +14,8 @@ spec:
   interval: 1h0m0s
   values:
     server:
+      extraArgs:
+        httpListenAddr: "[::]:9428"
       retentionPeriod: "7d"
       persistentVolume:
         enabled: true
