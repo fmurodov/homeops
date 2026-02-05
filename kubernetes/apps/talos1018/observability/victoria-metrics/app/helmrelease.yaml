@@ -28,9 +28,11 @@ spec:
           memory: 256Mi
         limits:
           memory: 512Mi
+      service:
+        clusterIP: ""
       ingress:
         enabled: true
-        className: nginx
+        ingressClassName: nginx
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt
           gethomepage.dev/enabled: "true"

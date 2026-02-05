@@ -31,6 +31,8 @@ spec:
           memory: 128Mi
         limits:
           memory: 256Mi
+      service:
+        clusterIP: ""
       # Alert rules evaluated by vmalert
       config:
         alerts:
