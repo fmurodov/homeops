@@ -52,6 +52,6 @@ spec:
             Match       *
             Host        victoria-logs-victoria-logs-single-server.observability.svc.cluster.local
             Port        9428
-            URI         /insert/loki/api/v1/push
+            URI         /insert/loki/api/v1/push?_msg_field=log
             Labels      job=fluent-bit
             Label_Keys  $kubernetes['namespace_name'], $kubernetes['pod_name'], $kubernetes['container_name']

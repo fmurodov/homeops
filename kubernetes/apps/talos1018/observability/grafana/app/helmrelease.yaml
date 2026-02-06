@@ -62,6 +62,10 @@ spec:
         groups_attribute_path: groups
         role_attribute_path: contains(groups[*], 'grafana-admin') && 'Admin' || 'Viewer'
 
+    # Grafana plugins
+    plugins:
+      - victoriametrics-logs-datasource
+
     # Datasources
     datasources:
       datasources.yaml:
@@ -74,7 +78,7 @@ spec:
             jsonData:
               timeInterval: "30s"
           - name: VictoriaLogs
-            type: loki
+            type: victoriametrics-logs-datasource
             url: http://victoria-logs-victoria-logs-single-server.observability.svc.cluster.local:9428
             jsonData:
               maxLines: 1000
