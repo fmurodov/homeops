@@ -13,7 +13,6 @@ spec:
         name: vm
   interval: 1h0m0s
   values:
-    fullnameOverride: victoria-logs
     server:
       extraArgs:
         httpListenAddr: "[::]:9428"

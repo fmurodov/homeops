@@ -5,18 +5,19 @@ kind: Kustomization
 resources:
   - ./namespace.yaml
 
-  # Storage backends (no deps — own their HelmRepositories)
+  # Exporters (no deps — own their HelmRepositories)
+  - ./kube-state-metrics/ks.yaml
+  - ./node-exporter/ks.yaml
+
+  # Storage backends (depend on exporters for scraping)
   - ./victoria-metrics/ks.yaml
   - ./victoria-logs/ks.yaml
-  - ./kube-state-metrics/ks.yaml
 
-  # Exporters (depend on HelmRepo owners above)
-  - ./node-exporter/ks.yaml
+  # Alerting
   - ./alertmanager/ks.yaml
-
-  # Collection & alerting (depend on storage backends)
-  - ./vmagent/ks.yaml
   - ./vmalert/ks.yaml
+
+  # Log collection
   - ./fluent-bit/ks.yaml
 
   # Visualization

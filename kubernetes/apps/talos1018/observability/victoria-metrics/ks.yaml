@@ -1,13 +1,16 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# victoria-metrics - Metrics storage and query engine
-# Owns the 'vm' HelmRepository used by victoria-logs, vmagent, vmalert
+# victoria-metrics - Metrics storage, query engine, and scraper
+# Owns the 'vm' HelmRepository used by victoria-logs, vmalert
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: victoria-metrics
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: kube-state-metrics
+    - name: node-exporter
   interval: 1h
   retryInterval: 1m
   timeout: 5m
