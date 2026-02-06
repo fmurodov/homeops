@@ -82,6 +82,11 @@ spec:
             url: http://victoria-logs-victoria-logs-single-server.observability.svc.cluster.local:9428
             jsonData:
               maxLines: 1000
+          - name: Alertmanager
+            type: alertmanager
+            url: http://alertmanager.observability.svc.cluster.local:9093
+            jsonData:
+              implementation: prometheus
 
     # Dashboards
     dashboardProviders:

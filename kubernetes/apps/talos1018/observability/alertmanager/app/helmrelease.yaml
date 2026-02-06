@@ -26,7 +26,7 @@ spec:
       enabled: false
     ingress:
       enabled: true
-      ingressClassName: nginx
+      className: nginx
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt
         gethomepage.dev/enabled: "true"
