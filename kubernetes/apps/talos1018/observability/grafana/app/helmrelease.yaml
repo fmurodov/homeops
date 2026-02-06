@@ -55,7 +55,7 @@ spec:
         client_id: $${GF_OIDC_CLIENT_ID}
         client_secret: $${GF_OIDC_CLIENT_SECRET}
         scopes: openid profile email
-        auth_url: https://pid.${CLUSTER_DOMAIN}/authorize
+        auth_url: https://pid.${DOMAIN}/authorize
         token_url: https://pid.${CLUSTER_DOMAIN}/oauth2/token
         api_url: https://pid.${CLUSTER_DOMAIN}/userinfo
         auto_sign_up: true
