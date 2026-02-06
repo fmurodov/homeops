@@ -54,12 +54,13 @@ spec:
         name: Pocket ID
         client_id: $${GF_OIDC_CLIENT_ID}
         client_secret: $${GF_OIDC_CLIENT_SECRET}
-        scopes: openid profile email
+        scopes: openid profile email groups
         auth_url: https://pid.${DOMAIN}/authorize
         token_url: https://pid.${CLUSTER_DOMAIN}/api/oidc/token
         api_url: https://pid.${CLUSTER_DOMAIN}/api/oidc/userinfo
         auto_sign_up: true
-        default_role: Admin
+        groups_attribute_path: groups
+        role_attribute_path: contains(groups[*], 'grafana-admin') && 'Admin' || 'Viewer'
 
     # Datasources
     datasources:
