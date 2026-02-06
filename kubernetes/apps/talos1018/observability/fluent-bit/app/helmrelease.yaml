@@ -44,6 +44,8 @@ spec:
             Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
             Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
             Kube_Meta_Cache_TTL 300
+            Merge_Log           On
+            Keep_Log            On
       outputs: |
         [OUTPUT]
             Name        loki
