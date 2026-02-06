@@ -111,11 +111,6 @@ spec:
                   regex: (.+):(.+)
                   target_label: __address__
                   replacement: "$${1}:10250"
-              metric_relabel_configs:
-                - source_labels:
-                    - __name__
-                  action: drop
-                  regex: "container_(network_tcp_usage_total|network_udp_usage_total|tasks_state)"
 
             # Pod autodiscovery via prometheus.io annotations
             - job_name: kubernetes-pods
@@ -155,39 +150,6 @@ spec:
                     - __meta_kubernetes_pod_name
                   action: replace
                   target_label: pod
-
-            # Service autodiscovery via prometheus.io annotations
-            - job_name: kubernetes-services
-              kubernetes_sd_configs:
-                - role: service
-              relabel_configs:
-                - source_labels:
-                    - __meta_kubernetes_service_annotation_prometheus_io_scrape
-                  action: keep
-                  regex: "true"
-                - source_labels:
-                    - __meta_kubernetes_service_annotation_prometheus_io_scheme
-                  action: replace
-                  target_label: __scheme__
-                  regex: (https?)
-                - source_labels:
-                    - __meta_kubernetes_service_annotation_prometheus_io_path
-                  action: replace
-                  target_label: __metrics_path__
-                  regex: (.+)
-                - source_labels:
-                    - __address__
-                    - __meta_kubernetes_service_annotation_prometheus_io_port
-                  action: replace
-                  regex: ([^:]+)(?::\d+)?;(\d+)
-                  target_label: __address__
-                  replacement: $1:$2
-                - action: labelmap
-                  regex: __meta_kubernetes_service_label_(.+)
-                - source_labels:
-                    - __meta_kubernetes_namespace
-                  action: replace
-                  target_label: namespace
 
             # Node Exporter
             - job_name: node-exporter
