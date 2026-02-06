@@ -56,8 +56,8 @@ spec:
         client_secret: $${GF_OIDC_CLIENT_SECRET}
         scopes: openid profile email
         auth_url: https://pid.${DOMAIN}/authorize
-        token_url: https://pid.${CLUSTER_DOMAIN}/oauth2/token
-        api_url: https://pid.${CLUSTER_DOMAIN}/userinfo
+        token_url: https://pid.${CLUSTER_DOMAIN}/api/oidc/token
+        api_url: https://pid.${CLUSTER_DOMAIN}/api/oidc/userinfo
         auto_sign_up: true
         default_role: Admin
 
