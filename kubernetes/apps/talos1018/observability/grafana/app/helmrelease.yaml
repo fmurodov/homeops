@@ -110,6 +110,58 @@ spec:
           gnetId: 15760
           revision: 36
           datasource: VictoriaMetrics
+        kubernetes-views-namespaces:
+          gnetId: 15758
+          revision: 42
+          datasource: VictoriaMetrics
+        victorialogs-single-node:
+          gnetId: 22084
+          revision: 6
+          datasource: VictoriaMetrics
+        fluent-bit:
+          gnetId: 18855
+          revision: 1
+          datasource: VictoriaMetrics
+        ingress-nginx:
+          gnetId: 9614
+          revision: 1
+          datasource: VictoriaMetrics
+        cert-manager:
+          gnetId: 20842
+          revision: 3
+          datasource: VictoriaMetrics
+        longhorn:
+          gnetId: 16888
+          revision: 9
+          datasource: VictoriaMetrics
+        cilium-agent:
+          gnetId: 16611
+          revision: 1
+          datasource: VictoriaMetrics
+        cilium-hubble:
+          gnetId: 16613
+          revision: 1
+          datasource: VictoriaMetrics
+        n8n-system-health:
+          gnetId: 24474
+          revision: 1
+          datasource: VictoriaMetrics
+        n8n-workflow-analytics:
+          gnetId: 24475
+          revision: 1
+          datasource: VictoriaMetrics
+        cloudflare-tunnels:
+          gnetId: 17457
+          revision: 6
+          datasource: VictoriaMetrics
+        alertmanager:
+          gnetId: 9578
+          revision: 4
+          datasource: VictoriaMetrics
+        vmalert:
+          gnetId: 14950
+          revision: 18
+          datasource: VictoriaMetrics
 
     # Ingress
     ingress:

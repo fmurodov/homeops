@@ -172,6 +172,20 @@ spec:
                     - __meta_kubernetes_service_name
                   action: keep
                   regex: kube-state-metrics
+
+            # Longhorn manager metrics
+            - job_name: longhorn
+              kubernetes_sd_configs:
+                - role: endpoints
+                  namespaces:
+                    names:
+                      - longhorn-system
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_name
+                    - __meta_kubernetes_endpoint_port_name
+                  action: keep
+                  regex: longhorn-backend;manager
     # Standalone charts are used for these — disable the bundled ones
     vmagent:
       enabled: false

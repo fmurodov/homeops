@@ -16,6 +16,13 @@ spec:
   interval: 1m0s
   values:
     controller:
+      metrics:
+        enabled: true
+        port: 10254
+        portName: metrics
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "10254"
       service:
         labels:
           service.kubernetes.io/topology: external

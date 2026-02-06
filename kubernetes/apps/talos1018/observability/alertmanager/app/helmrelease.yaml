@@ -13,6 +13,9 @@ spec:
         name: prometheus
   interval: 1h0m0s
   values:
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9093"
     resources:
       requests:
         cpu: 25m
