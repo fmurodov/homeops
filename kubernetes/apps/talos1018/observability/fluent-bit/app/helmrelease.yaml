@@ -55,8 +55,7 @@ spec:
             Name        loki
             Match       *
             Host        victoria-logs.observability.svc.cluster.local
-            Port        8428
+            Port        9428
             URI         /insert/loki/api/v1/push
             Labels      job=fluent-bit
             Label_Keys  namespace, pod, container
-            LogNameKey  log
