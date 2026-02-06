@@ -14,6 +14,9 @@ spec:
   interval: 1h0m0s
   values:
     server:
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8880"
       extraArgs:
         httpListenAddr: "[::]:8880"
         enableTCP6: "true"

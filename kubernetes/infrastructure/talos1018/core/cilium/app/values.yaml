@@ -52,6 +52,10 @@ enableIPv4Masquerade: true
 # bpf:
 #   masquerade: true
 
+# Prometheus metrics for Cilium agent
+prometheus:
+  enabled: true
+
 # Hubble observability
 hubble:
   enabled: true

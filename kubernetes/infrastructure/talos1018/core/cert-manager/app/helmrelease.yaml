@@ -18,3 +18,7 @@ spec:
   values:
     crds:
       enabled: true
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9402"
+      prometheus.io/path: /metrics

@@ -34,6 +34,8 @@ spec:
               N8N_HOST: &hostName n8n.${CLUSTER_DOMAIN}
               N8N_LOG_LEVEL: info
               N8N_LOG_OUTPUT: console
+              N8N_METRICS: true
+              N8N_METRICS_PREFIX: n8n_
               N8N_ENCRYPTION_KEY:
                 valueFrom:
                   secretKeyRef:
@@ -46,6 +48,10 @@ spec:
               limits:
                 memory: 2Gi
         pod:
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "8080"
+            prometheus.io/path: /metrics
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000

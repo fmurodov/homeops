@@ -20,6 +20,9 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: reloader-reloader
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
     spec:
       containers:
         - image: "ghcr.io/stakater/reloader:v1.4.12"
