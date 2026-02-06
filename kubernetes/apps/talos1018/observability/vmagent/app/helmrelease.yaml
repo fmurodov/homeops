@@ -16,6 +16,7 @@ spec:
     extraArgs:
       httpListenAddr: "[::]:8429"
       enableTCP6: "true"
+    fullnameOverride: vmagent
     remoteWrite:
       - url: http://victoria-metrics.observability.svc.cluster.local:8428/api/v1/write
     rbac:
@@ -32,165 +33,165 @@ spec:
       global:
         scrape_interval: 30s
       scrape_configs:
-      # Kubernetes API server
-      - job_name: kubernetes-api-server
-        kubernetes_sd_configs:
-          - role: endpoints
-        scheme: https
-        tls_config:
-          insecure_skip_verify: true
-          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-        relabel_configs:
-          - source_labels:
-              - __meta_kubernetes_service_namespace
-              - __meta_kubernetes_service_name
-              - __meta_kubernetes_endpoint_port_name
-            regex: default;kubernetes;https
-            action: keep
+        # Kubernetes API server
+        - job_name: kubernetes-api-server
+          kubernetes_sd_configs:
+            - role: endpoints
+          scheme: https
+          tls_config:
+            insecure_skip_verify: true
+            ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          relabel_configs:
+            - source_labels:
+                - __meta_kubernetes_service_namespace
+                - __meta_kubernetes_service_name
+                - __meta_kubernetes_endpoint_port_name
+              regex: default;kubernetes;https
+              action: keep
 
-      # Kubelet metrics
-      - job_name: kubernetes-kubelet
-        kubernetes_sd_configs:
-          - role: node
-        scheme: https
-        tls_config:
-          insecure_skip_verify: true
-        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-        relabel_configs:
-          - action: labelmap
-            regex: __meta_kubernetes_node_label_(.+)
-          - source_labels:
-              - __address__
-            regex: (.+):(.+)
-            target_label: __address__
-            replacement: "$${1}:10250"
+        # Kubelet metrics
+        - job_name: kubernetes-kubelet
+          kubernetes_sd_configs:
+            - role: node
+          scheme: https
+          tls_config:
+            insecure_skip_verify: true
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+            - source_labels:
+                - __address__
+              regex: (.+):(.+)
+              target_label: __address__
+              replacement: "$${1}:10250"
 
-      # cAdvisor (container metrics via kubelet)
-      - job_name: kubernetes-cadvisor
-        kubernetes_sd_configs:
-          - role: node
-        scheme: https
-        metrics_path: /metrics/cadvisor
-        tls_config:
-          insecure_skip_verify: true
-        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-        relabel_configs:
-          - action: labelmap
-            regex: __meta_kubernetes_node_label_(.+)
-          - source_labels:
-              - __address__
-            regex: (.+):(.+)
-            target_label: __address__
-            replacement: "$${1}:10250"
-        metric_relabel_configs:
-          # Drop high-cardinality metrics
-          - source_labels:
-              - __name__
-            action: drop
-            regex: "container_(network_tcp_usage_total|network_udp_usage_total|tasks_state|memory_working_set_bytes)"
+        # cAdvisor (container metrics via kubelet)
+        - job_name: kubernetes-cadvisor
+          kubernetes_sd_configs:
+            - role: node
+          scheme: https
+          metrics_path: /metrics/cadvisor
+          tls_config:
+            insecure_skip_verify: true
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+            - source_labels:
+                - __address__
+              regex: (.+):(.+)
+              target_label: __address__
+              replacement: "$${1}:10250"
+          metric_relabel_configs:
+            # Drop high-cardinality metrics
+            - source_labels:
+                - __name__
+              action: drop
+              regex: "container_(network_tcp_usage_total|network_udp_usage_total|tasks_state|memory_working_set_bytes)"
 
-      # Pod autodiscovery via prometheus.io annotations
-      # Pods must have: prometheus.io/scrape: "true"
-      # Optional: prometheus.io/port, prometheus.io/path, prometheus.io/scheme
-      - job_name: kubernetes-pods
-        kubernetes_sd_configs:
-          - role: pod
-        relabel_configs:
-          - source_labels:
-              - __meta_kubernetes_pod_annotation_prometheus_io_scrape
-            action: keep
-            regex: "true"
-          - source_labels:
-              - __meta_kubernetes_pod_annotation_prometheus_io_scheme
-            action: replace
-            target_label: __scheme__
-            regex: (https?)
-            replacement: $1
-          - source_labels:
-              - __meta_kubernetes_pod_annotation_prometheus_io_path
-            action: replace
-            target_label: __metrics_path__
-            regex: (.+)
-            replacement: $1
-          - source_labels:
-              - __address__
-              - __meta_kubernetes_pod_annotation_prometheus_io_port
-            action: replace
-            regex: ([^:]+)(?::\d+)?;(\d+)
-            target_label: __address__
-            replacement: $1:$2
-          - action: labelmap
-            regex: __meta_kubernetes_pod_label_(.+)
-          - source_labels:
-              - __meta_kubernetes_namespace
-            action: replace
-            target_label: namespace
-          - source_labels:
-              - __meta_kubernetes_pod_name
-            action: replace
-            target_label: pod
+        # Pod autodiscovery via prometheus.io annotations
+        # Pods must have: prometheus.io/scrape: "true"
+        # Optional: prometheus.io/port, prometheus.io/path, prometheus.io/scheme
+        - job_name: kubernetes-pods
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels:
+                - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+              action: keep
+              regex: "true"
+            - source_labels:
+                - __meta_kubernetes_pod_annotation_prometheus_io_scheme
+              action: replace
+              target_label: __scheme__
+              regex: (https?)
+              replacement: $1
+            - source_labels:
+                - __meta_kubernetes_pod_annotation_prometheus_io_path
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+              replacement: $1
+            - source_labels:
+                - __address__
+                - __meta_kubernetes_pod_annotation_prometheus_io_port
+              action: replace
+              regex: ([^:]+)(?::\d+)?;(\d+)
+              target_label: __address__
+              replacement: $1:$2
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels:
+                - __meta_kubernetes_namespace
+              action: replace
+              target_label: namespace
+            - source_labels:
+                - __meta_kubernetes_pod_name
+              action: replace
+              target_label: pod
 
-      # Service autodiscovery via prometheus.io annotations
-      # Services must have: prometheus.io/scrape: "true"
-      - job_name: kubernetes-services
-        kubernetes_sd_configs:
-          - role: service
-        relabel_configs:
-          - source_labels:
-              - __meta_kubernetes_service_annotation_prometheus_io_scrape
-            action: keep
-            regex: "true"
-          - source_labels:
-              - __meta_kubernetes_service_annotation_prometheus_io_scheme
-            action: replace
-            target_label: __scheme__
-            regex: (https?)
-          - source_labels:
-              - __meta_kubernetes_service_annotation_prometheus_io_path
-            action: replace
-            target_label: __metrics_path__
-            regex: (.+)
-          - source_labels:
-              - __address__
-              - __meta_kubernetes_service_annotation_prometheus_io_port
-            action: replace
-            regex: ([^:]+)(?::\d+)?;(\d+)
-            target_label: __address__
-            replacement: $1:$2
-          - action: labelmap
-            regex: __meta_kubernetes_service_label_(.+)
-          - source_labels:
-              - __meta_kubernetes_namespace
-            action: replace
-            target_label: namespace
+        # Service autodiscovery via prometheus.io annotations
+        # Services must have: prometheus.io/scrape: "true"
+        - job_name: kubernetes-services
+          kubernetes_sd_configs:
+            - role: service
+          relabel_configs:
+            - source_labels:
+                - __meta_kubernetes_service_annotation_prometheus_io_scrape
+              action: keep
+              regex: "true"
+            - source_labels:
+                - __meta_kubernetes_service_annotation_prometheus_io_scheme
+              action: replace
+              target_label: __scheme__
+              regex: (https?)
+            - source_labels:
+                - __meta_kubernetes_service_annotation_prometheus_io_path
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels:
+                - __address__
+                - __meta_kubernetes_service_annotation_prometheus_io_port
+              action: replace
+              regex: ([^:]+)(?::\d+)?;(\d+)
+              target_label: __address__
+              replacement: $1:$2
+            - action: labelmap
+              regex: __meta_kubernetes_service_label_(.+)
+            - source_labels:
+                - __meta_kubernetes_namespace
+              action: replace
+              target_label: namespace
 
-      # Node Exporter — discovered via the service created by prometheus-node-exporter
-      - job_name: node-exporter
-        kubernetes_sd_configs:
-          - role: endpoints
-        relabel_configs:
-          - source_labels:
-              - __meta_kubernetes_service_name
-            action: keep
-            regex: prometheus-node-exporter
-          - action: labelmap
-            regex: __meta_kubernetes_node_label_(.+)
+        # Node Exporter — discovered via the service created by prometheus-node-exporter
+        - job_name: node-exporter
+          kubernetes_sd_configs:
+            - role: endpoints
+          relabel_configs:
+            - source_labels:
+                - __meta_kubernetes_service_name
+              action: keep
+              regex: prometheus-node-exporter
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
 
-      # kube-state-metrics — discovered via service
-      - job_name: kube-state-metrics
-        kubernetes_sd_configs:
-          - role: endpoints
-        relabel_configs:
-          - source_labels:
-              - __meta_kubernetes_service_name
-            action: keep
-            regex: kube-state-metrics
+        # kube-state-metrics — discovered via service
+        - job_name: kube-state-metrics
+          kubernetes_sd_configs:
+            - role: endpoints
+          relabel_configs:
+            - source_labels:
+                - __meta_kubernetes_service_name
+              action: keep
+              regex: kube-state-metrics
 
       # Static target carried over from previous Prometheus config
-      - job_name: tinypc-2-exporter
-        static_configs:
-          - targets:
-              - "tinypc-2:9182"
-        scrape_interval: 60s
-        metrics_path: /metrics
+      # - job_name: tinypc-2-exporter
+      #   static_configs:
+      #     - targets:
+      #         - "tinypc-2:9182"
+      #   scrape_interval: 60s
+      #   metrics_path: /metrics
