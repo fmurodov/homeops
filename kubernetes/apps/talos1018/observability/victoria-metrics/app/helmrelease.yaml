@@ -13,7 +13,10 @@ spec:
         name: vm
   interval: 1h0m0s
   values:
-    fullnameOverride: victoria-metrics
+    rbac:
+      create: true
+    serviceAccount:
+      create: true
     server:
       enabled: true
       extraArgs:
@@ -50,6 +53,163 @@ spec:
           - secretName: victoria-metrics-tls
             hosts:
               - vm.${CLUSTER_DOMAIN}
+      # Built-in scraping (replaces separate vmagent)
+      scrape:
+        enabled: true
+        config:
+          global:
+            scrape_interval: 30s
+          scrape_configs:
+            # Kubernetes API server
+            - job_name: kubernetes-api-server
+              kubernetes_sd_configs:
+                - role: endpoints
+              scheme: https
+              tls_config:
+                insecure_skip_verify: true
+                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_namespace
+                    - __meta_kubernetes_service_name
+                    - __meta_kubernetes_endpoint_port_name
+                  regex: default;kubernetes;https
+                  action: keep
+
+            # Kubelet metrics
+            - job_name: kubernetes-kubelet
+              kubernetes_sd_configs:
+                - role: node
+              scheme: https
+              tls_config:
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:10250"
+
+            # cAdvisor (container metrics via kubelet)
+            - job_name: kubernetes-cadvisor
+              kubernetes_sd_configs:
+                - role: node
+              scheme: https
+              metrics_path: /metrics/cadvisor
+              tls_config:
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:10250"
+              metric_relabel_configs:
+                - source_labels:
+                    - __name__
+                  action: drop
+                  regex: "container_(network_tcp_usage_total|network_udp_usage_total|tasks_state)"
+
+            # Pod autodiscovery via prometheus.io annotations
+            - job_name: kubernetes-pods
+              kubernetes_sd_configs:
+                - role: pod
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+                  action: keep
+                  regex: "true"
+                - source_labels:
+                    - __meta_kubernetes_pod_annotation_prometheus_io_scheme
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                  replacement: $1
+                - source_labels:
+                    - __meta_kubernetes_pod_annotation_prometheus_io_path
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                  replacement: $1
+                - source_labels:
+                    - __address__
+                    - __meta_kubernetes_pod_annotation_prometheus_io_port
+                  action: replace
+                  regex: ([^:]+)(?::\d+)?;(\d+)
+                  target_label: __address__
+                  replacement: $1:$2
+                - action: labelmap
+                  regex: __meta_kubernetes_pod_label_(.+)
+                - source_labels:
+                    - __meta_kubernetes_namespace
+                  action: replace
+                  target_label: namespace
+                - source_labels:
+                    - __meta_kubernetes_pod_name
+                  action: replace
+                  target_label: pod
+
+            # Service autodiscovery via prometheus.io annotations
+            - job_name: kubernetes-services
+              kubernetes_sd_configs:
+                - role: service
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_annotation_prometheus_io_scrape
+                  action: keep
+                  regex: "true"
+                - source_labels:
+                    - __meta_kubernetes_service_annotation_prometheus_io_scheme
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                - source_labels:
+                    - __meta_kubernetes_service_annotation_prometheus_io_path
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels:
+                    - __address__
+                    - __meta_kubernetes_service_annotation_prometheus_io_port
+                  action: replace
+                  regex: ([^:]+)(?::\d+)?;(\d+)
+                  target_label: __address__
+                  replacement: $1:$2
+                - action: labelmap
+                  regex: __meta_kubernetes_service_label_(.+)
+                - source_labels:
+                    - __meta_kubernetes_namespace
+                  action: replace
+                  target_label: namespace
+
+            # Node Exporter
+            - job_name: node-exporter
+              kubernetes_sd_configs:
+                - role: endpoints
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_name
+                  action: keep
+                  regex: prometheus-node-exporter
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+
+            # kube-state-metrics
+            - job_name: kube-state-metrics
+              kubernetes_sd_configs:
+                - role: endpoints
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_name
+                  action: keep
+                  regex: kube-state-metrics
     # Standalone charts are used for these — disable the bundled ones
     vmagent:
       enabled: false

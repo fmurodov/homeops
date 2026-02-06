@@ -19,11 +19,6 @@ spec:
         memory: 64Mi
       limits:
         memory: 128Mi
-    # Fluent Bit configuration
-    # NOTE: The Loki output plugin sends to /loki/api/v1/push by default.
-    # VictoriaLogs accepts Loki-compatible push at /insert/loki/api/v1/push.
-    # If logs do not appear, verify the victoria-logs chart supports the
-    # standard Loki path, or adjust the victoria-logs extraArgs accordingly.
     config:
       service: |
         [SERVICE]
@@ -31,15 +26,12 @@ spec:
             Daemon        Off
             Log_Level     info
             Parsers_File  parsers.conf
-            DB            /var/lib/fluentbit/tail_inputs.db
-            DB.Sync       Strict
       inputs: |
         [INPUT]
             Name              tail
             Path              /var/log/containers/*.log
             Exclude_Path      /var/log/containers/*fluent-bit*.log,/var/log/containers/*victoria-logs*.log
             Tag               kube.*
-            Parser            cri
             multiline.parser  cri
       filters: |
         [FILTER]
@@ -54,8 +46,8 @@ spec:
         [OUTPUT]
             Name        loki
             Match       *
-            Host        victoria-logs.observability.svc.cluster.local
+            Host        victoria-logs-victoria-logs-single-server.observability.svc.cluster.local
             Port        9428
             URI         /insert/loki/api/v1/push
             Labels      job=fluent-bit
-            Label_Keys  namespace, pod, container
+            Label_Keys  $kubernetes['namespace_name'], $kubernetes['pod_name'], $kubernetes['container_name']

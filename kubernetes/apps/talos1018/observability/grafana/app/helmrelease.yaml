@@ -68,17 +68,17 @@ spec:
         datasources:
           - name: VictoriaMetrics
             type: prometheus
-            url: http://victoria-metrics.observability.svc.cluster.local:8428
+            url: http://victoria-metrics-victoria-metrics-single-server.observability.svc.cluster.local:8428
             isDefault: true
             jsonData:
-              timeInterval: "60s"
+              timeInterval: "30s"
           - name: VictoriaLogs
             type: loki
-            url: http://victoria-logs.observability.svc.cluster.local:8428
+            url: http://victoria-logs-victoria-logs-single-server.observability.svc.cluster.local:9428
             jsonData:
               maxLines: 1000
 
-    # Dashboards — downloaded from Grafana Panel Library (gnetId)
+    # Dashboards
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
@@ -95,15 +95,15 @@ spec:
       default:
         node-exporter-full:
           gnetId: 1860
+          revision: 37
+          datasource: VictoriaMetrics
+        kubernetes-views-global:
+          gnetId: 15757
+          revision: 43
+          datasource: VictoriaMetrics
+        kubernetes-views-pods:
+          gnetId: 15760
           revision: 36
-          datasource: VictoriaMetrics
-        kubernetes-cluster-overview:
-          gnetId: 3119
-          revision: 4
-          datasource: VictoriaMetrics
-        kubernetes-pod-overview:
-          gnetId: 13550
-          revision: 2
           datasource: VictoriaMetrics
 
     # Ingress

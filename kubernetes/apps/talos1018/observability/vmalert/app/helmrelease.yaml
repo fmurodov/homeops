@@ -13,16 +13,15 @@ spec:
         name: vm
   interval: 1h0m0s
   values:
-    fullnameOverride: vmalert
     server:
       extraArgs:
         httpListenAddr: "[::]:8880"
         enableTCP6: "true"
       datasource:
-        url: http://victoria-metrics.observability.svc.cluster.local:8428
+        url: http://victoria-metrics-victoria-metrics-single-server.observability.svc.cluster.local:8428
       remote:
         write:
-          url: http://victoria-metrics.observability.svc.cluster.local:8428
+          url: http://victoria-metrics-victoria-metrics-single-server.observability.svc.cluster.local:8428
       notifier:
         alertmanager:
           url: http://alertmanager.observability.svc.cluster.local:9093
