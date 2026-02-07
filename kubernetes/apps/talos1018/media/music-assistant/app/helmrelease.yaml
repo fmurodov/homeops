@@ -20,8 +20,10 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/music-assistant/server
-              tag: "2.8.0.dev2026020704" # TODO: ipv6 support. switch to beta and then to 2.8.0
+              # repository: ghcr.io/music-assistant/server
+              # tag: "2.8.0.dev2026020704" # TODO: ipv6 support. switch to beta and then to 2.8.0
+              repository: ghcr.io/fmurodov/music-assistant-server
+              tag: "fix-ipv6"
             env:
               TZ: ${TIMEZONE}
             probes:
