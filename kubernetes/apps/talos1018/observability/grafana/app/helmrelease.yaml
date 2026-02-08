@@ -122,7 +122,7 @@ spec:
         victorialogs-single-node:
           gnetId: 22084
           revision: 6
-          datasource: VictoriaMetrics
+          datasource: VictoriaLogs
         fluent-bit:
           gnetId: 18855
           revision: 1
