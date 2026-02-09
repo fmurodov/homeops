@@ -128,8 +128,8 @@ spec:
           revision: 1
           datasource: VictoriaMetrics
         ingress-nginx:
-          gnetId: 9614
-          revision: 1
+          gnetId: 14314
+          revision: 2
           datasource: VictoriaMetrics
         cert-manager:
           gnetId: 20842
@@ -137,7 +137,7 @@ spec:
           datasource: VictoriaMetrics
         longhorn:
           gnetId: 16888
-          revision: 9
+          revision: 11
           datasource: VictoriaMetrics
         cilium-agent:
           gnetId: 16611
@@ -149,10 +149,6 @@ spec:
           datasource: VictoriaMetrics
         n8n-system-health:
           gnetId: 24474
-          revision: 1
-          datasource: VictoriaMetrics
-        n8n-workflow-analytics:
-          gnetId: 24475
           revision: 1
           datasource: VictoriaMetrics
         cloudflare-tunnels:

@@ -133,13 +133,30 @@ spec:
                   target_label: __metrics_path__
                   regex: (.+)
                   replacement: $1
+                # IPv4: 10.0.0.1(:port)?;annotation → 10.0.0.1:annotation
                 - source_labels:
                     - __address__
                     - __meta_kubernetes_pod_annotation_prometheus_io_port
                   action: replace
-                  regex: ([^:]+)(?::\d+)?;(\d+)
+                  regex: (\d+\.\d+\.\d+\.\d+)(?::\d+)?;(\d+)
                   target_label: __address__
                   replacement: $1:$2
+                # IPv6 with brackets: [fd00::1](:port)?;annotation → [fd00::1]:annotation
+                - source_labels:
+                    - __address__
+                    - __meta_kubernetes_pod_annotation_prometheus_io_port
+                  action: replace
+                  regex: (\[.+?\])(?::\d+)?;(\d+)
+                  target_label: __address__
+                  replacement: $1:$2
+                # Bare IPv6: fd00::1;annotation → [fd00::1]:annotation
+                - source_labels:
+                    - __address__
+                    - __meta_kubernetes_pod_annotation_prometheus_io_port
+                  action: replace
+                  regex: ([0-9a-fA-F][0-9a-fA-F:]+);(\d+)
+                  target_label: __address__
+                  replacement: "[$1]:$2"
                 - action: labelmap
                   regex: __meta_kubernetes_pod_label_(.+)
                 - source_labels:
