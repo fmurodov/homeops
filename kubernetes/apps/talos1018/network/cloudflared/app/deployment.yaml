@@ -40,6 +40,10 @@ spec:
                 secretKeyRef:
                   name: cloudflared-secret
                   key: TUNNEL_TOKEN
+          ports:
+            - name: metrics
+              containerPort: 2000
+              protocol: TCP
           resources:
             limits:
               cpu: "0.05"
