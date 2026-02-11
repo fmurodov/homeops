@@ -26,7 +26,7 @@ spec:
           browser:
             image:
               repository: ghcr.io/browserless/chrome
-              tag: v2.39.0
+              tag: v2.40.0
               pullPolicy: IfNotPresent
             env:
               - { name: HOST, value: "::" }
