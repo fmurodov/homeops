@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: homebox
-          image: "ghcr.io/sysadminsmedia/homebox:0.23.0-rootless"
+          image: "ghcr.io/sysadminsmedia/homebox:0.23.1-rootless"
           imagePullPolicy: Always
           ports:
             - name: http
