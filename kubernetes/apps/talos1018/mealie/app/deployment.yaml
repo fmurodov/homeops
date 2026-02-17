@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: mealie
-          image: "ghcr.io/mealie-recipes/mealie:v3.9.1"
+          image: "ghcr.io/mealie-recipes/mealie:v3.11.0"
           imagePullPolicy: Always
           ports:
             - name: http
