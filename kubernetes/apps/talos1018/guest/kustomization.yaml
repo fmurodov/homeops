@@ -4,6 +4,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./namespace.yaml
-  - ./network-policies/network-policy-default.yaml
-  - ./network-policies/network-policy-allow-internet.yaml
+  - ./network-policy.yaml
   - ./ripe-atlas/ks.yaml
