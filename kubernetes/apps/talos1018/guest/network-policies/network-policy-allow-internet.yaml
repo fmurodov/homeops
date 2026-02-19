@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: guest-allow-internet
+  namespace: guest
+spec:
+  endpointSelector: {}
+  egress:
+    # DNS via kube-dns
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # IPv4 internet, excluding RFC1918
+    - toCIDRSet:
+        - cidr: "0.0.0.0/0"
+          except:
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+            - "192.168.0.0/16"
+            - "127.0.0.0/8"
+            - "169.254.0.0/16" # link-local
+    # IPv6 internet, excluding ULA and special ranges
+    - toCIDRSet:
+        - cidr: "::/0"
+          except:
+            - "fc00::/7" # ULA
+            - "fe80::/10" # link-local
+            - "::1/128" # loopback
+            - "${IPV6_PREFIX_GUA}::/48"

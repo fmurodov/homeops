@@ -1,0 +1,8 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: guest
+  labels:
+    pod-security.kubernetes.io/enforce: privileged

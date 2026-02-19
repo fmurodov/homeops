@@ -1,0 +1,54 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ripe-atlas
+  labels:
+    app.kubernetes.io/name: ripe-atlas
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ripe-atlas
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ripe-atlas
+    spec:
+      containers:
+        - name: ripe-atlas
+          image: ghcr.io/jamesits/ripe-atlas:5120
+          securityContext:
+            runAsUser: 0
+            capabilities:
+              add:
+                - NET_RAW
+                - CHOWN
+                - SETUID
+                - SETGID
+                - DAC_OVERRIDE
+          volumeMounts:
+            - name: data
+              mountPath: /etc/ripe-atlas
+              subPath: etc
+            - name: data
+              mountPath: /var/spool/ripe-atlas
+              subPath: spool
+            - name: run
+              mountPath: /run/ripe-atlas
+          resources:
+            requests:
+              cpu: 10m
+              memory: 20Mi
+            limits:
+              cpu: "1"
+              memory: 128Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ripe-atlas-data
+        - name: run
+          emptyDir: {}
