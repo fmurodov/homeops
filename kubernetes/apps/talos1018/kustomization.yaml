@@ -38,3 +38,6 @@ resources:
 
   # Development and Testing
   - ./podinfo/ks.yaml
+
+  # Guest ns for untrusted
+  - ./guest
