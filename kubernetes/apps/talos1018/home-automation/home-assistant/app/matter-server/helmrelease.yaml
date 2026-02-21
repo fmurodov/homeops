@@ -26,6 +26,23 @@ spec:
     controllers:
       matter-server:
         type: statefulset
+        pod:
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            fsGroupChangePolicy: "OnRootMismatch"
+        initContainers:
+          fix-permissions:
+            image:
+              repository: busybox
+              tag: latest
+            command:
+              - sh
+              - -c
+              - chown -R 1000:1000 /data
+            securityContext:
+              runAsUser: 0
         containers:
           app:
             image:
@@ -35,6 +52,14 @@ spec:
               TZ: ${TIMEZONE}
               MATTER_SERVER__INSTANCE_NAME: "{{ .Release.Name }}"
               DISABLE_DASHBOARD: false
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              capabilities:
+                drop:
+                  - ALL
+              seccompProfile:
+                type: RuntimeDefault
     defaultPodOptions:
       annotations:
         k8s.v1.cni.cncf.io/networks: network/multus-macvlan2, network/multus-macvlan3
