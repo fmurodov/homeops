@@ -32,22 +32,11 @@ spec:
             runAsGroup: 1000
             fsGroup: 1000
             fsGroupChangePolicy: "OnRootMismatch"
-        initContainers:
-          fix-permissions:
-            image:
-              repository: busybox
-              tag: latest
-            command:
-              - sh
-              - -c
-              - chown -R 1000:1000 /data
-            securityContext:
-              runAsUser: 0
         containers:
           app:
             image:
               repository: ghcr.io/matter-js/matterjs-server
-              tag: 0.3.8
+              tag: 0.4.0
             env:
               TZ: ${TIMEZONE}
               MATTER_SERVER__INSTANCE_NAME: "{{ .Release.Name }}"
