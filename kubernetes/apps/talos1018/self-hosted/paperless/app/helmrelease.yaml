@@ -160,10 +160,10 @@ spec:
               - "exec java -cp \"/tika-server-standard-$${TIKA_VERSION}.jar:/tika-extras/*\" org.apache.tika.server.core.TikaServerCli -h :: $0 $@"
             resources:
               requests:
-                cpu: "0.002"
-                memory: 200Mi
+                cpu: 50m
+                memory: 256Mi
               limits:
-                cpu: "0.02"
+                cpu: "1"
                 memory: 1Gi
 
     service:
