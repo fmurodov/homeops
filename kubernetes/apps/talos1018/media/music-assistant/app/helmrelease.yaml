@@ -53,6 +53,20 @@ spec:
         ports:
           http:
             port: 8095
+      streamserver:
+        controller: music-assistant
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:2000:0:6:15"
+        labels:
+          service.kubernetes.io/topology: external
+        ipFamilyPolicy: SingleStack
+        ipFamilies:
+          - IPv6
+        ports:
+          streamserver:
+            port: 8097
+            protocol: TCP
 
     ingress:
       app:
