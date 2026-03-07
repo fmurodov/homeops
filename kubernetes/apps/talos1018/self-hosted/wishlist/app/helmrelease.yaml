@@ -94,7 +94,7 @@ spec:
                 admin off
             }
 
-            [::]:3280 {
+            http://[::]:3280 {
                 @static {
                     file
                     path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.webp
