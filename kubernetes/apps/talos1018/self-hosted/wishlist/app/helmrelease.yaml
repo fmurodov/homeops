@@ -21,6 +21,7 @@ spec:
               ORIGIN: "https://wishlist.${DOMAIN}"
               TOKEN_TIME: "72"
               DEFAULT_CURRENCY: "EUR"
+              HOST: "::"
             resources:
               requests:
                 cpu: 5m
@@ -47,6 +48,11 @@ spec:
         className: nginx
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Self-Hosted
+          gethomepage.dev/icon: sh-cmintey-wishlist.png
+          gethomepage.dev/name: Wishlist
+          gethomepage.dev/app: wishlist
         enabled: true
         hosts:
           - host: &hostName wishlist.${DOMAIN}
@@ -69,3 +75,47 @@ spec:
                 subPath: data
               - path: /usr/src/app/uploads
                 subPath: uploads
+      caddyfile:
+        type: configMap
+        name: wishlist-caddyfile
+        advancedMounts:
+          wishlist:
+            app:
+              - path: /usr/src/app/Caddyfile
+                subPath: Caddyfile
+                readOnly: true
+    # Override Caddy config to listen IPv6
+    configMaps:
+      caddyfile:
+        data:
+          Caddyfile: |
+            {
+                auto_https off
+                admin off
+            }
+
+            [::]:3280 {
+                @static {
+                    file
+                    path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.webp
+                }
+
+                @not_sse {
+                    not path /wishlists/*/events
+                    not path /lists/*/events
+                }
+
+                handle_path /api/assets/* {
+                    header @static Cache-Control max-age=31536000
+                    root * /usr/src/app/uploads/
+                    file_server
+                }
+
+                encode @not_sse {
+                    gzip
+                }
+
+                reverse_proxy [::1]:3000 {
+                    flush_interval -1
+                }
+            }
