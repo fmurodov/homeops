@@ -22,6 +22,9 @@ kubeconfig
 *~
 .*.sw?
 
+# Claude Code
+.claude/
+
 # Editor directories and files
 .vscode/
 .idea/

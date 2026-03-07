@@ -8,5 +8,6 @@ resources:
   - ./changedetection/ks.yaml
   - ./paperless/ks.yaml
   - ./n8n/ks.yaml
+  - ./wishlist/ks.yaml
 # components:
 #   - ../../../components/common
