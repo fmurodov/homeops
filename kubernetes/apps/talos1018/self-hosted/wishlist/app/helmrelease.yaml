@@ -77,7 +77,7 @@ spec:
                 subPath: uploads
       caddyfile:
         type: configMap
-        name: wishlist-caddyfile
+        name: wishlist
         advancedMounts:
           wishlist:
             app:
