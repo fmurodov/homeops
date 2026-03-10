@@ -7,6 +7,11 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: "letsencrypt"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: ADSB
+    gethomepage.dev/icon: https://www.flightaware.com/images/favicon-32x32.png
+    gethomepage.dev/name: FlightAware
+    gethomepage.dev/app: piaware
 
 spec:
   ingressClassName: nginx

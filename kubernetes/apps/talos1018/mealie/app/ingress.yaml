@@ -7,6 +7,16 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: "letsencrypt"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Main
+    gethomepage.dev/icon: sh-mealie.svg
+    gethomepage.dev/name: Mealie
+    gethomepage.dev/app: mealie
+    gethomepage.dev/description: Recipe manager
+    gethomepage.dev/widget.type: mealie
+    gethomepage.dev/widget.url: http://mealie-http.mealie.svc.cluster.local:9000
+    gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_MEALIE_APIKEY}}"
+    gethomepage.dev/widget.version: "2"
 
 spec:
   ingressClassName: nginx

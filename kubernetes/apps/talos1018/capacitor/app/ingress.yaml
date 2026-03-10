@@ -22,6 +22,11 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
     kubernetes.io/ingress.class: nginx
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Infra
+    gethomepage.dev/icon: flux-cd.svg
+    gethomepage.dev/name: Capacitor
+    gethomepage.dev/app: onechart
 spec:
   ingressClassName: nginx
   tls:

@@ -7,6 +7,12 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: "letsencrypt"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Main
+    gethomepage.dev/icon: sh-bricktracker.png
+    gethomepage.dev/name: BrickTracker
+    gethomepage.dev/app: bricktracker
+    gethomepage.dev/description: LEGO sets tracker
 spec:
   ingressClassName: nginx
   tls:

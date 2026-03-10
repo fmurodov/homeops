@@ -8,6 +8,11 @@ metadata:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: "1024m"
     cert-manager.io/cluster-issuer: "letsencrypt"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Network
+    gethomepage.dev/icon: sh-openspeedtest.svg
+    gethomepage.dev/name: Speedtest
+    gethomepage.dev/app: openspeedtest
 spec:
   ingressClassName: nginx
   tls:
