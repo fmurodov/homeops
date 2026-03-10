@@ -51,6 +51,15 @@ spec:
         className: nginx
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Monitoring
+          gethomepage.dev/icon: sh-changedetection.svg
+          gethomepage.dev/name: changedetection
+          gethomepage.dev/app: changedetection
+          gethomepage.dev/description: Web page change detection
+          gethomepage.dev/widget.type: changedetectionio
+          gethomepage.dev/widget.url: http://changedetection-http.self-hosted.svc.cluster.local:5000
+          gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_CHANGEDETECTION_APIKEY}}"
         enabled: true
         hosts:
           - host: changedetection.${CLUSTER_DOMAIN}

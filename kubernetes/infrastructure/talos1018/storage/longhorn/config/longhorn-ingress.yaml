@@ -16,6 +16,12 @@ metadata:
     # custom max body size for file uploading like backing image uploading
     nginx.ingress.kubernetes.io/proxy-body-size: 10000m
     cert-manager.io/cluster-issuer: "letsencrypt"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Infra
+    gethomepage.dev/icon: sh-rancher-longhorn.svg
+    gethomepage.dev/name: Longhorn
+    gethomepage.dev/app: longhorn
+    gethomepage.dev/description: Cloud native distributed block storage for Kubernetes
 spec:
   ingressClassName: nginx
   tls:

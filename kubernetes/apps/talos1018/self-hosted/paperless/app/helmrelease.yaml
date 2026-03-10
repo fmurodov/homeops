@@ -212,6 +212,15 @@ spec:
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt
           nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Main
+          gethomepage.dev/icon: sh-paperless-ngx.svg
+          gethomepage.dev/name: Paperless-ngx
+          gethomepage.dev/app: paperless
+          gethomepage.dev/description: Document management system
+          gethomepage.dev/widget.type: paperlessngx
+          gethomepage.dev/widget.url: http://paperless-http.self-hosted.svc.cluster.local:8000
+          gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_PAPERLESS_APIKEY}}"
         enabled: true
         hosts:
           - host: paperless.${CLUSTER_DOMAIN}
