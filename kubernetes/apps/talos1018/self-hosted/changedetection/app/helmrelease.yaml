@@ -52,7 +52,7 @@ spec:
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Monitoring
+          gethomepage.dev/group: Apps
           gethomepage.dev/icon: sh-changedetection.svg
           gethomepage.dev/name: changedetection
           gethomepage.dev/app: changedetection

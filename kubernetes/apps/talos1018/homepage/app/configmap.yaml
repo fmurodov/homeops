@@ -22,7 +22,7 @@ data:
     mode: cluster
     ingress: true
   services.yaml: |
-    - Main:
+    - Apps:
       - Printer:
           description: HP Printer and Scanner
           href: http://printer-hp-1.home./
@@ -68,6 +68,25 @@ data:
           icon: http://adsb-feeder.home.:8080/images/tar1090-favicon.png
 
   settings.yaml: |
+    layout:
+      Apps:
+        style: row
+        columns: 4
+      Smart Home:
+        style: row
+        columns: 3
+      Infra:
+        style: row
+        columns: 3
+      Observability:
+        style: row
+        columns: 4
+      Network:
+        style: row
+        columns: 2
+      ADSB:
+        style: row
+        columns: 3
     providers:
       longhorn:
         url: http://longhorn-frontend.longhorn-system.svc.cluster.local

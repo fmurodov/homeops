@@ -6,7 +6,7 @@ metadata:
   name: homepage
   labels:
     app.kubernetes.io/name: homepage
-  annotations:
+  annotations: {}
 spec:
   ports:
     - port: 3000

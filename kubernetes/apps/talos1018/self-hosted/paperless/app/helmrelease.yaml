@@ -213,7 +213,7 @@ spec:
           cert-manager.io/cluster-issuer: letsencrypt
           nginx.ingress.kubernetes.io/proxy-body-size: "500m"
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Main
+          gethomepage.dev/group: Apps
           gethomepage.dev/icon: sh-paperless-ngx.svg
           gethomepage.dev/name: Paperless-ngx
           gethomepage.dev/app: paperless
