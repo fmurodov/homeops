@@ -68,6 +68,12 @@ spec:
         className: nginx
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Apps
+          gethomepage.dev/icon: sh-n8n.svg
+          gethomepage.dev/name: n8n
+          gethomepage.dev/app: n8n
+          gethomepage.dev/description: Workflow automation
         enabled: true
         hosts:
           - host: *hostName

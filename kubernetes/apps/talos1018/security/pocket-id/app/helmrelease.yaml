@@ -70,7 +70,7 @@ spec:
           cert-manager.io/cluster-issuer: letsencrypt
           gethomepage.dev/enabled: "true"
           gethomepage.dev/description: Identity provider
-          gethomepage.dev/group: Security
+          gethomepage.dev/group: Apps
           gethomepage.dev/icon: sh-pocket-id.svg
           gethomepage.dev/name: Pocket ID
           gethomepage.dev/app: pocket-id

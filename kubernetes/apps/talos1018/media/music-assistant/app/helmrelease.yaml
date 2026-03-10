@@ -75,7 +75,7 @@ spec:
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
+          gethomepage.dev/group: Apps
           gethomepage.dev/icon: sh-music-assistant.svg
           gethomepage.dev/name: Music Assistant
           gethomepage.dev/app: music-assistant
