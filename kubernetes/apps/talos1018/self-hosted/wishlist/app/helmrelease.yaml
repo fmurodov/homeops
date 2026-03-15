@@ -16,7 +16,7 @@ spec:
           app:
             image:
               repository: ghcr.io/cmintey/wishlist
-              tag: v0.60.1
+              tag: v0.61.0
             env:
               ORIGIN: "https://wishlist.${DOMAIN}"
               TOKEN_TIME: "72"
