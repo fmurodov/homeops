@@ -18,3 +18,4 @@ spec:
   values:
     crds:
       enabled: true
+    featureGates: "ExperimentalGatewayAPISupport=true"
