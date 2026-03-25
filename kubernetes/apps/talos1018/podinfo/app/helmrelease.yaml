@@ -28,21 +28,4 @@ spec:
         memory: 64Mi
 
     ingress:
-      enabled: true
-      className: nginx
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Infra
-        gethomepage.dev/icon: sh-podinfo.svg
-        gethomepage.dev/name: Podinfo
-        gethomepage.dev/app: podinfo
-      hosts:
-        - host: podinfo.${CLUSTER_DOMAIN}
-          paths:
-            - path: /
-              pathType: Prefix
-      tls:
-        - secretName: podinfo-tls
-          hosts:
-            - podinfo.${CLUSTER_DOMAIN}
+      enabled: false
