@@ -26,10 +26,8 @@ jobs:
         id: claude-review
         uses: anthropics/claude-code-action@0ee1beea589a67d33340072691a5d42abec7ae6b # v1
         with:
-          model: claude-sonnet-4-6
-          max_turns: "5"
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          review_comment_prefix: "**Claude Review:**"
+          claude_args: "--model claude-sonnet-4-6 --max-turns 5"
           prompt: |
             Review this pull request. Focus on:
             - YAML syntax and structural correctness
