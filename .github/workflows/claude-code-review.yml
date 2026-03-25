@@ -27,7 +27,10 @@ jobs:
         uses: anthropics/claude-code-action@0ee1beea589a67d33340072691a5d42abec7ae6b # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: "--model claude-sonnet-4-6 --max-turns 5"
+          claude_args: >-
+            --model claude-sonnet-4-6
+            --max-turns 10
+            --allowedTools "Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*)"
           prompt: |
             Review this pull request. Focus on:
             - YAML syntax and structural correctness
