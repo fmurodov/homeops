@@ -7,10 +7,6 @@ l2announcements:
 
 kubeProxyReplacement: false
 
-# Gateway API support
-gatewayAPI:
-  enabled: true
-
 securityContext:
   capabilities:
     ciliumAgent:

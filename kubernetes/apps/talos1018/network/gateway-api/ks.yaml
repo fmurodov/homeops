@@ -17,3 +17,7 @@ spec:
   path: "./kubernetes/apps/talos1018/network/gateway-api/app"
   prune: true
   wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
