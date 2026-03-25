@@ -19,6 +19,10 @@ clusterSvcNets:
 cniConfig:
   name: none
 
+# Disable kube-proxy (Cilium kube-proxy replacement)
+proxy:
+  disabled: true
+
 additionalApiServerCertSans:
   - ::1
   - fd00:1018:0:5:10:18:6:91
