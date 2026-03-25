@@ -19,13 +19,25 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https
+    - name: https-internal
+      hostname: "*.${CLUSTER_DOMAIN}"
       protocol: HTTPS
       port: 443
       tls:
         mode: Terminate
         certificateRefs:
-          - name: gateway-tls
+          - name: gateway-internal-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-external
+      hostname: "*.${DOMAIN}"
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: gateway-external-tls
       allowedRoutes:
         namespaces:
           from: All
