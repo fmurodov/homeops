@@ -6,6 +6,7 @@ resources:
   - ./namespace.yaml
   - ./chrony/ks.yaml
   - ./cloudflared/ks.yaml
+  - ./gateway-api/ks.yaml
   - ./multus/ks.yaml
   - ./netbootxyz/ks.yaml
   - ./openspeedtest/ks.yaml
