@@ -5,11 +5,13 @@ metadata:
   name: main-gateway
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
-    io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:2000:0:6:16,10.18.6.16"
-  labels:
-    service.kubernetes.io/topology: external
 spec:
   gatewayClassName: cilium
+  infrastructure:
+    annotations:
+      io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:2000:0:6:16,10.18.6.16"
+    labels:
+      service.kubernetes.io/topology: external
   listeners:
     - name: http
       protocol: HTTP
