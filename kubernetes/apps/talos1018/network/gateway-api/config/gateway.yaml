@@ -1,0 +1,29 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: main-gateway
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:2000:0:6:16,10.18.6.16"
+  labels:
+    service.kubernetes.io/topology: external
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: gateway-tls
+      allowedRoutes:
+        namespaces:
+          from: All
