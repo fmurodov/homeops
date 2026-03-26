@@ -7,7 +7,9 @@ metadata:
   labels:
     app.kubernetes.io/name: esphome
 spec:
-  ipFamilyPolicy: PreferDualStack
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
   ports:
     - port: 6052
       targetPort: 6052
