@@ -1,0 +1,25 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: planefinder
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: ADSB
+    gethomepage.dev/icon: https://upload.wikimedia.org/wikipedia/commons/2/2e/Plane-finder.svg
+    gethomepage.dev/name: planefinder
+    gethomepage.dev/app: planefinder
+spec:
+  parentRefs:
+    - name: main-gateway
+      namespace: network
+  hostnames:
+    - "planefinder.adsb.${CLUSTER_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: planefinder
+          port: 30053
