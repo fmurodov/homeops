@@ -14,7 +14,7 @@ spec:
     - name: main-gateway
       namespace: network
   hostnames:
-    - "piaware.adsb.${CLUSTER_DOMAIN}"
+    - "piaware.${CLUSTER_DOMAIN}"
   rules:
     - matches:
         - path:

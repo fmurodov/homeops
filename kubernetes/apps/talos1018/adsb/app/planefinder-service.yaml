@@ -6,6 +6,9 @@ metadata:
   name: planefinder
   namespace: adsb
 spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv4
   selector:
     app.kubernetes.io/name: planefinder
   ports:
