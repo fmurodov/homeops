@@ -1,0 +1,25 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: flightradar24
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: ADSB
+    gethomepage.dev/icon: https://www.flightradar24.com/static/favicons/favicon.svg
+    gethomepage.dev/name: Flightradar24
+    gethomepage.dev/app: flightradar24
+spec:
+  parentRefs:
+    - name: main-gateway
+      namespace: network
+  hostnames:
+    - "fr24.adsb.${CLUSTER_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: flightradar24
+          port: 8754

@@ -5,4 +5,4 @@ kind: Kustomization
 resources:
   - rbac.yaml
   - manifest.yaml
-  - ingress.yaml
+  - httproute.yaml

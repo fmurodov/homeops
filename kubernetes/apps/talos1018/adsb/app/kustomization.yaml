@@ -9,11 +9,11 @@ resources:
   - adsbexchange-deployment.yaml
   - flightradar24-deployment.yaml
   - flightradar24-service.yaml
-  - flightradar24-ingress.yaml
+  - flightradar24-httproute.yaml
   - piaware-deployment.yaml
   - piaware-service.yaml
-  - piaware-ingress.yaml
+  - piaware-httproute.yaml
   - planefinder-deployment.yaml
   - planefinder-service.yaml
-  - planefinder-ingress.yaml
+  - planefinder-httproute.yaml
   - radarbox-deployment.yaml
