@@ -14,7 +14,7 @@ spec:
     - name: main-gateway
       namespace: network
   hostnames:
-    - "planefinder.adsb.${CLUSTER_DOMAIN}"
+    - "planefinder.${CLUSTER_DOMAIN}"
   rules:
     - matches:
         - path:
