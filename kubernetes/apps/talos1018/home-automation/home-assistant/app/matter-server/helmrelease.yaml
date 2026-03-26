@@ -45,6 +45,8 @@ spec:
               allowPrivilegeEscalation: false
               runAsNonRoot: true
               capabilities:
+                add:
+                  - NET_RAW
                 drop:
                   - ALL
               seccompProfile:
