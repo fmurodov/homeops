@@ -30,7 +30,7 @@ spec:
               protocol: TCP
           env:
             - name: BK_HOST
-              value: "::"
+              value: "[::]"
           envFrom:
             - configMapRef:
                 name: bricktracker-config
