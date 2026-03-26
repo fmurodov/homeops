@@ -10,4 +10,4 @@ resources:
   - service.yaml
   - bricktracker-secret.sops.yaml
   - configmap.yaml
-  - ingress.yaml
+  - httproute.yaml

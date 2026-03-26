@@ -9,4 +9,4 @@ resources:
   - homebox-secret.sops.yaml
   - deployment.yaml
   - service.yaml
-  - ingress.yaml
+  - httproute.yaml

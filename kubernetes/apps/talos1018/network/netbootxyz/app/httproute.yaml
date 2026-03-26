@@ -1,0 +1,26 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: netbootxyz
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Infra
+    gethomepage.dev/icon: sh-netboot-xyz.svg
+    gethomepage.dev/name: netbootxyz
+    gethomepage.dev/app: netbootxyz
+    gethomepage.dev/description: iPXE netboot
+spec:
+  parentRefs:
+    - name: main-gateway
+      namespace: network
+  hostnames:
+    - "netbootxyz.${CLUSTER_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: netbootxyz
+          port: 3000

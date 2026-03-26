@@ -1,0 +1,26 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: bricktracker
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Apps
+    gethomepage.dev/icon: sh-bricktracker.png
+    gethomepage.dev/name: BrickTracker
+    gethomepage.dev/app: bricktracker
+    gethomepage.dev/description: LEGO sets tracker
+spec:
+  parentRefs:
+    - name: main-gateway
+      namespace: network
+  hostnames:
+    - "bricktracker.${CLUSTER_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: bricktracker-http
+          port: 3333

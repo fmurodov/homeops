@@ -9,4 +9,4 @@ resources:
   - service.yaml
   - esphome-secret.sops.yaml
   - configmap-font.yaml
-  - ingress.yaml
+  - httproute.yaml
