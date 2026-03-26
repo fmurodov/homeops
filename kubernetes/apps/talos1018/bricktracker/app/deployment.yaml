@@ -28,6 +28,9 @@ spec:
             - name: http
               containerPort: 3333
               protocol: TCP
+          env:
+            - name: BK_HOST
+              value: "::"
           envFrom:
             - configMapRef:
                 name: bricktracker-config
