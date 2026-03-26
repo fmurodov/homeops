@@ -22,6 +22,8 @@ spec:
         - name: esphome
           image: "ghcr.io/esphome/esphome:2026.3.0"
           imagePullPolicy: Always
+          command: ["esphome"]
+          args: ["dashboard", "/config", "--address", "::"]
           ports:
             - name: http
               containerPort: 6052
