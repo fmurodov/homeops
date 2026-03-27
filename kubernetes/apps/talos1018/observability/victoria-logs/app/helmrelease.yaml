@@ -33,21 +33,17 @@ spec:
       service:
         clusterIP: ""
       ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Observability
-          gethomepage.dev/icon: si-victoriametrics
-          gethomepage.dev/name: VictoriaLogs
-          gethomepage.dev/app: victoria-logs
-        hosts:
-          - name: vlogs.${CLUSTER_DOMAIN}
-            path:
-              - /
-            port: http
-        tls:
-          - secretName: victoria-logs-tls
-            hosts:
-              - vlogs.${CLUSTER_DOMAIN}
+        enabled: false
+    route:
+      enabled: true
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Observability
+        gethomepage.dev/icon: si-victoriametrics
+        gethomepage.dev/name: VictoriaLogs
+        gethomepage.dev/app: victoria-logs
+      parentRefs:
+        - name: main-gateway
+          namespace: network
+      hostnames:
+        - "vlogs.${CLUSTER_DOMAIN}"

@@ -35,24 +35,7 @@ spec:
       service:
         clusterIP: ""
       ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Observability
-          gethomepage.dev/icon: si-victoriametrics
-          gethomepage.dev/name: VictoriaMetrics
-          gethomepage.dev/app: victoria-metrics
-        hosts:
-          - name: vm.${CLUSTER_DOMAIN}
-            path:
-              - /
-            port: http
-        tls:
-          - secretName: victoria-metrics-tls
-            hosts:
-              - vm.${CLUSTER_DOMAIN}
+        enabled: false
       # Built-in scraping (replaces separate vmagent)
       scrape:
         enabled: true
@@ -203,6 +186,19 @@ spec:
                     - __meta_kubernetes_endpoint_port_name
                   action: keep
                   regex: longhorn-backend;manager
+    route:
+      enabled: true
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Observability
+        gethomepage.dev/icon: si-victoriametrics
+        gethomepage.dev/name: VictoriaMetrics
+        gethomepage.dev/app: victoria-metrics
+      parentRefs:
+        - name: main-gateway
+          namespace: network
+      hostnames:
+        - "vm.${CLUSTER_DOMAIN}"
     # Standalone charts are used for these — disable the bundled ones
     vmagent:
       enabled: false
