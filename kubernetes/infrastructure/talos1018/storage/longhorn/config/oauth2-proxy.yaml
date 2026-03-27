@@ -27,6 +27,7 @@ spec:
             - --cookie-secure=true
             - --cookie-name=_oauth2_proxy_longhorn
             - --silence-ping-logging=true
+            - --code-challenge-method=S256
           env:
             - name: OAUTH2_PROXY_CLIENT_ID
               valueFrom:
