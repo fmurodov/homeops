@@ -6,4 +6,3 @@ namespace: self-hosted
 resources:
   - ./pvc.yaml
   - ./helmrelease.yaml
-  - ./httproute.yaml

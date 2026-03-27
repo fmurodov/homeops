@@ -206,12 +206,10 @@ spec:
       #       app:
       #         - path: /data/nas
 
-    ingress:
+    route:
       app:
-        className: nginx
+        enabled: true
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt
-          nginx.ingress.kubernetes.io/proxy-body-size: "500m"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
           gethomepage.dev/icon: sh-paperless-ngx.svg
@@ -219,17 +217,18 @@ spec:
           gethomepage.dev/app: paperless
           gethomepage.dev/description: Document management system
           gethomepage.dev/widget.type: paperlessngx
-          gethomepage.dev/widget.url: http://paperless-http.self-hosted.svc.cluster.local:8000
+          gethomepage.dev/widget.url: http://paperless.self-hosted.svc.cluster.local:8000
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_PAPERLESS_APIKEY}}" }}'
-        enabled: false
-        hosts:
-          - host: paperless.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: *port
-        tls:
-          - hosts:
-              - paperless.${CLUSTER_DOMAIN}
-            secretName: paperless-tls
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - "paperless.${CLUSTER_DOMAIN}"
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: *port

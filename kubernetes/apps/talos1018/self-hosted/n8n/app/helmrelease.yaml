@@ -63,36 +63,44 @@ spec:
         ports:
           http:
             port: *port
-    ingress:
+    route:
       app:
-        className: nginx
+        enabled: true
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
           gethomepage.dev/icon: sh-n8n.svg
           gethomepage.dev/name: n8n
           gethomepage.dev/app: n8n
           gethomepage.dev/description: Workflow automation
-        enabled: false
-        hosts:
-          - host: *hostName
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: *port
-          - host: &webhook n8n-webhook.${DOMAIN}
-            paths:
-              - path: /webhook
-                service:
-                  identifier: app
-                  port: *port
-        tls:
-          - hosts:
-              - *hostName
-              - *webhook
-            secretName: n8n-tls
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - *hostName
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: *port
+      webhook:
+        enabled: true
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - "n8n-webhook.${DOMAIN}"
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: *port
 
     persistence:
       data:

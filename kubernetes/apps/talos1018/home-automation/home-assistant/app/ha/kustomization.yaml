@@ -7,4 +7,3 @@ resources:
   - ./helmrepository.yaml
   - ./pvc.yaml
   - ./helmrelease.yaml
-  - ./httproute.yaml

@@ -79,36 +79,30 @@ spec:
           http:
             port: &port 1411
 
-    ingress:
+    route:
       app:
-        className: nginx
+        enabled: true
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt
           gethomepage.dev/enabled: "true"
           gethomepage.dev/description: Identity provider
           gethomepage.dev/group: Apps
           gethomepage.dev/icon: sh-pocket-id.svg
           gethomepage.dev/name: Pocket ID
           gethomepage.dev/app: pocket-id
-        enabled: false
-        hosts:
-          - host: pid.${DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: *port
-          - host: pid.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: *port
-        tls:
-          - secretName: pid-tls
-            hosts:
-              - pid.${DOMAIN}
-              - pid.${CLUSTER_DOMAIN}
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - "pid.${DOMAIN}"
+          - "pid.${CLUSTER_DOMAIN}"
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: *port
 
     persistence:
       config:
