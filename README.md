@@ -15,7 +15,7 @@ homeops/
 │   │   └── talos1018/  # Cluster applications
 │   ├── infrastructure/ # Infrastructure components
 │   │   └── talos1018/
-│   │       ├── core/   # Core components (CNI, ingress, cert-manager)
+│   │       ├── core/   # Core components (CNI, cert-manager)
 │   │       └── storage/ # Storage layer (Longhorn)
 │   ├── clusters/       # Flux configurations
 │   │   └── talos1018/
@@ -43,9 +43,8 @@ A 3-node Kubernetes cluster running on Talos Linux. For detailed setup and confi
 Layered architecture with minimal dependencies:
 
 **Core** (no dependencies):
-- Cilium CNI with L2 announcements
+- Cilium CNI with L2 announcements and Gateway API (HTTPRoutes for all apps)
 - cert-manager with Let's Encrypt
-- ingress-nginx
 
 **Storage** (depends on core):
 - Longhorn with S3 backups to Cloudflare R2

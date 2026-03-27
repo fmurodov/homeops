@@ -16,7 +16,7 @@ kubernetes/
 ├── clusters/           # Cluster-specific manifests
 │   └── talos1018/     # Configuration for talos1018 cluster
 ├── infrastructure/     # Core infrastructure components
-│   ├── controllers/   # Infrastructure controllers (cert-manager, ingress-nginx, etc.)
+│   ├── controllers/   # Infrastructure controllers (cert-manager, etc.)
 │   └── configs/       # Infrastructure configurations
 ├── apps/              # Application deployments
 │   ├── base/         # Base app configurations

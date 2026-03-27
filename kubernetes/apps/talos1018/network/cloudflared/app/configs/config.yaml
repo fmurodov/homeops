@@ -6,5 +6,5 @@ ingress:
       httpHostHeader: ""
       noTLSVerify: true
       originServerName: ""
-    service: https://ingress-nginx-release-controller.ingress-nginx.svc.cluster.local
+    service: https://cilium-gateway-main-gateway.network.svc.cluster.local
   - service: http_status:404
