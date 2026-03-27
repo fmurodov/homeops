@@ -5,4 +5,3 @@ kind: Kustomization
 resources:
   - ./cilium/ks.yaml # CNI network plugin
   - ./cert-manager/ks.yaml # Certificate management
-  - ./ingress-nginx/ks.yaml # Ingress controller

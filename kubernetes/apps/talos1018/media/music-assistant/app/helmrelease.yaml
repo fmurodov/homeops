@@ -68,29 +68,28 @@ spec:
             port: 8097
             protocol: TCP
 
-    ingress:
+    route:
       app:
-        enabled: false
-        className: nginx
+        enabled: true
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
           gethomepage.dev/icon: sh-music-assistant.svg
           gethomepage.dev/name: Music Assistant
           gethomepage.dev/app: music-assistant
-        hosts:
-          - host: mass.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                pathType: Prefix
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - secretName: music-assistant-tls
-            hosts:
-              - mass.${CLUSTER_DOMAIN}
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - "mass.${CLUSTER_DOMAIN}"
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: 8095
 
     persistence:
       data:

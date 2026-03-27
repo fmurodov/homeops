@@ -51,37 +51,29 @@ spec:
           http:
             port: 8123
 
-    ingress:
+    route:
       app:
-        enabled: false
-        className: nginx
+        enabled: true
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Smart Home
           gethomepage.dev/icon: home-assistant.svg
           gethomepage.dev/name: Home Assistant
           gethomepage.dev/app: home-assistant
-        hosts:
-          - host: hass.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                pathType: Prefix
-                service:
-                  identifier: app
-                  port: http
-          - host: hass.${DOMAIN}
-            paths:
-              - path: /
-                pathType: Prefix
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - secretName: home-assistant-tls
-            hosts:
-              - hass.${CLUSTER_DOMAIN}
-              - hass.${DOMAIN}
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - "hass.${CLUSTER_DOMAIN}"
+          - "hass.${DOMAIN}"
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: 8123
 
     persistence:
       config:

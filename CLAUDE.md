@@ -29,7 +29,7 @@ homeops/
 │   │   ├── infrastructure.yaml      # Infrastructure layer
 │   │   └── apps.yaml               # Applications layer
 │   ├── infrastructure/talos1018/
-│   │   ├── core/              # Cilium, cert-manager, ingress-nginx
+│   │   ├── core/              # Cilium, cert-manager
 │   │   └── storage/           # Longhorn
 │   ├── apps/talos1018/        # 20+ applications
 │   └── components/common/     # Shared components (cluster-secrets)
@@ -47,7 +47,7 @@ homeops/
 ```
 cluster-config (secrets/vars)
     ↓
-infra-core (Cilium, cert-manager, ingress-nginx)
+infra-core (Cilium with L2 + Gateway API, cert-manager)
     ↓
 infra-storage (Longhorn)
     ↓
@@ -153,6 +153,7 @@ talosctl apply-config -n <node-ip> --file clusterconfig/<config>.yaml
 # 1. Create directory structure
 kubernetes/apps/talos1018/<category>/<app-name>/
 ├── helmrelease.yaml (or custom manifests)
+├── httproute.yaml   # HTTPRoute to main-gateway (or use chart's native route: support)
 ├── secret.sops.yaml (if needed)
 └── kustomization.yaml
 
@@ -164,6 +165,12 @@ sops --encrypt --encrypted-regex '^(data|stringData)$' \
 # 4. Validate before commit
 ./scripts/validate.sh flux
 ```
+
+**Routing**: All apps use Cilium Gateway API. Point HTTPRoutes at `main-gateway` in the `network` namespace.
+- Internal apps: hostname `<name>.${CLUSTER_DOMAIN}`, listener `https-internal`
+- External apps: hostname `<name>.${DOMAIN}`, listener `https-external`
+- Add `gethomepage.dev/*` annotations for Homepage discovery
+- If the Helm chart supports `route:` natively, use that instead of a standalone `httproute.yaml`
 
 ### Working with Secrets
 

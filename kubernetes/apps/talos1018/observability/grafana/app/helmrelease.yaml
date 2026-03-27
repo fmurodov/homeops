@@ -130,10 +130,6 @@ spec:
           gnetId: 18855
           revision: 1
           datasource: VictoriaMetrics
-        ingress-nginx:
-          gnetId: 14314
-          revision: 2
-          datasource: VictoriaMetrics
         cert-manager:
           gnetId: 20842
           revision: 3
@@ -167,21 +163,5 @@ spec:
           revision: 18
           datasource: VictoriaMetrics
 
-    # Ingress
     ingress:
       enabled: false
-      ingressClassName: nginx
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Observability
-        gethomepage.dev/icon: sh-grafana.svg
-        gethomepage.dev/name: Grafana
-        gethomepage.dev/app: grafana
-      path: /
-      hosts:
-        - grafana.${CLUSTER_DOMAIN}
-      tls:
-        - secretName: grafana-tls
-          hosts:
-            - grafana.${CLUSTER_DOMAIN}
