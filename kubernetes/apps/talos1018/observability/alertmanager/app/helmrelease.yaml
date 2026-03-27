@@ -25,24 +25,7 @@ spec:
     persistence:
       enabled: false
     ingress:
-      enabled: true
-      className: nginx
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Observability
-        gethomepage.dev/icon: sh-alertmanager.svg
-        gethomepage.dev/name: Alertmanager
-        gethomepage.dev/app: alertmanager
-      hosts:
-        - host: alertmanager.${CLUSTER_DOMAIN}
-          paths:
-            - path: /
-              pathType: Prefix
-      tls:
-        - secretName: alertmanager-tls
-          hosts:
-            - alertmanager.${CLUSTER_DOMAIN}
+      enabled: false
     # Placeholder configuration — TODO: add receivers
     config:
       global:

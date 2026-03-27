@@ -43,28 +43,27 @@ spec:
         ports:
           http:
             port: &port 3280
-    ingress:
+    route:
       app:
-        className: nginx
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
           gethomepage.dev/icon: sh-cmintey-wishlist.png
           gethomepage.dev/name: Wishlist
           gethomepage.dev/app: wishlist
-        enabled: true
-        hosts:
-          - host: &hostName wishlist.${DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: *port
-        tls:
-          - hosts:
-              - *hostName
-            secretName: wishlist-tls
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - "wishlist.${DOMAIN}"
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: *port
     persistence:
       data:
         existingClaim: wishlist-data
