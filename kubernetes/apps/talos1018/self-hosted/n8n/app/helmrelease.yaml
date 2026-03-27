@@ -74,7 +74,7 @@ spec:
           gethomepage.dev/name: n8n
           gethomepage.dev/app: n8n
           gethomepage.dev/description: Workflow automation
-        enabled: true
+        enabled: false
         hosts:
           - host: *hostName
             paths:

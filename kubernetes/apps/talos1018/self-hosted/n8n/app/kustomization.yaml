@@ -7,3 +7,4 @@ resources:
   - ./pvc.yaml
   - ./n8n-secret.sops.yaml
   - ./helmrelease.yaml
+  - ./httproute.yaml

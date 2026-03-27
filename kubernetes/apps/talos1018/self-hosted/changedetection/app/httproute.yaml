@@ -1,0 +1,29 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: changedetection
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Apps
+    gethomepage.dev/icon: sh-changedetection.svg
+    gethomepage.dev/name: changedetection
+    gethomepage.dev/app: changedetection
+    gethomepage.dev/description: Web page change detection
+    gethomepage.dev/widget.type: changedetectionio
+    gethomepage.dev/widget.url: http://changedetection.self-hosted.svc.cluster.local:5000
+    gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_CHANGEDETECTION_APIKEY}}" }}'
+spec:
+  parentRefs:
+    - name: main-gateway
+      namespace: network
+  hostnames:
+    - "changedetection.${CLUSTER_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: changedetection
+          port: 5000
