@@ -186,19 +186,19 @@ spec:
                     - __meta_kubernetes_endpoint_port_name
                   action: keep
                   regex: longhorn-backend;manager
-    route:
-      enabled: true
-      annotations:
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Observability
-        gethomepage.dev/icon: si-victoriametrics
-        gethomepage.dev/name: VictoriaMetrics
-        gethomepage.dev/app: victoria-metrics
-      parentRefs:
-        - name: main-gateway
-          namespace: network
-      hostnames:
-        - "vm.${CLUSTER_DOMAIN}"
+      route:
+        enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Observability
+          gethomepage.dev/icon: si-victoriametrics
+          gethomepage.dev/name: VictoriaMetrics
+          gethomepage.dev/app: victoria-metrics
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - "vm.${CLUSTER_DOMAIN}"
     # Standalone charts are used for these — disable the bundled ones
     vmagent:
       enabled: false

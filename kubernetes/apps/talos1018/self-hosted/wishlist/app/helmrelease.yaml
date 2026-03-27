@@ -45,6 +45,7 @@ spec:
             port: &port 3280
     route:
       app:
+        enabled: true
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
