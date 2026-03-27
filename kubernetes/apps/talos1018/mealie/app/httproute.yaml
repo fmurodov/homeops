@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.30.0/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mealie
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Apps
+    gethomepage.dev/icon: sh-mealie.svg
+    gethomepage.dev/name: Mealie
+    gethomepage.dev/app: mealie
+    gethomepage.dev/description: Recipe manager
+    gethomepage.dev/widget.type: mealie
+    gethomepage.dev/widget.url: http://mealie-http.mealie.svc.cluster.local:9000
+    gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_MEALIE_APIKEY}}"
+    gethomepage.dev/widget.version: "2"
+spec:
+  parentRefs:
+    - name: main-gateway
+      namespace: network
+  hostnames:
+    - "mealie.${CLUSTER_DOMAIN}"
+    - "recipe.${DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: mealie-http
+          port: 9000

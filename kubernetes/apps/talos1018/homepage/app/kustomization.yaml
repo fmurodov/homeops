@@ -13,4 +13,4 @@ resources:
   - homepage-secret.sops.yaml
   - secret.yaml
   - configmap.yaml
-  - ingress.yaml
+  - httproute.yaml
