@@ -8,4 +8,6 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
+  - oauth2-proxy.yaml
+  - oauth2-proxy-secret.sops.yaml
   - httproute.yaml

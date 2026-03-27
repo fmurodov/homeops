@@ -34,7 +34,6 @@ resources:
 
   # Utilities
   - ./adsb/ks.yaml
-  - ./capacitor/ks.yaml
 
   # Development and Testing
   - ./podinfo/ks.yaml
