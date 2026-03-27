@@ -34,16 +34,16 @@ spec:
         clusterIP: ""
       ingress:
         enabled: false
-    route:
-      enabled: true
-      annotations:
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Observability
-        gethomepage.dev/icon: si-victoriametrics
-        gethomepage.dev/name: VictoriaLogs
-        gethomepage.dev/app: victoria-logs
-      parentRefs:
-        - name: main-gateway
-          namespace: network
-      hostnames:
-        - "vlogs.${CLUSTER_DOMAIN}"
+      route:
+        enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Observability
+          gethomepage.dev/icon: si-victoriametrics
+          gethomepage.dev/name: VictoriaLogs
+          gethomepage.dev/app: victoria-logs
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - "vlogs.${CLUSTER_DOMAIN}"
