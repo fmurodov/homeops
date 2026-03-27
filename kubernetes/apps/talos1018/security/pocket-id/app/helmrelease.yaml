@@ -39,6 +39,21 @@ spec:
                   secretKeyRef:
                     name: pocket-id-secret
                     key: MAXMIND_LICENSE_KEY
+              SMTP_HOST: smtp.resend.com
+              SMTP_PORT: "465"
+              SMTP_TLS: tls
+              SMTP_FROM: pid@resend.${DOMAIN}
+              SMTP_USER: resend
+              SMTP_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: pocket-id-secret
+                    key: SMTP_PASSWORD
+              EMAILS_VERIFIED: "true"
+              EMAIL_LOGIN_NOTIFICATION_ENABLED: "true"
+              EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED: "true"
+              EMAIL_ONE_TIME_ACCESS_AS_UNAUTHENTICATED_ENABLED: "true"
+              EMAIL_API_KEY_EXPIRATION_ENABLED: "true"
             probes:
               liveness:
                 enabled: true
