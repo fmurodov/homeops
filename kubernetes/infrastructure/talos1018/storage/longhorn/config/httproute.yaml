@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.30.0/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: longhorn
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Infra
+    gethomepage.dev/icon: sh-rancher-longhorn.svg
+    gethomepage.dev/name: Longhorn
+    gethomepage.dev/app: longhorn
+    gethomepage.dev/description: Cloud native distributed block storage for Kubernetes
+spec:
+  parentRefs:
+    - name: main-gateway
+      namespace: network
+  hostnames:
+    - "longhorn.${CLUSTER_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: oauth2-proxy
+          port: 4180
