@@ -74,7 +74,7 @@ spec:
           gethomepage.dev/icon: sh-pocket-id.svg
           gethomepage.dev/name: Pocket ID
           gethomepage.dev/app: pocket-id
-        enabled: true
+        enabled: false
         hosts:
           - host: pid.${DOMAIN}
             paths:

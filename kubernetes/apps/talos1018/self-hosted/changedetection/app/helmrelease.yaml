@@ -60,7 +60,7 @@ spec:
           gethomepage.dev/widget.type: changedetectionio
           gethomepage.dev/widget.url: http://changedetection-http.self-hosted.svc.cluster.local:5000
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_CHANGEDETECTION_APIKEY}}" }}'
-        enabled: true
+        enabled: false
         hosts:
           - host: changedetection.${CLUSTER_DOMAIN}
             paths:

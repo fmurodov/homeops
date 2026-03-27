@@ -8,3 +8,4 @@ resources:
   - ./pocket-id-secret.sops.yaml
   - ./oci-repository.yaml
   - ./helmrelease.yaml
+  - ./httproute.yaml
