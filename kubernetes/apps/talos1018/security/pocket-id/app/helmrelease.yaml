@@ -49,6 +49,7 @@ spec:
                   secretKeyRef:
                     name: pocket-id-secret
                     key: SMTP_PASSWORD
+              UI_CONFIG_DISABLED: "true"
               EMAILS_VERIFIED: "true"
               EMAIL_LOGIN_NOTIFICATION_ENABLED: "true"
               EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED: "true"
