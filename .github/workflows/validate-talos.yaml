@@ -26,5 +26,10 @@ jobs:
           curl -sL https://talos.dev/install | sh
           talosctl version --client
 
+      - name: Install talhelper
+        run: |
+          curl -sL https://github.com/budimanjojo/talhelper/releases/latest/download/talhelper_linux_amd64.tar.gz | tar xz -C /usr/local/bin talhelper
+          talhelper --version
+
       - name: Validate Talos configurations
         run: ./scripts/validate.sh talos
