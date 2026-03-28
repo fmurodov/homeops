@@ -46,18 +46,10 @@
     },
     {
       customType: "regex",
-      description: "Match Talos factory installer images with version tags in YAML files",
-      managerFilePatterns: ["/\\.ya?ml$/"],
+      description: "Match Talos factory installer images with version tags",
+      managerFilePatterns: ["/\\.ya?ml$/", "/\\.md$/"],
       matchStrings: [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s+image: factory\\.talos\\.dev/installer/[a-f0-9]+:(?<currentValue>v\\S+)",
-      ],
-      datasourceTemplate: "github-releases",
-    },
-    {
-      customType: "regex",
-      description: "Match Talos factory installer images with version tags in Markdown files",
-      managerFilePatterns: ["/\\.md$/"],
-      matchStrings: [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*factory\\.talos\\.dev/(installer|metal-installer)/[a-f0-9]+:(?<currentValue>v\\S+)",
       ],
       datasourceTemplate: "github-releases",

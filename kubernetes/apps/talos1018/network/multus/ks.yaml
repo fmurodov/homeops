@@ -7,13 +7,13 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h
+  retryInterval: 1m
   timeout: 5m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   path: "./kubernetes/apps/talos1018/network/multus/app"
-  targetNamespace: network
   prune: true
   wait: true
   healthChecks:
@@ -39,6 +39,5 @@ spec:
   dependsOn:
     - name: multus
   path: "./kubernetes/apps/talos1018/network/multus/networks"
-  targetNamespace: network
   prune: true
   wait: true

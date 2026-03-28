@@ -21,7 +21,7 @@ spec:
             - --provider=oidc
             - --oidc-issuer-url=https://pid.${DOMAIN}
             - --upstream=http://longhorn-frontend:80
-            - --http-address=0.0.0.0:4180
+            - --http-address=[::]:4180
             - --redirect-url=https://longhorn.${CLUSTER_DOMAIN}/oauth2/callback
             - --email-domain=*
             - --cookie-secure=true
