@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# n8n - Document management
+# n8n - Workflow automation
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -27,4 +27,4 @@ spec:
     substituteFrom:
       - kind: Secret
         name: cluster-secrets
-  wait: false
+  wait: true

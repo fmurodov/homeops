@@ -7,5 +7,3 @@ resources:
   - ./mosquitto/ks.yaml
   - ./esphome/ks.yaml
   - ./home-assistant/ks.yaml
-# components:
-#   - ../../../components/common
