@@ -8,6 +8,8 @@ on:
     tags-ignore: ["*"]
     paths:
       - "kubernetes/**"
+      - "scripts/validate-flux.sh"
+      - ".yamllint.yaml"
       - ".github/workflows/validate-flux.yaml"
 
 jobs:
@@ -24,5 +26,7 @@ jobs:
         uses: fluxcd/pkg/actions/kubeconform@357bbcc3462ccf78cc17fd0b9b7d498b1848bf14 # main
       - name: Setup kustomize
         uses: fluxcd/pkg/actions/kustomize@357bbcc3462ccf78cc17fd0b9b7d498b1848bf14 # main
+      - name: Setup yamllint
+        run: pip install yamllint
       - name: Validate manifests
         run: ./scripts/validate.sh flux

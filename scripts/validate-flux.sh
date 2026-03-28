@@ -42,6 +42,21 @@ kustomize_config="kustomization.yaml"
 kubeconform_flags=("-skip=Secret")
 kubeconform_config=("-strict" "-ignore-missing-schemas" "-schema-location" "default" "-schema-location" "/tmp/flux-crd-schemas" "-verbose")
 
+# Run yamllint if available
+if command -v yamllint &> /dev/null; then
+    echo "INFO - Running yamllint"
+    cd "$(git rev-parse --show-toplevel)" || exit 1
+    if ! yamllint -c .yamllint.yaml kubernetes/ talos/; then
+        echo "❌ yamllint found errors"
+        exit 1
+    fi
+    echo "✅ yamllint passed"
+    echo ""
+    cd "$(git rev-parse --show-toplevel)/kubernetes" || exit 1
+else
+    echo "INFO - yamllint not found, skipping lint"
+fi
+
 echo "INFO - Downloading Flux OpenAPI schemas"
 mkdir -p /tmp/flux-crd-schemas/master-standalone-strict
 curl -sL https://github.com/fluxcd/flux2/releases/latest/download/crd-schemas.tar.gz | tar zxf - -C /tmp/flux-crd-schemas/master-standalone-strict
@@ -71,6 +86,24 @@ find . -type f -name $kustomize_config -print0 | while IFS= read -r -d $'\0' fil
       exit 1
     fi
 done
+
+# Check for duplicate resources across leaf kustomizations (app/ directories only)
+echo "INFO - Checking for duplicate resources across app kustomizations"
+DUPES_FILE=$(mktemp)
+find . -path "*/app/$kustomize_config" -o -path "*/config/$kustomize_config" -o -path "*/networks/$kustomize_config" | \
+  while IFS= read -r file; do
+    kustomize build "${file/%$kustomize_config}" "${kustomize_flags[@]}" 2>/dev/null | \
+      yq e -N '[.kind, .metadata.name, .metadata.namespace // "default"] | join("/")' - 2>/dev/null
+done | sort | uniq -d > "$DUPES_FILE"
+
+if [ -s "$DUPES_FILE" ]; then
+    echo "❌ Duplicate resources found across kustomizations:"
+    cat "$DUPES_FILE" | sed 's/^/  - /'
+    rm -f "$DUPES_FILE"
+    exit 1
+fi
+rm -f "$DUPES_FILE"
+echo "✅ No duplicate resources found"
 
 echo ""
 echo "✅ All Flux/Kubernetes manifests are valid!"
