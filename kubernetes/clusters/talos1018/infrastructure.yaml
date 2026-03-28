@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# Core infrastructure components (Cilium, cert-manager, Ingress NGINX)
+# Core infrastructure components (Cilium, cert-manager, Gateway API)
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
