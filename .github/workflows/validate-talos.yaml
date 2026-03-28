@@ -10,6 +10,7 @@ on:
     tags-ignore: ["*"]
     paths:
       - "talos/**/*.yaml"
+      - "scripts/validate.sh"
       - ".github/workflows/validate-talos.yaml"
 
 jobs:

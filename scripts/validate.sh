@@ -33,9 +33,26 @@ if [ "$VALIDATE_TALOS" = true ]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
 
+    # Validate talconfig.yaml with talhelper if available
+    if command -v talhelper &> /dev/null; then
+        echo "🔎 Validating talconfig.yaml with talhelper..."
+        for talconfig in $(find talos -name "talconfig.yaml" 2>/dev/null | sort); do
+            if talhelper validate talconfig "$talconfig" --no-substitute; then
+                echo "✅ $talconfig is valid"
+            else
+                echo "❌ $talconfig validation failed"
+                VALIDATION_FAILED=1
+            fi
+        done
+        echo ""
+    else
+        echo "⚠️  talhelper is not installed - skipping talconfig validation"
+        echo ""
+    fi
+
     # Check if talosctl is installed
     if ! command -v talosctl &> /dev/null; then
-        echo "⚠️  talosctl is not installed - skipping Talos validation"
+        echo "⚠️  talosctl is not installed - skipping Talos node config validation"
         echo ""
     else
         echo "📦 talosctl version:"
