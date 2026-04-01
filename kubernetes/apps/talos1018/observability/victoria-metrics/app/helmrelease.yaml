@@ -97,6 +97,7 @@ spec:
 
             # Pod autodiscovery via prometheus.io annotations
             - job_name: kubernetes-pods
+              honor_labels: true
               kubernetes_sd_configs:
                 - role: pod
               relabel_configs:
