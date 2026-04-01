@@ -7,6 +7,7 @@ resources:
   - ./backup-secret.sops.yaml
   - ./backup-b2-secret.sops.yaml
   - ./daily-backup.yaml
+  - ./daily-snapshot-cleanup.yaml
   - ./oauth2-proxy-secret.sops.yaml
   - ./oauth2-proxy.yaml
   - ./httproute.yaml
