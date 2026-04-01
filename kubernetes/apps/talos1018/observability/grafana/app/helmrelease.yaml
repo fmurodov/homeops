@@ -162,6 +162,10 @@ spec:
           gnetId: 14950
           revision: 18
           datasource: VictoriaMetrics
+        trivy-operator:
+          gnetId: 17813
+          revision: 3
+          datasource: VictoriaMetrics
 
     ingress:
       enabled: false
