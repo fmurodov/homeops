@@ -13,6 +13,9 @@ spec:
         name: aquasecurity
   interval: 1h0m0s
   values:
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
     operator:
       scanJobsConcurrentLimit: 1
       vulnerabilityScannerScanOnlyCurrentRevisions: true
