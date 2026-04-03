@@ -22,6 +22,14 @@ spec:
               TOKEN_TIME: "72"
               DEFAULT_CURRENCY: "EUR"
               HOST: "::"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              runAsNonRoot: true
+              capabilities:
+                drop: [ALL]
+              seccompProfile:
+                type: RuntimeDefault
             resources:
               requests:
                 cpu: 5m

@@ -21,9 +21,21 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "2000"
     spec:
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
       containers:
         - name: cloudflared
           image: cloudflare/cloudflared:2026.3.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           args:
             - tunnel
             - --no-autoupdate

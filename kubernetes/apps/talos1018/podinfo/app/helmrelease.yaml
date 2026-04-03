@@ -27,5 +27,14 @@ spec:
         cpu: 100m
         memory: 64Mi
 
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      capabilities:
+        drop: [ALL]
+      seccompProfile:
+        type: RuntimeDefault
+
     ingress:
       enabled: false

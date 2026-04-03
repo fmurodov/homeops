@@ -20,9 +20,22 @@ spec:
       labels:
         app.kubernetes.io/name: homebox
     spec:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: homebox
           image: "ghcr.io/sysadminsmedia/homebox:0.24.0-rootless"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           imagePullPolicy: Always
           ports:
             - name: http

@@ -22,6 +22,13 @@ spec:
       containers:
         - name: adsbexchange
           image: ghcr.io/sdr-enthusiasts/docker-adsbexchange:20250210.1909
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           envFrom:
             - secretRef:
                 name: adsb-config

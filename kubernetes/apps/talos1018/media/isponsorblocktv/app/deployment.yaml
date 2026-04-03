@@ -18,9 +18,21 @@ spec:
       labels:
         app.kubernetes.io/name: isponsorblocktv
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: isponsorblocktv
           image: ghcr.io/dmunozv04/isponsorblocktv:v2.6.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           resources:
             limits:
               cpu: "0.001"
