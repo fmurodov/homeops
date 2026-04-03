@@ -19,12 +19,17 @@ spec:
       labels:
         app.kubernetes.io/name: adsbexchange
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: adsbexchange
           image: ghcr.io/sdr-enthusiasts/docker-adsbexchange:20250210.1909
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
+            runAsNonRoot: true
             capabilities:
               drop: [ALL]
             seccompProfile:
