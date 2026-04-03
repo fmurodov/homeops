@@ -37,6 +37,11 @@ spec:
     defaultSettings:
       backupTarget: s3://talos1018-longhorn@auto/1018/
       backupTargetCredentialSecret: longhorn-b2-backups
+      autoCleanupSystemGeneratedSnapshot: "true"
+      autoCleanupRecurringJobBackupSnapshot: "true"
+      autoCleanupSnapshotWhenDeleteBackup: "true"
+      autoCleanupSnapshotAfterOnDemandBackupCompleted: "true"
+      removeSnapshotsDuringFilesystemTrim: "enabled"
       defaultReplicaCount: "3"
       createDefaultDiskLabeledNodes: true
       # systemManagedComponentsNodeSelector: "node.longhorn.io/create-default-disk:true"
