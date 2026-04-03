@@ -18,9 +18,22 @@ spec:
       labels:
         app.kubernetes.io/name: mosquitto
     spec:
+      securityContext:
+        runAsUser: 1883
+        runAsGroup: 1883
+        fsGroup: 1883
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: mosquitto
           image: eclipse-mosquitto:2.0.22
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - containerPort: 1883
           volumeMounts:
