@@ -21,9 +21,9 @@ spec:
         app.kubernetes.io/name: homebox
     spec:
       securityContext:
-        runAsUser: 65534
-        runAsGroup: 65534
-        fsGroup: 65534
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: homebox
