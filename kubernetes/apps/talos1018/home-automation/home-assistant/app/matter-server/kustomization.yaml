@@ -6,3 +6,6 @@ namespace: home-automation
 resources:
   - ./pvc.yaml
   - ./helmrelease.yaml
+  - ./oauth2-proxy.yaml
+  - ./matter-server-oauth2-proxy-secret.sops.yaml
+  - ./httproute.yaml
