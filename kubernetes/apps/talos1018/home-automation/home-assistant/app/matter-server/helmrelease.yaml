@@ -41,6 +41,7 @@ spec:
               TZ: ${TIMEZONE}
               MATTER_SERVER__INSTANCE_NAME: "{{ .Release.Name }}"
               DISABLE_DASHBOARD: false
+              PRODUCTION_MODE: "true"
             securityContext:
               allowPrivilegeEscalation: false
               runAsNonRoot: true

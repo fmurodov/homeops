@@ -16,6 +16,10 @@ spec:
   path: ./kubernetes/apps/talos1018/home-automation/home-assistant/app
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   postBuild:
     substituteFrom:
       - kind: Secret
