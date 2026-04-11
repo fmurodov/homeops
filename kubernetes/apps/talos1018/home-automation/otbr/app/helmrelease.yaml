@@ -79,21 +79,21 @@ spec:
         k8s.v1.cni.cncf.io/networks: network/multus-macvlan2
 
     service:
-      otbr-1:
+      "1":
         controller: otbr-1
         ports:
           rest:
             port: 8081
           web:
             port: 8080
-      otbr-2:
+      "2":
         controller: otbr-2
         ports:
           rest:
             port: 8081
           web:
             port: 8080
-      otbr-3:
+      "3":
         controller: otbr-3
         ports:
           rest:
