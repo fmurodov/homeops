@@ -36,7 +36,7 @@ spec:
               repository: openthread/border-router
               tag: latest
               pullPolicy: Always
-            env:
+            env: &env
               OT_RCP_DEVICE: "spinel+hdlc+uart:///dev/thread0?uart-baudrate=460800&uart-flow-control"
               OT_INFRA_IF: "net1"
               OT_THREAD_IF: "wpan0"
@@ -67,7 +67,12 @@ spec:
           nodeSelector:
             kubernetes.io/hostname: talos-1018-3
         containers:
-          app: *container
+          app:
+            <<: *container
+            env:
+              <<: *env
+              # Sonoff Dongle-PMG24 does not have RTS/CTS wired — no hardware flow control
+              OT_RCP_DEVICE: "spinel+hdlc+uart:///dev/thread0?uart-baudrate=460800"
 
     defaultPodOptions:
       annotations:
