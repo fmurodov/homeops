@@ -27,7 +27,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: homebox
-          image: "ghcr.io/sysadminsmedia/homebox:0.24.0-rootless"
+          image: "ghcr.io/sysadminsmedia/homebox:0.24.2-rootless"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
