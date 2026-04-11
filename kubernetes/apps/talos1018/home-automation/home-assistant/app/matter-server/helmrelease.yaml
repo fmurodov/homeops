@@ -54,7 +54,7 @@ spec:
                 type: RuntimeDefault
     defaultPodOptions:
       annotations:
-        k8s.v1.cni.cncf.io/networks: network/multus-macvlan2, network/multus-macvlan3
+        k8s.v1.cni.cncf.io/networks: network/multus-macvlan2
     service:
       app:
         controller: matter-server
