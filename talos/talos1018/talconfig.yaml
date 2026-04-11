@@ -244,3 +244,10 @@ controlPlane:
     - |-
       cluster:
         allowSchedulingOnControlPlanes: true
+
+    # udev rules for USB Thread dongles — creates stable /dev/thread0 symlink
+    - |-
+      machine:
+        udev:
+          rules:
+            - SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="thread0", MODE="0666"

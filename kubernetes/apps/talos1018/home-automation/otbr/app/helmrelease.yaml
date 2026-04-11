@@ -1,0 +1,127 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: otbr
+spec:
+  chart:
+    spec:
+      chart: app-template
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+      version: 4.6.2
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      otbr-1:
+        type: deployment
+        replicas: 0
+        pod:
+          nodeSelector:
+            kubernetes.io/hostname: talos-1018-1
+        containers:
+          app: &container
+            image:
+              repository: openthread/border-router
+              tag: latest
+              pullPolicy: Always
+            env:
+              OT_RCP_DEVICE: "spinel+hdlc+uart:///dev/thread0?uart-baudrate=460800&uart-flow-control"
+              OT_INFRA_IF: "net1"
+              OT_THREAD_IF: "wpan0"
+              OT_REST_LISTEN_ADDR: "::"
+              OT_REST_LISTEN_PORT: "8081"
+              OT_WEB_LISTEN_ADDR: "::"
+              OT_WEB_LISTEN_PORT: "8080"
+              OT_LOG_LEVEL: "4"
+            securityContext:
+              privileged: true
+              capabilities:
+                add:
+                  - NET_ADMIN
+
+      otbr-2:
+        type: deployment
+        replicas: 1
+        pod:
+          nodeSelector:
+            kubernetes.io/hostname: talos-1018-2
+        containers:
+          app: *container
+
+      otbr-3:
+        type: deployment
+        replicas: 1
+        pod:
+          nodeSelector:
+            kubernetes.io/hostname: talos-1018-3
+        containers:
+          app: *container
+
+    defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: network/multus-macvlan2
+
+    service:
+      otbr-1:
+        controller: otbr-1
+        ports:
+          rest:
+            port: 8081
+          web:
+            port: 8080
+      otbr-2:
+        controller: otbr-2
+        ports:
+          rest:
+            port: 8081
+          web:
+            port: 8080
+      otbr-3:
+        controller: otbr-3
+        ports:
+          rest:
+            port: 8081
+          web:
+            port: 8080
+
+    persistence:
+      data-1:
+        existingClaim: otbr-data-1
+        advancedMounts:
+          otbr-1:
+            app:
+              - path: /data
+      data-2:
+        existingClaim: otbr-data-2
+        advancedMounts:
+          otbr-2:
+            app:
+              - path: /data
+      data-3:
+        existingClaim: otbr-data-3
+        advancedMounts:
+          otbr-3:
+            app:
+              - path: /data
+      thread-dongle:
+        type: hostPath
+        hostPath: /dev/thread0
+        globalMounts:
+          - path: /dev/thread0
+      tun:
+        type: hostPath
+        hostPath: /dev/net/tun
+        globalMounts:
+          - path: /dev/net/tun
