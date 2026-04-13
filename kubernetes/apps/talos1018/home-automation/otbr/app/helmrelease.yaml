@@ -53,7 +53,7 @@ spec:
 
       otbr-2:
         type: deployment
-        replicas: 1
+        replicas: 0
         pod:
           nodeSelector:
             kubernetes.io/hostname: talos-1018-2
