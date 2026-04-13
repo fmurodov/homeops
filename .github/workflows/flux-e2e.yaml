@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Flux
-        uses: fluxcd/flux2/action@ac7f72b62b1f0fe48a912e22262f7f20ac3dc61e # main
+        uses: fluxcd/flux2/action@7d27a26665b34463b0ed5fb54fa06642375536f9 # main
       - name: Setup Kubernetes
         uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
         with:
