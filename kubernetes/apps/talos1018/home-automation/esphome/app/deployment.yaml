@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: esphome
-          image: "ghcr.io/esphome/esphome:2026.3.3"
+          image: "ghcr.io/esphome/esphome:2026.4.0"
           imagePullPolicy: Always
           command: ["esphome"]
           args: ["dashboard", "/config", "--address", "::"]
