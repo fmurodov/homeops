@@ -32,7 +32,7 @@ data:
           description: Obshi Server
           icon: minecraft
           app: bds
-          namespace: minecraft
+          namespace: minecraft-bedrock
           widget:
             type: gamedig
             serverType: mbe
