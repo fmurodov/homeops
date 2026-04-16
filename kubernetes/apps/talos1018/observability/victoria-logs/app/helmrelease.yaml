@@ -41,7 +41,7 @@ spec:
           gethomepage.dev/group: Observability
           gethomepage.dev/icon: si-victoriametrics
           gethomepage.dev/name: VictoriaLogs
-          gethomepage.dev/app: victoria-logs
+          gethomepage.dev/app: victoria-logs-single
         parentRefs:
           - name: main-gateway
             namespace: network

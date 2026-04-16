@@ -32,7 +32,7 @@ spec:
           args:
             - --provider=oidc
             - --oidc-issuer-url=https://pid.${DOMAIN}
-            - --upstream=http://matter-server-app:5580
+            - --upstream=http://matter-server:5580
             - --http-address=[::]:4180
             - --redirect-url=https://matter-server.${CLUSTER_DOMAIN}/oauth2/callback
             - --email-domain=*
