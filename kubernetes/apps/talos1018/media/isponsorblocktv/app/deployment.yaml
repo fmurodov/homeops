@@ -24,7 +24,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: isponsorblocktv
-          image: ghcr.io/dmunozv04/isponsorblocktv:v2.7.0
+          image: ghcr.io/dmunozv04/isponsorblocktv:v2.8.1
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
