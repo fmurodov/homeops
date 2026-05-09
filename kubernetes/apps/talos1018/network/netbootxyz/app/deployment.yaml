@@ -27,7 +27,7 @@ spec:
               value: "Etc/UTC"
             - name: MENU_VERSION
               # renovate: datasource=github-releases depName=netbootxyz/netboot.xyz
-              value: 3.0.1
+              value: 3.0.2
           ports:
             - name: http
               containerPort: 3000
