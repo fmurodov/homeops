@@ -135,7 +135,7 @@ spec:
           redis:
             image:
               repository: docker.io/gotenberg/gotenberg
-              tag: 8.30.1
+              tag: 8.32.0
             command:
               - gotenberg
               - --chromium-disable-javascript=true
