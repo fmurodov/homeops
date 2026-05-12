@@ -12,14 +12,10 @@ spec:
   selector:
     app: bds
   ports:
-    - name: bds-ipv4
+    - name: bds
       protocol: UDP
       port: 19132
       targetPort: 19132
-    - name: bds-ipv6
-      protocol: UDP
-      port: 19133
-      targetPort: 19133
   # Use LoadBalancer if running on a provider that supports that
   type: LoadBalancer
   ipFamilyPolicy: PreferDualStack

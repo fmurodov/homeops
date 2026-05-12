@@ -33,11 +33,8 @@ spec:
             - mountPath: /data
               name: data
           ports:
-            - name: bds-ipv4
+            - name: bds
               containerPort: 19132
-              protocol: UDP
-            - name: bds-ipv6
-              containerPort: 19133
               protocol: UDP
           resources:
             limits:

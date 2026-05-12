@@ -19,7 +19,8 @@ data:
   #LEVEL_NAME: "my_minecraft_world"
   #LEVEL_SEED: "33480944"
   SERVER_NAME: "obshi"
-  #SERVER_PORT: "19132"
+  SERVER_PORT: "19132"
+  SERVER_PORT_V6: "19132"
   #LEVEL_TYPE: "DEFAULT" # Options: FLAT, LEGACY, DEFAULT
   #ALLOW_CHEATS: "false" # Options: true, false
   #MAX_PLAYERS: "10"
@@ -35,3 +36,4 @@ data:
   #TICK_DISTANCE: "4"
   #MAX_THREADS: "8"
   OPS: "2535463860242144,2535442747126241,2535459909665364" # fmurodov,Akram7983,Robiya1830
+  ENABLE_BDS_V6BIND_FIX: "true"
