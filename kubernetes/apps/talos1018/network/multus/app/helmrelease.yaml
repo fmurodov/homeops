@@ -105,3 +105,4 @@ spec:
     serviceAccount:
       multus:
         enabled: true
+        automountServiceAccountToken: true
