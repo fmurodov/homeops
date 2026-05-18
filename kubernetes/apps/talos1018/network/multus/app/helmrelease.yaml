@@ -20,6 +20,7 @@ spec:
           identifier: multus
         pod:
           hostNetwork: true
+          automountServiceAccountToken: true
         initContainers:
           cni-plugins:
             image:
@@ -105,4 +106,3 @@ spec:
     serviceAccount:
       multus:
         enabled: true
-        automountServiceAccountToken: true
