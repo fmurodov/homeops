@@ -166,6 +166,10 @@ spec:
           gnetId: 17813
           revision: 2
           datasource: VictoriaMetrics
+        victorialogs-explorer:
+          gnetId: 22759
+          revision: 9
+          datasource: VictoriaLogs
 
     ingress:
       enabled: false
