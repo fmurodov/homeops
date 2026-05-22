@@ -34,7 +34,7 @@ spec:
           app: &container
             image:
               repository: openthread/border-router
-              tag: latest@sha256:a1bd0f0af8702a13c1435ca8706492772fb00b73e84bcf8be5d18b07b6d81310
+              tag: latest@sha256:787ba90b5a6a845fa166739dbf6c4e95aa2886e47665f4b218a77d94e6a4c933
             env: &env
               OT_RCP_DEVICE: "spinel+hdlc+uart:///dev/thread0?uart-baudrate=460800&uart-flow-control"
               OT_INFRA_IF: "net1"
