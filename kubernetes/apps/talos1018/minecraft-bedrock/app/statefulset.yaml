@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: main
-          image: "itzg/minecraft-bedrock-server:2026.5.2"
+          image: "itzg/minecraft-bedrock-server:2026.5.3"
           imagePullPolicy: Always
           envFrom:
             - configMapRef:
