@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Setup yq
         uses: fluxcd/pkg/actions/yq@2b9f4c54119931dd929e1f47b88ef8ae118fa6c0 # main
       - name: Setup kubeconform
