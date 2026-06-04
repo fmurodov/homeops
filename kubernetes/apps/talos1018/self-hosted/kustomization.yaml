@@ -8,4 +8,5 @@ resources:
   - ./changedetection/ks.yaml
   - ./paperless/ks.yaml
   - ./n8n/ks.yaml
+  - ./sure/ks.yaml
   - ./wishlist/ks.yaml

@@ -1,0 +1,260 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app sure
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      sure:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image: &sureImage
+              repository: ghcr.io/we-promise/sure
+              # renovate: datasource=docker depName=ghcr.io/we-promise/sure
+              tag: 0.7.1
+            env: &sureEnv
+              SELF_HOSTED: "true"
+              ONBOARDING_STATE: "open"
+              RAILS_FORCE_SSL: "false"
+              RAILS_ASSUME_SSL: "true"
+              PORT: "3000"
+              APP_DOMAIN: &host sure.${CLUSTER_DOMAIN}
+              DB_HOST: sure-postgres
+              DB_PORT: "5432"
+              POSTGRES_USER: &pgUser sure
+              POSTGRES_DB: &pgDb sure_production
+              REDIS_URL: redis://sure-redis:6379/1
+              EXCHANGE_RATE_PROVIDER: yahoo_finance
+              SECURITIES_PROVIDER: yahoo_finance
+              WEBAUTHN_RP_ID: *host
+              WEBAUTHN_ALLOWED_ORIGINS: https://sure.${CLUSTER_DOMAIN}
+              OIDC_ISSUER: https://pid.${CLUSTER_DOMAIN}
+              OIDC_REDIRECT_URI: https://sure.${CLUSTER_DOMAIN}/auth/openid_connect/callback
+              SECRET_KEY_BASE:
+                valueFrom:
+                  secretKeyRef:
+                    name: sure-secret
+                    key: SECRET_KEY_BASE
+              POSTGRES_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: sure-secret
+                    key: POSTGRES_PASSWORD
+              OIDC_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: sure-secret
+                    key: OIDC_CLIENT_ID
+              OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: sure-secret
+                    key: OIDC_CLIENT_SECRET
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+                  failureThreshold: 60
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+          worker:
+            image: *sureImage
+            command:
+              - bundle
+              - exec
+              - sidekiq
+            env: *sureEnv
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+        pod:
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            fsGroupChangePolicy: OnRootMismatch
+
+      postgres:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          postgres:
+            image:
+              repository: postgres
+              # renovate: datasource=docker depName=postgres
+              tag: "16"
+            env:
+              POSTGRES_USER: *pgUser
+              POSTGRES_DB: *pgDb
+              PGDATA: /var/lib/postgresql/data/pgdata
+              POSTGRES_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: sure-secret
+                    key: POSTGRES_PASSWORD
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: [pg_isready, -U, sure, -d, sure_production]
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: [pg_isready, -U, sure, -d, sure_production]
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: [pg_isready, -U, sure, -d, sure_production]
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+                  failureThreshold: 30
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+        pod:
+          securityContext:
+            fsGroup: 999
+            fsGroupChangePolicy: OnRootMismatch
+
+      redis:
+        containers:
+          redis:
+            image:
+              repository: ghcr.io/valkey-io/valkey
+              # renovate: datasource=docker depName=ghcr.io/valkey-io/valkey
+              tag: 9.1.0
+            command:
+              - valkey-server
+              - --appendonly
+              - "yes"
+              - --dir
+              - /data
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: [valkey-cli, ping]
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: [valkey-cli, ping]
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+
+    service:
+      app:
+        forceRename: *app
+        primary: true
+        controller: sure
+        ports:
+          http:
+            port: 3000
+      postgres:
+        controller: postgres
+        ports:
+          postgres:
+            port: 5432
+      redis:
+        controller: redis
+        ports:
+          redis:
+            port: 6379
+
+    route:
+      app:
+        enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Apps
+          gethomepage.dev/icon: sh-maybe-finance.png
+          gethomepage.dev/name: Sure
+          gethomepage.dev/app: sure
+          gethomepage.dev/description: Personal finance
+        parentRefs:
+          - name: main-gateway
+            namespace: network
+        hostnames:
+          - *host
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: 3000
+
+    persistence:
+      app-data:
+        existingClaim: sure-app-data
+        advancedMounts:
+          sure:
+            app:
+              - path: /rails/storage
+            worker:
+              - path: /rails/storage
+      postgres-data:
+        existingClaim: sure-postgres-data
+        advancedMounts:
+          postgres:
+            postgres:
+              - path: /var/lib/postgresql/data
+      redis-data:
+        existingClaim: sure-redis-data
+        advancedMounts:
+          redis:
+            redis:
+              - path: /data
