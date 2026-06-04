@@ -22,7 +22,7 @@ spec:
               tag: 0.7.1
             env: &sureEnv
               SELF_HOSTED: "true"
-              ONBOARDING_STATE: "open"
+              ONBOARDING_STATE: "closed"
               RAILS_FORCE_SSL: "false"
               RAILS_ASSUME_SSL: "true"
               PORT: "3000"
