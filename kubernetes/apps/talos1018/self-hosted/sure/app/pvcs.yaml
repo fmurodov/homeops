@@ -1,0 +1,43 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sure-app-data
+  labels:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job.longhorn.io/daily-backup: enabled
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sure-postgres-data
+  labels:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job.longhorn.io/daily-backup: enabled
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sure-redis-data
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
