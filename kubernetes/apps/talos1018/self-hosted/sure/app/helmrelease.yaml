@@ -37,7 +37,9 @@ spec:
               SECURITIES_PROVIDER: yahoo_finance
               WEBAUTHN_RP_ID: *host
               WEBAUTHN_ALLOWED_ORIGINS: https://sure.${CLUSTER_DOMAIN}
-              OIDC_ISSUER: https://pid.${CLUSTER_DOMAIN}
+              AUTH_LOCAL_LOGIN_ENABLED: "false"
+              AUTH_LOCAL_ADMIN_OVERRIDE_ENABLED: "true"
+              OIDC_ISSUER: https://pid.${DOMAIN}
               OIDC_REDIRECT_URI: https://sure.${CLUSTER_DOMAIN}/auth/openid_connect/callback
               SECRET_KEY_BASE:
                 valueFrom:
