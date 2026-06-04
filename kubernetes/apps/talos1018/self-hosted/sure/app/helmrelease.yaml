@@ -26,6 +26,7 @@ spec:
               RAILS_FORCE_SSL: "false"
               RAILS_ASSUME_SSL: "true"
               PORT: "3000"
+              BINDING: "::"
               APP_DOMAIN: &host sure.${CLUSTER_DOMAIN}
               DB_HOST: sure-postgres
               DB_PORT: "5432"
