@@ -63,6 +63,11 @@ spec:
                   secretKeyRef:
                     name: sure-secret
                     key: OIDC_CLIENT_SECRET
+              BRAND_FETCH_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: sure-secret
+                    key: BRAND_FETCH_CLIENT_ID
               OPENAI_URI_BASE:
                 valueFrom:
                   secretKeyRef:
