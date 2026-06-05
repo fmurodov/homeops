@@ -41,7 +41,7 @@ spec:
               AUTH_LOCAL_ADMIN_OVERRIDE_ENABLED: "true"
               OIDC_ISSUER: https://pid.${DOMAIN}
               OIDC_REDIRECT_URI: https://sure.${CLUSTER_DOMAIN}/auth/openid_connect/callback
-              OPENAI_MODEL: "openai/gpt-oss-20b"
+              OPENAI_MODEL: "qwen3.6-35b-a3b"
               AI_DEBUG_MODE: "true"
               SECRET_KEY_BASE:
                 valueFrom:
