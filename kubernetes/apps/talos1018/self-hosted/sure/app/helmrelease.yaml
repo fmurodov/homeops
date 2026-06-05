@@ -63,6 +63,16 @@ spec:
                   secretKeyRef:
                     name: sure-secret
                     key: OIDC_CLIENT_SECRET
+              OPENAI_URI_BASE:
+                valueFrom:
+                  secretKeyRef:
+                    name: sure-secret
+                    key: OPENAI_URI_BASE
+              OPENAI_ACCESS_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: sure-secret
+                    key: OPENAI_ACCESS_TOKEN
             probes:
               liveness:
                 enabled: true
