@@ -21,11 +21,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Setup yq
-        uses: fluxcd/pkg/actions/yq@cdaab83e15547a5581af84b120a5931517b19f87 # main
+        uses: fluxcd/pkg/actions/yq@6cbabe18ac37cf23cd68e47fe5df47fbe98c2f15 # main
       - name: Setup kubeconform
-        uses: fluxcd/pkg/actions/kubeconform@cdaab83e15547a5581af84b120a5931517b19f87 # main
+        uses: fluxcd/pkg/actions/kubeconform@6cbabe18ac37cf23cd68e47fe5df47fbe98c2f15 # main
       - name: Setup kustomize
-        uses: fluxcd/pkg/actions/kustomize@cdaab83e15547a5581af84b120a5931517b19f87 # main
+        uses: fluxcd/pkg/actions/kustomize@6cbabe18ac37cf23cd68e47fe5df47fbe98c2f15 # main
       - name: Setup yamllint
         run: pip install yamllint
       - name: Validate manifests
