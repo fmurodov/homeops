@@ -42,7 +42,6 @@ spec:
               OIDC_ISSUER: https://pid.${DOMAIN}
               OIDC_REDIRECT_URI: https://sure.${CLUSTER_DOMAIN}/auth/openid_connect/callback
               OPENAI_URI_BASE: "http://ollama.ai.svc.cluster.local:11434/v1"
-              OPENAI_ACCESS_TOKEN: "ollama"
               OPENAI_MODEL: "llama3.2:3b"
               AI_DEBUG_MODE: "true"
               SECRET_KEY_BASE:
@@ -70,6 +69,11 @@ spec:
                   secretKeyRef:
                     name: sure-secret
                     key: BRAND_FETCH_CLIENT_ID
+              OPENAI_ACCESS_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: sure-secret
+                    key: OPENAI_ACCESS_TOKEN
             probes:
               liveness:
                 enabled: true
