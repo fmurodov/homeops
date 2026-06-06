@@ -19,6 +19,9 @@ resources:
   # Self Hosted
   - ./self-hosted
 
+  # AI / LLM
+  - ./ai
+
   # Web Services and Apps
   - ./homepage/ks.yaml
   - ./mealie/ks.yaml
