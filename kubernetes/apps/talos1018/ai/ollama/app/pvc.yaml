@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-models
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
