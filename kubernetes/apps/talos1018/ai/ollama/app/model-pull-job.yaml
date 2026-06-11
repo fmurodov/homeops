@@ -18,7 +18,7 @@ spec:
       containers:
         - name: pull
           # renovate: datasource=docker depName=ollama/ollama
-          image: ollama/ollama:0.30.6
+          image: ollama/ollama:0.30.7
           env:
             - name: OLLAMA_HOST
               value: http://ollama.ai.svc.cluster.local:11434

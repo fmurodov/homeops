@@ -18,7 +18,7 @@ spec:
             image:
               repository: ollama/ollama
               # renovate: datasource=docker depName=ollama/ollama
-              tag: 0.30.6
+              tag: 0.30.7
             env:
               OLLAMA_HOST: "[::]:11434"
               OLLAMA_MODELS: /data/models
