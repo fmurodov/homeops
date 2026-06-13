@@ -23,7 +23,8 @@ spec:
               OLLAMA_HOST: "[::]:11434"
               OLLAMA_MODELS: /data/models
               HOME: /data
-              OLLAMA_KEEP_ALIVE: 24h
+              # Unload idle models after 5m so RAM is freed between requests; ollama auto-loads on next call.
+              OLLAMA_KEEP_ALIVE: 5m
               OLLAMA_MAX_LOADED_MODELS: "1"
               OLLAMA_NUM_PARALLEL: "2"
             probes:
@@ -61,17 +62,28 @@ spec:
                   failureThreshold: 60
             resources:
               requests:
-                cpu: 500m
-                memory: 4Gi
-              limits:
-                cpu: "2"
+                cpu: "1"
                 memory: 6Gi
+              limits:
+                cpu: "3"
+                memory: 8Gi
         pod:
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
             fsGroup: 1000
             fsGroupChangePolicy: OnRootMismatch
+          # Pin to nodes with more CPU headroom; talos-1018-1 is excluded.
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: In
+                        values:
+                          - talos-1018-2
+                          - talos-1018-3
 
     service:
       app:
