@@ -24,6 +24,7 @@ spec:
               value: http://ollama.ai.svc.cluster.local:11434
           command:
             - /bin/sh
+            - -eu
             - -c
             - |
               until ollama list >/dev/null 2>&1; do
@@ -32,6 +33,8 @@ spec:
               done
               echo "Pulling qwen3.5:9b..."
               ollama pull qwen3.5:9b
+              echo "Verifying model is present..."
+              ollama list | grep -q '^qwen3\.5:9b\b'
               echo "Done."
           resources:
             requests:
