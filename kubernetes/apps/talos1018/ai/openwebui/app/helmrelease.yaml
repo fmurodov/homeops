@@ -22,6 +22,8 @@ spec:
               # renovate: datasource=docker depName=ghcr.io/open-webui/open-webui
               tag: 0.9.6
             env:
+              # uvicorn binds HOST:PORT; "::" → IPv6 (cluster is IPv6-primary).
+              HOST: "::"
               PORT: "8080"
               # Backend
               OLLAMA_BASE_URL: http://ollama.ai.svc.cluster.local:11434
@@ -107,6 +109,8 @@ spec:
         forceRename: *app
         primary: true
         controller: openwebui
+        ipFamilyPolicy: SingleStack
+        ipFamilies: [IPv6]
         ports:
           http:
             port: 8080
