@@ -84,9 +84,11 @@ spec:
                   httpGet:
                     path: /health
                     port: 8080
-                  initialDelaySeconds: 10
-                  periodSeconds: 5
-                  failureThreshold: 60
+                  # First run downloads ~1 GB of sentence-transformers weights from HF
+                  # into the PVC; restarts still need ~2 min to load embeddings. 20 min cap.
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  failureThreshold: 120
             resources:
               requests:
                 cpu: 50m
