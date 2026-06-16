@@ -72,6 +72,11 @@ spec:
                 secretKeyRef:
                   name: homebox-secret
                   key: HBOX_OIDC_CLIENT_SECRET
+            - name: HBOX_AUTH_API_KEY_PEPPER
+              valueFrom:
+                secretKeyRef:
+                  name: homebox-secret
+                  key: HBOX_AUTH_API_KEY_PEPPER
           volumeMounts:
             - mountPath: /data
               name: data
