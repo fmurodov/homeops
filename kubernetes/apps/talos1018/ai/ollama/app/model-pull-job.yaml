@@ -23,7 +23,7 @@ spec:
             - name: OLLAMA_HOST
               value: http://ollama.ai.svc.cluster.local:11434
             - name: MODELS
-              value: "llama3.2:3b qwen2.5:7b"
+              value: "llama3.2:3b"
           command:
             - /bin/sh
             - -eu
@@ -38,6 +38,8 @@ spec:
                 ollama pull "$model"
                 echo "Verifying $model is present..."
                 ollama list | awk '{print $1}' | grep -Fxq "$model"
+                echo "Preloading $model into memory..."
+                ollama run "$model" "" >/dev/null 2>&1 || true
               done
               echo "Done."
           resources:

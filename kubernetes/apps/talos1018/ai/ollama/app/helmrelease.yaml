@@ -23,8 +23,8 @@ spec:
               OLLAMA_HOST: "[::]:11434"
               OLLAMA_MODELS: /data/models
               HOME: /data
-              OLLAMA_KEEP_ALIVE: 30m
-              OLLAMA_MAX_LOADED_MODELS: "2"
+              OLLAMA_KEEP_ALIVE: "-1"
+              OLLAMA_MAX_LOADED_MODELS: "1"
               OLLAMA_NUM_PARALLEL: "2"
             probes:
               liveness:
