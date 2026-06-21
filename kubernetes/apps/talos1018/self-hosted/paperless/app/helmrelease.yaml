@@ -107,8 +107,8 @@ spec:
                 enabled: true
                 spec:
                   initialDelaySeconds: 10
-                  periodSeconds: 1
-                  failureThreshold: 300
+                  periodSeconds: 5
+                  failureThreshold: 120
             resources:
               requests:
                 cpu: "0.8"
