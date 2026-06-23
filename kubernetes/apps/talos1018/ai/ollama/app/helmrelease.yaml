@@ -25,7 +25,7 @@ spec:
               HOME: /data
               OLLAMA_KEEP_ALIVE: "-1"
               OLLAMA_MAX_LOADED_MODELS: "1"
-              OLLAMA_NUM_PARALLEL: "2"
+              OLLAMA_NUM_PARALLEL: "1"
             probes:
               liveness:
                 enabled: true
