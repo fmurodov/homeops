@@ -23,7 +23,7 @@ spec:
             - name: OLLAMA_HOST
               value: http://ollama.ai.svc.cluster.local:11434
             - name: MODELS
-              value: "llama3.2:3b"
+              value: "llama3.1:8b"
           command:
             - /bin/sh
             - -eu
