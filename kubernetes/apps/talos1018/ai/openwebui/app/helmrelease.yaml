@@ -20,7 +20,7 @@ spec:
             image:
               repository: ghcr.io/open-webui/open-webui
               # renovate: datasource=docker depName=ghcr.io/open-webui/open-webui
-              tag: 0.9.6
+              tag: v0.10.1
             env:
               # uvicorn binds HOST:PORT; "::" → IPv6 (cluster is IPv6-primary).
               HOST: "::"
