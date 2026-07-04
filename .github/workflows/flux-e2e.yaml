@@ -16,11 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@v7
       - name: Setup Flux
-        uses: fluxcd/flux2/action@006ecb6b0401525e703585df9e87d6d0d2ed34bd # main
+        uses: fluxcd/flux2/action@main
       - name: Setup Kubernetes
-        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
+        uses: helm/kind-action@v1.14.0
         with:
           cluster_name: flux
       - name: Install Flux in Kubernetes Kind
