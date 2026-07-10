@@ -43,6 +43,7 @@ spec:
               DISABLE_DASHBOARD: false
               PRODUCTION_MODE: "true"
               BLE_PROXY: "true"
+              ENABLE_TIME_SYNC: "true"
             securityContext:
               allowPrivilegeEscalation: false
               runAsNonRoot: true
