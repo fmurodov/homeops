@@ -28,6 +28,20 @@ homeops/
 └── .github/            # CI/CD workflows
 ```
 
+## Disaster Recovery
+
+Simple tools for restoring Longhorn volumes and running apps locally when cluster is down. See [dr/README.md](dr/README.md).
+
+```bash
+# Restore volume from S3 backup
+cd dr
+./scripts/restore-volume.sh esphome-data
+
+# Run app with docker-compose
+cd examples/esphome
+docker-compose up -d
+```
+
 ## Projects
 
 ### Talos1018 Cluster
