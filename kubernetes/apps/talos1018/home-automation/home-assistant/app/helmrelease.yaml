@@ -64,8 +64,8 @@ spec:
           - name: main-gateway
             namespace: network
         hostnames:
-          - "hass.${CLUSTER_DOMAIN}"
-          - "hass.${DOMAIN}"
+          - "hass.${CLUSTER_DOMAIN_LEGACY}"
+          - "hass.${DOMAIN_LEGACY}"
         rules:
           - matches:
               - path:

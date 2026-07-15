@@ -15,7 +15,7 @@ spec:
     - name: main-gateway
       namespace: network
   hostnames:
-    - "alertmanager.${CLUSTER_DOMAIN}"
+    - "alertmanager.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
         - path:

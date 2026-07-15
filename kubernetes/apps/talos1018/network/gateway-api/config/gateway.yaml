@@ -20,7 +20,7 @@ spec:
         namespaces:
           from: All
     - name: https-internal
-      hostname: "*.${CLUSTER_DOMAIN}"
+      hostname: "*.${CLUSTER_DOMAIN_LEGACY}"
       protocol: HTTPS
       port: 443
       tls:
@@ -31,7 +31,7 @@ spec:
         namespaces:
           from: All
     - name: https-external
-      hostname: "*.${DOMAIN}"
+      hostname: "*.${DOMAIN_LEGACY}"
       protocol: HTTPS
       port: 443
       tls:

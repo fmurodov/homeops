@@ -1,6 +1,6 @@
 ---
 ingress:
-  - hostname: "*.${DOMAIN}"
+  - hostname: "*.${DOMAIN_LEGACY}"
     originRequest:
       http2Origin: true
       httpHostHeader: ""

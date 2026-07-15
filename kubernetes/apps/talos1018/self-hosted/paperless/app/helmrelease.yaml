@@ -28,7 +28,7 @@ spec:
                   secretKeyRef:
                     name: paperless-secret
                     key: PAPERLESS_SECRET_KEY
-              PAPERLESS_URL: https://paperless.${CLUSTER_DOMAIN}
+              PAPERLESS_URL: https://paperless.${CLUSTER_DOMAIN_LEGACY}
               PAPERLESS_PORT: "8000"
               PAPERLESS_TIME_ZONE: "${TIMEZONE}"
               PAPERLESS_WEBSERVER_WORKERS: "2"
@@ -82,7 +82,7 @@ spec:
                         "client_id": "$(PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_ID)",
                         "secret": "$(PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_SECRET)",
                         "settings": {
-                          "server_url": "https://pid.${CLUSTER_DOMAIN}/.well-known/openid-configuration"
+                          "server_url": "https://pid.${CLUSTER_DOMAIN_LEGACY}/.well-known/openid-configuration"
                         }
                       }
                     ]
@@ -223,7 +223,7 @@ spec:
           - name: main-gateway
             namespace: network
         hostnames:
-          - "paperless.${CLUSTER_DOMAIN}"
+          - "paperless.${CLUSTER_DOMAIN_LEGACY}"
         rules:
           - matches:
               - path:

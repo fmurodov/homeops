@@ -40,7 +40,7 @@ spec:
             - name: TZ
               value: ${TIMEZONE}
             - name: BASE_URL
-              value: "https://mealie.${CLUSTER_DOMAIN}"
+              value: "https://mealie.${CLUSTER_DOMAIN_LEGACY}"
             - name: OIDC_AUTH_ENABLED
               value: "true"
             - name: OIDC_PROVIDER_NAME
@@ -50,7 +50,7 @@ spec:
             - name: OIDC_SIGNUP_ENABLED
               value: "true"
             - name: OIDC_CONFIGURATION_URL
-              value: https://pid.${DOMAIN}/.well-known/openid-configuration
+              value: https://pid.${DOMAIN_LEGACY}/.well-known/openid-configuration
             - name: OIDC_GROUPS_CLAIM
               value: groups
             - name: OIDC_ADMIN_GROUP

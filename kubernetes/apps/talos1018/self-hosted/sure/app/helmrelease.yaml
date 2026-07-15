@@ -27,7 +27,7 @@ spec:
               RAILS_ASSUME_SSL: "true"
               PORT: "3000"
               BINDING: "::"
-              APP_DOMAIN: &host sure.${CLUSTER_DOMAIN}
+              APP_DOMAIN: &host sure.${CLUSTER_DOMAIN_LEGACY}
               DB_HOST: sure-postgres
               DB_PORT: "5432"
               POSTGRES_USER: &pgUser sure
@@ -36,11 +36,11 @@ spec:
               EXCHANGE_RATE_PROVIDER: yahoo_finance
               SECURITIES_PROVIDER: yahoo_finance
               WEBAUTHN_RP_ID: *host
-              WEBAUTHN_ALLOWED_ORIGINS: https://sure.${CLUSTER_DOMAIN}
+              WEBAUTHN_ALLOWED_ORIGINS: https://sure.${CLUSTER_DOMAIN_LEGACY}
               AUTH_LOCAL_LOGIN_ENABLED: "false"
               AUTH_LOCAL_ADMIN_OVERRIDE_ENABLED: "true"
-              OIDC_ISSUER: https://pid.${DOMAIN}
-              OIDC_REDIRECT_URI: https://sure.${CLUSTER_DOMAIN}/auth/openid_connect/callback
+              OIDC_ISSUER: https://pid.${DOMAIN_LEGACY}
+              OIDC_REDIRECT_URI: https://sure.${CLUSTER_DOMAIN_LEGACY}/auth/openid_connect/callback
               OPENAI_URI_BASE: http://ollama.ai.svc.cluster.local:11434/v1
               OPENAI_MODEL: "llama3.1:8b"
               AI_DEBUG_MODE: "true"
