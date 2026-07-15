@@ -53,7 +53,7 @@ spec:
             - name: HBOX_OPTIONS_TRUST_PROXY
               value: "true"
             - name: HBOX_OPTIONS_HOSTNAME
-              value: "homebox.${CLUSTER_DOMAIN}"
+              value: "homebox.${CLUSTER_DOMAIN_LEGACY}"
             - name: HBOX_OPTIONS_ALLOW_LOCAL_LOGIN
               value: "false"
             - name: HBOX_OIDC_ENABLED
@@ -61,7 +61,7 @@ spec:
             - name: HBOX_OIDC_BUTTON_TEXT
               value: "Sign in with Pocket ID"
             - name: HBOX_OIDC_ISSUER_URL
-              value: https://pid.${DOMAIN}
+              value: https://pid.${DOMAIN_LEGACY}
             - name: HBOX_OIDC_CLIENT_ID
               valueFrom:
                 secretKeyRef:

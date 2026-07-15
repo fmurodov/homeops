@@ -27,7 +27,7 @@ spec:
               PORT: "8080"
               # Backend
               OLLAMA_BASE_URL: http://ollama.ai.svc.cluster.local:11434
-              WEBUI_URL: https://openwebui.${CLUSTER_DOMAIN}
+              WEBUI_URL: https://openwebui.${CLUSTER_DOMAIN_LEGACY}
               # Disable local signups — auth via Pocket ID only
               WEBUI_AUTH: "true"
               ENABLE_SIGNUP: "false"
@@ -39,8 +39,8 @@ spec:
               OAUTH_SCOPES: openid email profile
               OAUTH_USERNAME_CLAIM: preferred_username
               OAUTH_EMAIL_CLAIM: email
-              OPENID_PROVIDER_URL: https://pid.${DOMAIN}/.well-known/openid-configuration
-              OPENID_REDIRECT_URI: https://openwebui.${CLUSTER_DOMAIN}/oauth/oidc/callback
+              OPENID_PROVIDER_URL: https://pid.${DOMAIN_LEGACY}/.well-known/openid-configuration
+              OPENID_REDIRECT_URI: https://openwebui.${CLUSTER_DOMAIN_LEGACY}/oauth/oidc/callback
               WEBUI_SECRET_KEY:
                 valueFrom:
                   secretKeyRef:
@@ -129,7 +129,7 @@ spec:
           - name: main-gateway
             namespace: network
         hostnames:
-          - openwebui.${CLUSTER_DOMAIN}
+          - openwebui.${CLUSTER_DOMAIN_LEGACY}
         rules:
           - matches:
               - path:

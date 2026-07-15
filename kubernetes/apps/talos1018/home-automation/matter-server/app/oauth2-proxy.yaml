@@ -31,10 +31,10 @@ spec:
               type: RuntimeDefault
           args:
             - --provider=oidc
-            - --oidc-issuer-url=https://pid.${DOMAIN}
+            - --oidc-issuer-url=https://pid.${DOMAIN_LEGACY}
             - --upstream=http://matter-server:5580
             - --http-address=[::]:4180
-            - --redirect-url=https://matter-server.${CLUSTER_DOMAIN}/oauth2/callback
+            - --redirect-url=https://matter-server.${CLUSTER_DOMAIN_LEGACY}/oauth2/callback
             - --email-domain=*
             - --cookie-secure=true
             - --cookie-name=_oauth2_proxy_matter_server

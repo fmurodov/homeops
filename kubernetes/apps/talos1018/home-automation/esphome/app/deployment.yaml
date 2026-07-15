@@ -34,7 +34,7 @@ spec:
             - name: TZ
               value: "${TIMEZONE}"
             - name: BASE_URL
-              value: "https://esphome.${CLUSTER_DOMAIN}"
+              value: "https://esphome.${CLUSTER_DOMAIN_LEGACY}"
             - name: ESPHOME_DASHBOARD_USE_PING
               value: "true"
             - name: USERNAME
