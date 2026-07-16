@@ -78,6 +78,14 @@ spec:
             failureThreshold: 1
             initialDelaySeconds: 10
             periodSeconds: 10
+          readinessProbe:
+            # Gates rolling updates on config changes: the old pod keeps
+            # serving until the new one is connected to the edge.
+            httpGet:
+              path: /ready
+              port: 2000
+            periodSeconds: 5
+            failureThreshold: 3
       volumes:
         - name: config
           configMap:

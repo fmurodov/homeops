@@ -1,19 +1,12 @@
 ---
+# Applies to all ingress rules; override per-rule if ever needed.
+originRequest:
+  http2Origin: true
+  matchSNItoHost: true
+  noTLSVerify: true
 ingress:
   - hostname: "*.${DOMAIN}"
-    originRequest:
-      http2Origin: true
-      httpHostHeader: ""
-      matchSNItoHost: true
-      noTLSVerify: true
-      originServerName: ""
     service: https://cilium-gateway-main-gateway.network.svc.cluster.local
   - hostname: "*.${DOMAIN_LEGACY}"
-    originRequest:
-      http2Origin: true
-      httpHostHeader: ""
-      matchSNItoHost: true
-      noTLSVerify: true
-      originServerName: ""
     service: https://cilium-gateway-main-gateway.network.svc.cluster.local
   - service: http_status:404
