@@ -20,7 +20,6 @@ spec:
     - name: main-gateway
       namespace: network
   hostnames:
-    - "mealie.${CLUSTER_DOMAIN}"
     - "recipe.${DOMAIN}"
   rules:
     - matches:
