@@ -40,7 +40,7 @@ spec:
             - name: TZ
               value: ${TIMEZONE}
             - name: BASE_URL
-              value: "https://mealie.${CLUSTER_DOMAIN}"
+              value: "https://recipe.${DOMAIN}"
             - name: OIDC_AUTH_ENABLED
               value: "true"
             - name: OIDC_PROVIDER_NAME
