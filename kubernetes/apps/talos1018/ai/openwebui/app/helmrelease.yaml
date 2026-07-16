@@ -39,7 +39,7 @@ spec:
               OAUTH_SCOPES: openid email profile
               OAUTH_USERNAME_CLAIM: preferred_username
               OAUTH_EMAIL_CLAIM: email
-              OPENID_PROVIDER_URL: https://pid.${DOMAIN_LEGACY}/.well-known/openid-configuration
+              OPENID_PROVIDER_URL: https://pid.${DOMAIN}/.well-known/openid-configuration
               OPENID_REDIRECT_URI: https://openwebui.${CLUSTER_DOMAIN}/oauth/oidc/callback
               WEBUI_SECRET_KEY:
                 valueFrom:

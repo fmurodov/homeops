@@ -31,7 +31,7 @@ spec:
               type: RuntimeDefault
           args:
             - --provider=oidc
-            - --oidc-issuer-url=https://pid.${DOMAIN_LEGACY}
+            - --oidc-issuer-url=https://pid.${DOMAIN}
             - --upstream=http://matter-server:5580
             - --http-address=[::]:4180
             - --redirect-url=https://matter-server.${CLUSTER_DOMAIN}/oauth2/callback
