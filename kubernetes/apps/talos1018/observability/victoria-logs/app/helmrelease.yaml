@@ -46,4 +46,5 @@ spec:
           - name: main-gateway
             namespace: network
         hostnames:
+          - "vlogs.${CLUSTER_DOMAIN}"
           - "vlogs.${CLUSTER_DOMAIN_LEGACY}"

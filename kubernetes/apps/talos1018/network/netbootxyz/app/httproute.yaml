@@ -15,6 +15,7 @@ spec:
     - name: main-gateway
       namespace: network
   hostnames:
+    - "netbootxyz.${CLUSTER_DOMAIN}"
     - "netbootxyz.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:

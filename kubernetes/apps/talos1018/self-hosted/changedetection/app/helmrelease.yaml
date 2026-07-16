@@ -63,6 +63,7 @@ spec:
           - name: main-gateway
             namespace: network
         hostnames:
+          - "changedetection.${CLUSTER_DOMAIN}"
           - "changedetection.${CLUSTER_DOMAIN_LEGACY}"
         rules:
           - matches:

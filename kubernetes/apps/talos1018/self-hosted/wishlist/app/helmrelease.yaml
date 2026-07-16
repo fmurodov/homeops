@@ -64,6 +64,7 @@ spec:
           - name: main-gateway
             namespace: network
         hostnames:
+          - "wishlist.${DOMAIN}"
           - "wishlist.${DOMAIN_LEGACY}"
         rules:
           - matches:

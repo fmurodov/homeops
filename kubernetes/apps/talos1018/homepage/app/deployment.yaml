@@ -31,7 +31,7 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: ${CLUSTER_DOMAIN_LEGACY},home.${CLUSTER_DOMAIN_LEGACY}
+              value: ${CLUSTER_DOMAIN},home.${CLUSTER_DOMAIN},${CLUSTER_DOMAIN_LEGACY},home.${CLUSTER_DOMAIN_LEGACY}
           envFrom:
             - secretRef:
                 name: homepage-secret

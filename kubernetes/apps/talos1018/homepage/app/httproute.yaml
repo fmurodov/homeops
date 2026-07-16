@@ -9,7 +9,9 @@ spec:
     - name: main-gateway
       namespace: network
   hostnames:
+    - "${CLUSTER_DOMAIN}"
     - "${CLUSTER_DOMAIN_LEGACY}"
+    - "home.${CLUSTER_DOMAIN}"
     - "home.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
