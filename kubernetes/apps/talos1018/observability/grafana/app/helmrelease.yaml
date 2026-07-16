@@ -48,7 +48,7 @@ spec:
 
     grafana.ini:
       server:
-        root_url: https://grafana.${CLUSTER_DOMAIN_LEGACY}
+        root_url: https://grafana.${CLUSTER_DOMAIN}
       auth:
         login_maximum_inactive_lifetime_duration: 1d
         login_maximum_duration: 30d

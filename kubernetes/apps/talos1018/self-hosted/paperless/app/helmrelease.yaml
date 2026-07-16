@@ -28,7 +28,7 @@ spec:
                   secretKeyRef:
                     name: paperless-secret
                     key: PAPERLESS_SECRET_KEY
-              PAPERLESS_URL: https://paperless.${CLUSTER_DOMAIN_LEGACY}
+              PAPERLESS_URL: https://paperless.${CLUSTER_DOMAIN}
               PAPERLESS_PORT: "8000"
               PAPERLESS_TIME_ZONE: "${TIMEZONE}"
               PAPERLESS_WEBSERVER_WORKERS: "2"
@@ -223,6 +223,7 @@ spec:
           - name: main-gateway
             namespace: network
         hostnames:
+          - "paperless.${CLUSTER_DOMAIN}"
           - "paperless.${CLUSTER_DOMAIN_LEGACY}"
         rules:
           - matches:

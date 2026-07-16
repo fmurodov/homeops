@@ -34,7 +34,7 @@ spec:
             - --oidc-issuer-url=https://pid.${DOMAIN_LEGACY}
             - --upstream=http://spoolman-http:8000
             - --http-address=[::]:4180
-            - --redirect-url=https://spoolman.${CLUSTER_DOMAIN_LEGACY}/oauth2/callback
+            - --redirect-url=https://spoolman.${CLUSTER_DOMAIN}/oauth2/callback
             - --email-domain=*
             - --cookie-secure=true
             - --cookie-name=_oauth2_proxy_spoolman
