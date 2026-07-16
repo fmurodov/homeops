@@ -1,12 +1,10 @@
 ---
-# NOTE: This file is not mounted anywhere — the tunnel is remotely managed
-# (TUNNEL_TOKEN); it only documents the public-hostname rules configured in
-# the Cloudflare Zero Trust dashboard.
 ingress:
   - hostname: "*.${DOMAIN}"
     originRequest:
       http2Origin: true
       httpHostHeader: ""
+      matchSNItoHost: true
       noTLSVerify: true
       originServerName: ""
     service: https://cilium-gateway-main-gateway.network.svc.cluster.local
@@ -14,6 +12,7 @@ ingress:
     originRequest:
       http2Origin: true
       httpHostHeader: ""
+      matchSNItoHost: true
       noTLSVerify: true
       originServerName: ""
     service: https://cilium-gateway-main-gateway.network.svc.cluster.local
