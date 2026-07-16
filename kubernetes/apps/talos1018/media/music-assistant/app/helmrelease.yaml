@@ -79,6 +79,7 @@ spec:
           - name: main-gateway
             namespace: network
         hostnames:
+          - "mass.${CLUSTER_DOMAIN}"
           - "mass.${CLUSTER_DOMAIN_LEGACY}"
         rules:
           - matches:

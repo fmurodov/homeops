@@ -199,6 +199,7 @@ spec:
           - name: main-gateway
             namespace: network
         hostnames:
+          - "vm.${CLUSTER_DOMAIN}"
           - "vm.${CLUSTER_DOMAIN_LEGACY}"
     # Standalone charts are used for these — disable the bundled ones
     vmagent:
