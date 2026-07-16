@@ -137,7 +137,9 @@ spec:
         longhorn:
           gnetId: 16888
           revision: 11
-          datasource: VictoriaMetrics
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
         cilium-agent:
           gnetId: 16611
           revision: 1
@@ -149,11 +151,15 @@ spec:
         n8n-system-health:
           gnetId: 24474
           revision: 1
-          datasource: VictoriaMetrics
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
         cloudflare-tunnels:
           gnetId: 17457
           revision: 6
-          datasource: VictoriaMetrics
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
         alertmanager:
           gnetId: 9578
           revision: 4
