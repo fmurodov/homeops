@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared-config
+data:
+  config.yaml: |
+    # originRequest applies to all ingress rules; override per-rule if needed.
+    originRequest:
+      http2Origin: true
+      matchSNItoHost: true
+      noTLSVerify: true
+    ingress:
+      - hostname: "*.${DOMAIN}"
+        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
+      - hostname: "*.${DOMAIN_LEGACY}"
+        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
+      - service: http_status:404

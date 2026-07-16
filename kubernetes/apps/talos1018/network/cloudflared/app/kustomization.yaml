@@ -5,8 +5,5 @@ kind: Kustomization
 namespace: network
 resources:
   - deployment.yaml
+  - configmap.yaml
   - cloudflared-secret.sops.yaml
-configMapGenerator:
-  - name: cloudflared-config
-    files:
-      - configs/config.yaml
