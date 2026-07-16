@@ -15,7 +15,6 @@ spec:
       namespace: network
   hostnames:
     - "fr24.${CLUSTER_DOMAIN}"
-    - "fr24.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
         - path:

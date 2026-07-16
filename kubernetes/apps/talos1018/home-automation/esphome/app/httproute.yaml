@@ -15,7 +15,6 @@ spec:
       namespace: network
   hostnames:
     - "esphome.${CLUSTER_DOMAIN}"
-    - "esphome.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
         - path:

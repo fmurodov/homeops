@@ -18,7 +18,7 @@ spec:
               repository: ghcr.io/cmintey/wishlist
               tag: v0.60.1
             env:
-              ORIGIN: "https://wishlist.${DOMAIN_LEGACY}"
+              ORIGIN: "https://wishlist.${DOMAIN}"
               TOKEN_TIME: "72"
               DEFAULT_CURRENCY: "EUR"
               HOST: "::"
@@ -65,7 +65,6 @@ spec:
             namespace: network
         hostnames:
           - "wishlist.${DOMAIN}"
-          - "wishlist.${DOMAIN_LEGACY}"
         rules:
           - matches:
               - path:

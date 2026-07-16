@@ -42,7 +42,7 @@ spec:
               SMTP_HOST: smtp.resend.com
               SMTP_PORT: "465"
               SMTP_TLS: tls
-              SMTP_FROM: pid@resend.${DOMAIN_LEGACY}
+              SMTP_FROM: pid@resend.${DOMAIN}
               SMTP_USER: resend
               SMTP_PASSWORD:
                 valueFrom:
@@ -94,8 +94,6 @@ spec:
             namespace: network
         hostnames:
           - "pid.${DOMAIN}"
-          - "pid.${DOMAIN_LEGACY}"
-          - "pid.${CLUSTER_DOMAIN_LEGACY}"
           - "pid.${CLUSTER_DOMAIN}"
         rules:
           - matches:

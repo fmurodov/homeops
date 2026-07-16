@@ -20,7 +20,6 @@ spec:
       namespace: network
   hostnames:
     - "homebox.${CLUSTER_DOMAIN}"
-    - "homebox.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
         - path:
