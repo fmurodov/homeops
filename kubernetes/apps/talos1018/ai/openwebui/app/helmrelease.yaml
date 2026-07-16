@@ -130,7 +130,6 @@ spec:
             namespace: network
         hostnames:
           - openwebui.${CLUSTER_DOMAIN}
-          - openwebui.${CLUSTER_DOMAIN_LEGACY}
         rules:
           - matches:
               - path:

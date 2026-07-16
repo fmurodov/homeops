@@ -64,7 +64,6 @@ spec:
             namespace: network
         hostnames:
           - "changedetection.${CLUSTER_DOMAIN}"
-          - "changedetection.${CLUSTER_DOMAIN_LEGACY}"
         rules:
           - matches:
               - path:

@@ -65,9 +65,7 @@ spec:
             namespace: network
         hostnames:
           - "hass.${CLUSTER_DOMAIN}"
-          - "hass.${CLUSTER_DOMAIN_LEGACY}"
           - "hass.${DOMAIN}"
-          - "hass.${DOMAIN_LEGACY}"
         rules:
           - matches:
               - path:

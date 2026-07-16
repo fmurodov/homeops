@@ -15,7 +15,6 @@ spec:
       namespace: network
   hostnames:
     - "grafana.${CLUSTER_DOMAIN}"
-    - "grafana.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
         - path:

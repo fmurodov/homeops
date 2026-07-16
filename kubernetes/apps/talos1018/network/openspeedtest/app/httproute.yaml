@@ -15,7 +15,6 @@ spec:
       namespace: network
   hostnames:
     - "speedtest.${CLUSTER_DOMAIN}"
-    - "speedtest.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
         - path:

@@ -41,27 +41,3 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    # Legacy domain listeners — remove once migration off the old domain is complete.
-    # They keep the original cert secret names to avoid re-issuance churn.
-    - name: https-internal-legacy
-      hostname: "*.${CLUSTER_DOMAIN_LEGACY}"
-      protocol: HTTPS
-      port: 443
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: gateway-internal-tls
-      allowedRoutes:
-        namespaces:
-          from: All
-    - name: https-external-legacy
-      hostname: "*.${DOMAIN_LEGACY}"
-      protocol: HTTPS
-      port: 443
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: gateway-external-tls
-      allowedRoutes:
-        namespaces:
-          from: All

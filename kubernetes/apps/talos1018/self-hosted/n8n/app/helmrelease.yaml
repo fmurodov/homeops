@@ -86,7 +86,6 @@ spec:
             namespace: network
         hostnames:
           - *hostName
-          - "n8n.${CLUSTER_DOMAIN_LEGACY}"
         rules:
           - matches:
               - path:
@@ -102,7 +101,6 @@ spec:
             namespace: network
         hostnames:
           - "n8n-webhook.${DOMAIN}"
-          - "n8n-webhook.${DOMAIN_LEGACY}"
         rules:
           - matches:
               - path:

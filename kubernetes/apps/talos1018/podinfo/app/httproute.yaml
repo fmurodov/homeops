@@ -15,7 +15,6 @@ spec:
       namespace: network
   hostnames:
     - "podinfo.${CLUSTER_DOMAIN}"
-    - "podinfo.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
         - path:

@@ -16,7 +16,6 @@ spec:
       namespace: network
   hostnames:
     - "bricktracker.${CLUSTER_DOMAIN}"
-    - "bricktracker.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
         - path:

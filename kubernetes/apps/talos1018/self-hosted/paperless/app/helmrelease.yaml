@@ -224,7 +224,6 @@ spec:
             namespace: network
         hostnames:
           - "paperless.${CLUSTER_DOMAIN}"
-          - "paperless.${CLUSTER_DOMAIN_LEGACY}"
         rules:
           - matches:
               - path:

@@ -17,7 +17,6 @@ spec:
       namespace: network
   hostnames:
     - "longhorn.${CLUSTER_DOMAIN}"
-    - "longhorn.${CLUSTER_DOMAIN_LEGACY}"
   rules:
     - matches:
         - path:
