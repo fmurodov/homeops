@@ -53,7 +53,7 @@ spec:
             - name: HBOX_OPTIONS_TRUST_PROXY
               value: "true"
             - name: HBOX_OPTIONS_HOSTNAME
-              value: "homebox.${CLUSTER_DOMAIN_LEGACY}"
+              value: "homebox.${CLUSTER_DOMAIN}"
             - name: HBOX_OPTIONS_ALLOW_LOCAL_LOGIN
               value: "false"
             - name: HBOX_OIDC_ENABLED
