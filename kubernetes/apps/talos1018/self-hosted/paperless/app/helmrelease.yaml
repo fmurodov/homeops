@@ -37,6 +37,7 @@ spec:
               PAPERLESS_CONSUMPTION_DIR: /data/local/consume
               PAPERLESS_DATA_DIR: /data/local/data
               PAPERLESS_EXPORT_DIR: /data/nas/export
+              PAPERLESS_LOGGING_DIR: /tmp/log
               PAPERLESS_MEDIA_ROOT: /data/local/media
               # Configure folder importer
               PAPERLESS_CONSUMER_POLLING: "60"
@@ -123,6 +124,9 @@ spec:
             image:
               repository: ghcr.io/valkey-io/valkey
               tag: 9.1.0
+            args:
+              - --appendonly
+              - "yes"
             resources:
               requests:
                 cpu: 5m
@@ -197,6 +201,18 @@ spec:
           paperless:
             app:
               - path: /data/local
+      logs:
+        type: emptyDir
+        advancedMounts:
+          paperless:
+            app:
+              - path: /tmp/log
+      redis-data:
+        existingClaim: paperless-redis-data
+        advancedMounts:
+          redis:
+            redis:
+              - path: /data
       # nas:
       #   type: nfs
       #   path: /data/vnas-1/paperless

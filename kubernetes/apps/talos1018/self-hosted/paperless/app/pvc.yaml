@@ -14,3 +14,16 @@ spec:
   resources:
     requests:
       storage: 20Gi
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-redis-data
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
