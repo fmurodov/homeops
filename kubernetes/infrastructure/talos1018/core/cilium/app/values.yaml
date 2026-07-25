@@ -44,11 +44,14 @@ ipv4:
 ipv6:
   enabled: true
 
-# Use Encapsulation mode (tunnel)
-routingMode: "tunnel"
-tunnelProtocol: "vxlan"
+# Native routing (no tunnel): all nodes share one L2 segment, so pod CIDRs are
+# reachable via direct per-node routes without VXLAN encapsulation.
+routingMode: "native"
+autoDirectNodeRoutes: true
 
-autoDirectNodeRoutes: false # Explicitly disable the native routing flag
+# Pod CIDRs are treated as internal (not masqueraded); must match clusterPodNets.
+ipv4NativeRoutingCIDR: "10.244.0.0/16"
+ipv6NativeRoutingCIDR: "fd00:1018:1000::/56"
 
 # Masquerade is essential for ULA pods to reach the Internet
 enableIPv6Masquerade: true
