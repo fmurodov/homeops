@@ -44,6 +44,13 @@ additionalMachineCertSans:
   - 127.0.0.1
 
 # Node definitions
+#
+# NOTE: pod IPv6 internet egress relies on SLAAC. Besides the static ULA/IPv4
+# addresses below, each node autoconfigures a GUA address (EUI-64) from router
+# advertisements on the untagged LAN. Cilium's IPv6 masquerade picks that GUA
+# as the source for pod -> internet IPv6 traffic, so egress keeps working (and
+# renumbers automatically) when the ISP prefix changes. Do not disable RA
+# acceptance on net0 or router advertisements on this segment.
 nodes:
   - hostname: talos-1018-1
     ipAddress: fd00:1018:0:5:10:18:6:91
