@@ -13,15 +13,16 @@ This directory contains the GitOps manifests for the home Kubernetes cluster man
 
 ```
 kubernetes/
-├── clusters/           # Cluster-specific manifests
-│   └── talos1018/     # Configuration for talos1018 cluster
-├── infrastructure/     # Core infrastructure components
-│   ├── controllers/   # Infrastructure controllers (cert-manager, etc.)
-│   └── configs/       # Infrastructure configurations
-├── apps/              # Application deployments
-│   ├── base/         # Base app configurations
-│   └── talos1018/    # Cluster-specific app deployments
-└── .sops.yaml        # SOPS configuration for secret management
+├── clusters/               # Flux entrypoint per cluster
+│   └── talos1018/          # GitRepository + cluster-config/infrastructure/apps Kustomizations
+├── infrastructure/         # Infrastructure components
+│   └── talos1018/
+│       ├── core/           # Cilium, cert-manager
+│       └── storage/        # Longhorn
+├── apps/                   # Application deployments
+│   └── talos1018/          # Grouped by category (home-automation, media, network, ...)
+├── components/             # Shared Kustomize components (cluster-secrets)
+└── .sops.yaml              # SOPS configuration for secret management
 ```
 
 Note: Validation scripts are located in the repository root at `scripts/` and are shared with Talos configurations.

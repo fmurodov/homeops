@@ -23,7 +23,7 @@ Quick bootstrap command (after preparing the external-pool.yaml with actual valu
 helm repo add cilium https://helm.cilium.io/
 helm repo update
 helm install cilium cilium/cilium \
-    --version 1.18.2 \
+    --version 1.19.6 \
     --namespace kube-system \
     -f kubernetes/infrastructure/talos1018/core/cilium/app/values.yaml
 ```
@@ -43,7 +43,7 @@ With Flux managing Cilium, upgrades are done by updating the version in `helmrel
 spec:
   chart:
     spec:
-      version: 1.18.2  # Update this version
+      version: 1.19.6  # Update this version
 ```
 
 Commit and push the change, and Flux will perform the upgrade.
@@ -51,10 +51,10 @@ Commit and push the change, and Flux will perform the upgrade.
 ## Configuration
 
 Cilium configuration is in `values.yaml`. Key features enabled:
-- Dual-stack IPv4/IPv6 support
+- Dual-stack IPv4/IPv6 support (IPv6-primary)
 - L2 announcements for LoadBalancer IPs
 - Hubble observability (relay and UI)
-- VXLAN tunnel mode
+- Native routing (direct node routes, no tunnel)
 - IPv4/IPv6 masquerading
 
 ## Related Resources

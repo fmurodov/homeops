@@ -76,13 +76,16 @@ talosctl kubeconfig --nodes fd00:1018:0:5:10:18:6:90
 >
 > After Flux takes over, these variables will be substituted automatically.
 
-Install Cilium using Helm (required before Flux can operate):
+Install Cilium using Helm (required before Flux can operate). Use the same
+version pinned in
+`../../kubernetes/infrastructure/talos1018/core/cilium/app/helmrelease.yaml`
+so the bootstrap matches what Flux will manage:
 
 ```bash
 helm repo add cilium https://helm.cilium.io/
 helm repo update
 helm install cilium cilium/cilium \
-    --version 1.18.2 \
+    --version 1.19.6 \
     --namespace kube-system \
     -f ../../kubernetes/infrastructure/talos1018/core/cilium/app/values.yaml \
     --create-namespace
@@ -148,11 +151,12 @@ talosctl upgrade -n fd00:1018:0:5:10:18:6:93 --image "$TALOS_IMAGE" --wait
 Once Flux is managing Cilium, upgrades are done by updating the version in
 `kubernetes/infrastructure/talos1018/core/cilium/helmrelease.yaml` and committing the change.
 
-For manual upgrades (before Flux takeover):
+For manual upgrades (before Flux takeover), match the version pinned in
+`helmrelease.yaml`:
 
 ```bash
 helm upgrade cilium cilium/cilium \
-    --version 1.18.2 \
+    --version 1.19.6 \
     --namespace kube-system \
     -f ../../kubernetes/infrastructure/talos1018/core/cilium/app/values.yaml \
     --reuse-values
