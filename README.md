@@ -35,15 +35,15 @@ homeops/
 A 3-node Kubernetes cluster running on Talos Linux. For detailed setup and configuration, see [talos/talos1018/README.md](talos/talos1018/README.md).
 
 - Control plane: 3 nodes
-- Network: Cilium CNI with L2 announcements
-- IP Range: 10.18.6.90-93
+- Network: Cilium CNI (native routing) with L2 announcements and Gateway API
+- Dual-stack, IPv6-primary (ULA `fd00:1018:0:5:10:18:6:90-93`, IPv4 `10.18.6.90-93`)
 
 ### Infrastructure Architecture
 
 Layered architecture with minimal dependencies:
 
 **Core** (no dependencies):
-- Cilium CNI with L2 announcements and Gateway API (HTTPRoutes for all apps)
+- Cilium CNI (native routing) with L2 announcements and Gateway API (HTTPRoutes for all apps)
 - cert-manager with Let's Encrypt
 
 **Storage** (depends on core):
