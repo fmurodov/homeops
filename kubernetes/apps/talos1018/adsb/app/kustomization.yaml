@@ -17,3 +17,10 @@ resources:
   - planefinder-service.yaml
   - planefinder-httproute.yaml
   - radarbox-deployment.yaml
+  - readsb-deployment.yaml
+  - readsb-service.yaml
+  - redis-deployment.yaml
+  - redis-service.yaml
+  - api-deployment.yaml
+  - api-service.yaml
+  - api-httproute.yaml
