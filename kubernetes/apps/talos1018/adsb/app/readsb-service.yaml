@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: readsb
+  namespace: adsb
+spec:
+  selector:
+    app.kubernetes.io/name: readsb
+  ports:
+    - port: 30152
+      targetPort: 30152
+      protocol: TCP
+      name: net-api

@@ -1,0 +1,67 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: readsb
+  namespace: adsb
+  labels:
+    app.kubernetes.io/name: readsb
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: readsb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: readsb
+    spec:
+      containers:
+        - name: readsb
+          image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest-build-845
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              add: [SETUID, SETGID]
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            # Network-only decoder: pulls Beast data from the same source
+            # feeding piaware/fr24/etc, no SDR attached to this container.
+            - name: READSB_NET_ONLY
+              value: "true"
+            - name: TAR1090_DISABLE
+              value: "true"
+            - name: BEASTHOST
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: BEASTHOST
+            - name: BEASTPORT
+              value: "30005"
+            - name: LAT
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LAT
+            - name: LONG
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LONG
+          ports:
+            # readsb's built-in --net-api-port, enabled by default
+            - containerPort: 30152
+              name: net-api
+          resources:
+            limits:
+              cpu: "0.3"
+              memory: "250Mi"
+            requests:
+              cpu: "0.02"
+              memory: "80Mi"
