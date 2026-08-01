@@ -22,6 +22,13 @@ spec:
               TOKEN_TIME: "72"
               DEFAULT_CURRENCY: "EUR"
               HOST: "::"
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
@@ -102,7 +109,9 @@ spec:
                 admin off
             }
 
-            http://[::]:3280 {
+            :3280 {
+                bind ::
+
                 @static {
                     file
                     path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.webp
