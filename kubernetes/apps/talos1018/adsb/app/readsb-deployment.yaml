@@ -54,6 +54,11 @@ spec:
                 secretKeyRef:
                   name: adsb-config
                   key: FEEDER_LONG
+            - name: TZ
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_TZ
           ports:
             # readsb's built-in --net-api-port, enabled by default
             - containerPort: 30152
