@@ -25,7 +25,20 @@ spec:
         fsGroup: 1000
       containers:
         - name: api
-          image: ghcr.io/adsblol/api:main
+          # Pinned before the "main" branch's 2026-03-13 provider refactor,
+          # which left the /v2/* router's _reapi_route() factory uncalled
+          # and never actually registers any routes (all /v2/* 404, no fork
+          # available with a fix - see adsblol/api commit dfdd419f).
+          image: ghcr.io/adsblol/api:sha-534a7c5
+          # Image's default CMD binds --host 0.0.0.0 (IPv4-only). This
+          # cluster's Services are IPv6-only, so the Gateway can't reach it
+          # without also binding IPv6.
+          command:
+            - uvicorn
+          args:
+            - src.adsb_api.app:app
+            - "--host=::"
+            - --port=80
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
