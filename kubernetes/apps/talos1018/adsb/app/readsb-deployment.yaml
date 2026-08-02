@@ -82,7 +82,26 @@ spec:
                   name: adsb-config
                   key: FEEDER_SITENAME
             - name: ULTRAFEEDER_CONFIG
-              value: "adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090"
+              value: "adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090;adsb,feed.planespotters.net,30004,beast_reduce_plus_out;mlat,mlat.planespotters.net,31090;adsb,in.adsb.lol,30004,beast_reduce_plus_out;mlat,in.adsb.lol,31090"
+          lifecycle:
+            # This build's nginx template ships with no IPv6 listen
+            # directive at all (upstream generates one only if it detects
+            # ::1 on lo at container-init time, which this build doesn't).
+            # This cluster's Services are IPv6-only, so add it ourselves.
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - |
+                    for i in $(seq 1 30); do
+                      s6-svstat /run/service/nginx 2>/dev/null | grep -q '^up' && break
+                      sleep 1
+                    done
+                    if ! grep -q 'listen \[::\]' /etc/nginx/sites-enabled/tar1090 2>/dev/null; then
+                      sed -i '/listen 80 default_server;/a\  listen [::]:80 default_server;' /etc/nginx/sites-enabled/tar1090
+                      nginx -s reload 2>/dev/null || true
+                    fi
           ports:
             - containerPort: 30152
               name: net-api
