@@ -82,7 +82,33 @@ spec:
                   name: adsb-config
                   key: FEEDER_SITENAME
             - name: ULTRAFEEDER_CONFIG
-              value: "adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090"
+              value: "adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090;adsb,feed.planespotters.net,30004,beast_reduce_plus_out;mlat,mlat.planespotters.net,31090;adsb,in.adsb.lol,30004,beast_reduce_plus_out;mlat,in.adsb.lol,31090"
+          lifecycle:
+            # Upstream only writes a `listen [::]:80` line if `ip a | grep
+            # 'inet6 ::1'` passes when this image's own startup script runs
+            # (added in sdr-enthusiasts/docker-tar1090@fdde0090 as a guard
+            # against IPv4-only Docker hosts where binding [::] crashes
+            # nginx entirely - see issue #308 / ultrafeeder#244). That check
+            # doesn't reliably pass this early in this image's own boot
+            # sequence under Cilium, even though the pod's netns has full
+            # IPv6 by the time any container starts. No env var bypasses it,
+            # so patch it in ourselves once nginx is confirmed up. Never
+            # fails the hook (would restart-loop the pod for no gain) - if
+            # something's missing, IPv6 just stays off, same as before.
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - |
+                    for i in $(seq 1 30); do
+                      s6-svstat /run/service/nginx 2>/dev/null | grep -q '^up' && break
+                      sleep 1
+                    done
+                    if [ -f /etc/nginx/sites-enabled/tar1090 ] && ! grep -q 'listen \[::\]' /etc/nginx/sites-enabled/tar1090; then
+                      sed -i '/listen 80 default_server;/a\  listen [::]:80 default_server;' /etc/nginx/sites-enabled/tar1090 && nginx -s reload
+                    fi
+                    exit 0
           ports:
             - containerPort: 30152
               name: net-api
