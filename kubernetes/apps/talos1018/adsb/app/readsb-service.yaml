@@ -17,3 +17,7 @@ spec:
       targetPort: 30005
       protocol: TCP
       name: beast-out
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http

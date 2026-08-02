@@ -19,6 +19,7 @@ resources:
   - radarbox-deployment.yaml
   - readsb-deployment.yaml
   - readsb-service.yaml
+  - readsb-httproute.yaml
   - redis-deployment.yaml
   - redis-service.yaml
   - api-deployment.yaml
