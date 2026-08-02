@@ -18,6 +18,10 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: readsb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: readsb
@@ -26,14 +30,14 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
-              add: [SETUID, SETGID]
+              # CHOWN: nginx chowns its runtime dirs (e.g. /var/lib/nginx/body)
+              # to www-data on every worker start; without it nginx crash-loops.
+              add: [SETUID, SETGID, CHOWN]
               drop: [ALL]
             seccompProfile:
               type: RuntimeDefault
           env:
             - name: READSB_NET_ONLY
-              value: "true"
-            - name: TAR1090_DISABLE
               value: "true"
             - name: BEASTHOST
               valueFrom:
@@ -52,18 +56,42 @@ spec:
                 secretKeyRef:
                   name: adsb-config
                   key: FEEDER_LONG
+            - name: ALT
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_ALT
             - name: TZ
               valueFrom:
                 secretKeyRef:
                   name: adsb-config
                   key: FEEDER_TZ
+            # nginx's /metrics location aliases /run/readsb/stats.prom, but
+            # PROMETHEUS_ENABLE hardcodes /run/readsb-prometheus.prom - write
+            # to the path nginx actually serves.
+            - name: READSB_EXTRA_ARGS
+              value: "--write-prom=/run/readsb/stats.prom"
+            - name: UUID
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_UUID
+            - name: MLAT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_SITENAME
+            - name: ULTRAFEEDER_CONFIG
+              value: "adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090"
           ports:
             - containerPort: 30152
               name: net-api
+            - containerPort: 80
+              name: http
           resources:
             limits:
-              cpu: "0.3"
-              memory: "250Mi"
+              cpu: "0.4"
+              memory: "350Mi"
             requests:
               cpu: "0.02"
-              memory: "80Mi"
+              memory: "100Mi"
