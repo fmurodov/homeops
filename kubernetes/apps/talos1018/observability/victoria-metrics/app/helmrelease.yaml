@@ -187,6 +187,24 @@ spec:
                     - __meta_kubernetes_endpoint_port_name
                   action: keep
                   regex: longhorn-backend;manager
+
+            # readsb (ultrafeeder) metrics - job name must be "ultrafeeder"
+            # to match the grafana.com dashboard's hardcoded panel queries,
+            # so it's a dedicated job rather than the generic
+            # kubernetes-pods annotation-based one.
+            - job_name: ultrafeeder
+              metrics_path: /metrics
+              kubernetes_sd_configs:
+                - role: endpoints
+                  namespaces:
+                    names:
+                      - adsb
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_name
+                    - __meta_kubernetes_endpoint_port_name
+                  action: keep
+                  regex: readsb;http
       route:
         enabled: true
         annotations:

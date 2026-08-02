@@ -17,6 +17,7 @@ resources:
   - planefinder-service.yaml
   - planefinder-httproute.yaml
   - radarbox-deployment.yaml
+  - readsb-pvc.yaml
   - readsb-deployment.yaml
   - readsb-service.yaml
   - readsb-httproute.yaml
