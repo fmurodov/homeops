@@ -31,8 +31,6 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           env:
-            # Network-only decoder: pulls Beast data from the same source
-            # feeding piaware/fr24/etc, no SDR attached to this container.
             - name: READSB_NET_ONLY
               value: "true"
             - name: TAR1090_DISABLE
@@ -60,7 +58,6 @@ spec:
                   name: adsb-config
                   key: FEEDER_TZ
           ports:
-            # readsb's built-in --net-api-port, enabled by default
             - containerPort: 30152
               name: net-api
           resources:
