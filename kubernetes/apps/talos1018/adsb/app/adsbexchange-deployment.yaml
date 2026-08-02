@@ -38,9 +38,6 @@ spec:
             - secretRef:
                 name: adsb-config
           env:
-            # Feed from the in-cluster readsb (already decoding the same
-            # BEASTHOST from adsb-secret) instead of connecting to the
-            # external receiver directly.
             - name: BEASTHOST
               value: "readsb.adsb.svc.cluster.local"
             - name: LAT
