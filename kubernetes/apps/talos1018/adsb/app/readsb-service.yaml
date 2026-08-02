@@ -13,3 +13,7 @@ spec:
       targetPort: 30152
       protocol: TCP
       name: net-api
+    - port: 30005
+      targetPort: 30005
+      protocol: TCP
+      name: beast-out
