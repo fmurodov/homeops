@@ -48,15 +48,12 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           env:
-            # Point the ADSBExchange-compatible /v2/* routes at our own readsb
-            # net-api-port instead of adsb.lol's infrastructure.
             - name: ADSBLOL_REAPI_ENDPOINT
               value: "http://readsb.adsb.svc.cluster.local:30152/"
             - name: ADSBLOL_REDIS_HOST
               value: "redis://redis:6379"
-            # Disable background tasks tied to adsb.lol's own Kubernetes
-            # infra (feeder/mlat aggregation, hub stats) - not reachable
-            # from here and not needed for the /v2/* endpoints.
+            # Tasks reach for adsb.lol's own Kubernetes infra (feeder/mlat
+            # aggregation, hub stats), unreachable from here.
             - name: ADSBLOL_ENABLED_BG_TASKS
               value: ""
           ports:
