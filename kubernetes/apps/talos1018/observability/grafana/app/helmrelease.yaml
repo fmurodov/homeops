@@ -160,6 +160,12 @@ spec:
           datasource:
             - name: DS_PROMETHEUS
               value: VictoriaMetrics
+        ultrafeeder-stats:
+          gnetId: 18398
+          revision: 5
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
         alertmanager:
           gnetId: 9578
           revision: 4
