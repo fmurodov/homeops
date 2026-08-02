@@ -33,6 +33,8 @@ spec:
             - secretRef:
                 name: adsb-config
           env:
+            - name: BEASTHOST
+              value: "readsb.adsb.svc.cluster.local"
             - name: LAT
               valueFrom:
                 secretKeyRef:
