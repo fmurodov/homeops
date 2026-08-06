@@ -82,6 +82,12 @@ spec:
                   key: FEEDER_SITENAME
             - name: ULTRAFEEDER_CONFIG
               value: "adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090;adsb,feed.planespotters.net,30004,beast_reduce_plus_out;mlat,mlat.planespotters.net,31090;adsb,in.adsb.lol,30004,beast_reduce_plus_out;mlat,in.adsb.lol,31090"
+            - name: TAR1090_USEROUTEAPI
+              value: "true"
+            - name: GRAPHS1090_DARKMODE
+              value: "true"
+            - name: TAR1090_ROUTEAPIURL
+              value: http://api/api/0/routeset
           lifecycle:
             # Upstream only writes a `listen [::]:80` line if `ip a | grep
             # 'inet6 ::1'` passes when this image's own startup script runs
