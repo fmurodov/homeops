@@ -32,13 +32,20 @@ spec:
               drop: [ALL]
             seccompProfile:
               type: RuntimeDefault
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
           ports:
             - containerPort: 6379
               name: redis
           resources:
             limits:
               cpu: "0.1"
-              memory: "100Mi"
+              memory: "256Mi"
             requests:
               cpu: "0.01"
-              memory: "20Mi"
+              memory: "32Mi"
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data
