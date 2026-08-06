@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./namespace.yaml
+  - ./adsb-config-secret.sops.yaml
+  - ./readsb/ks.yaml
+  - ./planefinder/ks.yaml
+  - ./piaware/ks.yaml
+  - ./flightradar24/ks.yaml
+  - ./radarbox/ks.yaml
+  - ./adsbexchange/ks.yaml
+  - ./redis/ks.yaml
+  - ./adsb-api/ks.yaml

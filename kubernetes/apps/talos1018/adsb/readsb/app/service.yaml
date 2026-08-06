@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: readsb
+spec:
+  selector:
+    app.kubernetes.io/name: readsb
+  ports:
+    - port: 30152
+      targetPort: 30152
+      name: net-api
+    - port: 30005
+      targetPort: 30005
+      name: beast-out
+    - port: 80
+      targetPort: 80
+      name: http

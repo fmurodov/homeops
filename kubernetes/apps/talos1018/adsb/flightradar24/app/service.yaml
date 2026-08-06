@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: flightradar24
+spec:
+  selector:
+    app.kubernetes.io/name: flightradar24
+  ports:
+    - port: 8754
+      targetPort: 8754
+      protocol: TCP
+      name: http
