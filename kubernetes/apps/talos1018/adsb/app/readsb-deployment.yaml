@@ -35,6 +35,9 @@ spec:
           volumeMounts:
             - name: globe-history
               mountPath: /var/globe_history
+            - name: globe-history
+              mountPath: /var/lib/collectd
+              subPath: collectd
           env:
             - name: READSB_NET_ONLY
               value: "true"
@@ -86,8 +89,11 @@ spec:
               value: "true"
             - name: GRAPHS1090_DARKMODE
               value: "true"
+            # Quotes are part of the value: this gets echoed unquoted into
+            # config.js, and browser-fetched, so needs to be a valid JS
+            # string literal pointing at a browser-reachable hostname.
             - name: TAR1090_ROUTEAPIURL
-              value: http://api/api/0/routeset
+              value: '"https://adsb-api.${CLUSTER_DOMAIN}/api/0/routeset"'
           lifecycle:
             # Upstream only writes a `listen [::]:80` line if `ip a | grep
             # 'inet6 ::1'` passes when this image's own startup script runs
