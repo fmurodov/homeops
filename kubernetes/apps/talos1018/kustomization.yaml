@@ -35,8 +35,8 @@ resources:
   # 3D Printing
   - ./spoolman/ks.yaml
 
-  # Utilities
-  - ./adsb/ks.yaml
+  # ADSB / Flight Tracking
+  - ./adsb
 
   # Development and Testing
   - ./podinfo/ks.yaml
