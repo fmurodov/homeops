@@ -24,6 +24,9 @@ piaware  flightradar24  radarbox  adsbexchange  planefinder
                         exposes /api/0/routeset
                               ▲
  readsb's TAR1090_ROUTEAPIURL─┘ (tar1090 UI route overlay)
+
+ readsb :80 (/data/aircraft.json) ──► skystats (polls aircraft.json,
+                                         stores history in skystats-db)
 ```
 
 ## Apps
@@ -38,6 +41,7 @@ piaware  flightradar24  radarbox  adsbexchange  planefinder
 | `adsbexchange` | Feeds ADSBExchange | – |
 | `redis` | Cache for `adsb-api` | – |
 | `adsb-api` | Self-hosted `adsblol/api` clone, backs tar1090's route overlay | `adsb-api.${CLUSTER_DOMAIN}` |
+| `skystats` | Aircraft stats dashboard ([tomcarman/skystats](https://github.com/tomcarman/skystats)), polls `readsb`'s aircraft.json into its own Postgres | `skystats.${CLUSTER_DOMAIN}` |
 
 ## Secrets
 
@@ -56,7 +60,8 @@ feeders: `EXTERNAL_BEASTHOST` (the external SDR's address, read only by
 Per-app credentials that only one feeder needs live in that app's own
 secret instead of the shared one: `piaware-config` (`PIAWARE_FEEDER_ID`),
 `planefinder-config` (`PLANEFINDER_SHARECODE`), `flightradar24-config`
-(`FR24_SHARING_KEY`), `radarbox-config` (`RADARBOX_SHARING_KEY`).
+(`FR24_SHARING_KEY`), `radarbox-config` (`RADARBOX_SHARING_KEY`),
+`skystats-secret` (`DB_PASSWORD`, for its own `skystats-db` Postgres).
 `adsbexchange` has no unique credential.
 
 ## Notes
@@ -68,4 +73,8 @@ secret instead of the shared one: `piaware-config` (`PIAWARE_FEEDER_ID`),
 - `readsb-data` (globe_history + graphs1090 stats) carries Longhorn
   `recurring-job.longhorn.io` backup labels and is covered by the cluster's
   `daily-backup` RecurringJob. `redis-data` is a disposable cache and isn't
-  backed up.
+  backed up. `skystats-db-data` also carries the backup labels since it
+  accumulates aircraft/route history over time.
+- `skystats`'s `DOMESTIC_COUNTRY_ISO` env var is a plain (non-secret) literal
+  in `deployment.yaml` set to `CHANGEME` — replace with your receiver's
+  2-letter ISO country code.
