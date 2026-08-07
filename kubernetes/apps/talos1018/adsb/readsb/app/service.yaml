@@ -13,6 +13,9 @@ spec:
     - port: 30005
       targetPort: 30005
       name: beast-out
+    - port: 30003
+      targetPort: 30003
+      name: sbs-out
     - port: 80
       targetPort: 80
       name: http

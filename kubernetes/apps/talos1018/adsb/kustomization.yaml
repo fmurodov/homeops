@@ -9,8 +9,11 @@ resources:
   - ./planefinder/ks.yaml
   - ./piaware/ks.yaml
   - ./flightradar24/ks.yaml
-  - ./radarbox/ks.yaml
+  - ./airnavradar/ks.yaml
   - ./adsbexchange/ks.yaml
+  - ./adsbhub/ks.yaml
+  - ./radarvirtuel/ks.yaml
+  - ./opensky-network/ks.yaml
   - ./redis/ks.yaml
   - ./adsb-api/ks.yaml
   - ./skystats/ks.yaml
