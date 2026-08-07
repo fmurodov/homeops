@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Apps
-    gethomepage.dev/icon: sh-bricktracker.png
+    gethomepage.dev/icon: brick-tracker
     gethomepage.dev/name: BrickTracker
     gethomepage.dev/app: bricktracker
     gethomepage.dev/description: LEGO sets tracker

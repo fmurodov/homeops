@@ -7,7 +7,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Home Automation
-    gethomepage.dev/icon: sh-matter.svg
+    gethomepage.dev/icon: sh-matter
     gethomepage.dev/name: Matter Server
     gethomepage.dev/app: matter-server
     gethomepage.dev/description: Matter protocol server for Home Assistant

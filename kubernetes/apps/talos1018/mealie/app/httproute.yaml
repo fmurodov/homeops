@@ -7,7 +7,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Apps
-    gethomepage.dev/icon: sh-mealie.svg
+    gethomepage.dev/icon: sh-mealie
     gethomepage.dev/name: Mealie
     gethomepage.dev/app: mealie
     gethomepage.dev/description: Recipe manager

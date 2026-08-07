@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Infra
-    gethomepage.dev/icon: sh-netboot-xyz.svg
+    gethomepage.dev/icon: sh-netboot-xyz
     gethomepage.dev/name: netbootxyz
     gethomepage.dev/app: netbootxyz
     gethomepage.dev/description: iPXE netboot

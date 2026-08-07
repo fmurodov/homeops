@@ -64,7 +64,7 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
-          gethomepage.dev/icon: sh-cmintey-wishlist.png
+          gethomepage.dev/icon: sh-cmintey-wishlist
           gethomepage.dev/name: Wishlist
           gethomepage.dev/app: wishlist
         parentRefs:

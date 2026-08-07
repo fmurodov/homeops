@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: ADSB
-    gethomepage.dev/icon: https://adsb.lol/favicon.ico
+    gethomepage.dev/icon: adsb
     gethomepage.dev/name: ADSB API
     gethomepage.dev/app: api
 spec:

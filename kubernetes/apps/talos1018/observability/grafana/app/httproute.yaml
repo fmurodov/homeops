@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Observability
-    gethomepage.dev/icon: sh-grafana.svg
+    gethomepage.dev/icon: sh-grafana
     gethomepage.dev/name: Grafana
     gethomepage.dev/app: grafana
 spec:

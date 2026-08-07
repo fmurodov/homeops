@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: ADSB
-    gethomepage.dev/icon: mdi-chart-box-outline
+    gethomepage.dev/icon: mdi-airplane
     gethomepage.dev/name: Skystats
     gethomepage.dev/app: skystats
 spec:

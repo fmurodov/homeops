@@ -228,7 +228,7 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
-          gethomepage.dev/icon: sh-paperless-ngx.svg
+          gethomepage.dev/icon: sh-paperless-ngx
           gethomepage.dev/name: Paperless-ngx
           gethomepage.dev/app: paperless
           gethomepage.dev/description: Document management system

@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Apps
-    gethomepage.dev/icon: sh-homebox.svg
+    gethomepage.dev/icon: sh-homebox
     gethomepage.dev/name: Homebox
     gethomepage.dev/app: homebox
     gethomepage.dev/description: Home inventory management

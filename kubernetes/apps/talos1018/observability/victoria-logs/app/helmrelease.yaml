@@ -39,7 +39,7 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Observability
-          gethomepage.dev/icon: si-victoriametrics
+          gethomepage.dev/icon: sh-victoriametrics
           gethomepage.dev/name: VictoriaLogs
           gethomepage.dev/app: victoria-logs-single
         parentRefs:

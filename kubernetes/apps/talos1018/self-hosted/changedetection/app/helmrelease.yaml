@@ -52,7 +52,7 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
-          gethomepage.dev/icon: sh-changedetection.svg
+          gethomepage.dev/icon: changedetection
           gethomepage.dev/name: changedetection
           gethomepage.dev/app: changedetection
           gethomepage.dev/description: Web page change detection

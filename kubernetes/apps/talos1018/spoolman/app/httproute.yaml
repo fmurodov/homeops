@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Apps
-    gethomepage.dev/icon: sh-spoolman.svg
+    gethomepage.dev/icon: sh-spoolman
     gethomepage.dev/name: Spoolman
     gethomepage.dev/app: spoolman
     gethomepage.dev/widget.type: spoolman
