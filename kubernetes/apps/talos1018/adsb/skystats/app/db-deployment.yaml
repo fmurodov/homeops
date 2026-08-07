@@ -22,14 +22,6 @@ spec:
       containers:
         - name: postgres
           image: postgres:18
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
-            runAsNonRoot: true
-            capabilities:
-              drop: [ALL]
-            seccompProfile:
-              type: RuntimeDefault
           env:
             - name: POSTGRES_USER
               value: "skystats"
