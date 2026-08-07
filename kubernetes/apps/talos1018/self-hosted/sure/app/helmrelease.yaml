@@ -235,7 +235,7 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
-          gethomepage.dev/icon: sh-maybe-finance.png
+          gethomepage.dev/icon: sh-sure-finance
           gethomepage.dev/name: Sure
           gethomepage.dev/app: sure
           gethomepage.dev/description: Personal finance

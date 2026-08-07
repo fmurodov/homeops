@@ -57,7 +57,7 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Smart Home
-          gethomepage.dev/icon: home-assistant.svg
+          gethomepage.dev/icon: home-assistant
           gethomepage.dev/name: Home Assistant
           gethomepage.dev/app: home-assistant
         parentRefs:

@@ -54,7 +54,7 @@ spec:
         [OUTPUT]
             Name        loki
             Match       *
-            Host        victoria-logs-victoria-logs-single-server.observability.svc.cluster.local
+            Host        victoria-logs-victoria-logs-single-server
             Port        9428
             URI         /insert/loki/api/v1/push?_msg_field=log
             Labels      job=fluent-bit

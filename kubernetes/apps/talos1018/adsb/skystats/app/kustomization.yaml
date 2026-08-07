@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: adsb
+resources:
+  - skystats-secret.sops.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - db-deployment.yaml
+  - service.yaml
+  - db-service.yaml
+  - httproute.yaml

@@ -72,7 +72,7 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
-          gethomepage.dev/icon: sh-music-assistant.svg
+          gethomepage.dev/icon: sh-music-assistant
           gethomepage.dev/name: Music Assistant
           gethomepage.dev/app: music-assistant
         parentRefs:

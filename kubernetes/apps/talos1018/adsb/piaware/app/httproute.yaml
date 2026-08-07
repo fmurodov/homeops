@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: ADSB
-    gethomepage.dev/icon: https://www.flightaware.com/images/favicon-32x32.png
+    gethomepage.dev/icon: si-flightaware
     gethomepage.dev/name: FlightAware
     gethomepage.dev/app: piaware
 spec:

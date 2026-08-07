@@ -77,7 +77,7 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
-          gethomepage.dev/icon: sh-n8n.svg
+          gethomepage.dev/icon: sh-n8n
           gethomepage.dev/name: n8n
           gethomepage.dev/app: n8n
           gethomepage.dev/description: Workflow automation

@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: skystats
+spec:
+  selector:
+    app.kubernetes.io/name: skystats
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http

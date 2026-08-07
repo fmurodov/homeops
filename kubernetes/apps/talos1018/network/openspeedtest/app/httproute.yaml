@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Network
-    gethomepage.dev/icon: sh-openspeedtest.svg
+    gethomepage.dev/icon: sh-openspeedtest
     gethomepage.dev/name: Speedtest
     gethomepage.dev/app: openspeedtest
 spec:

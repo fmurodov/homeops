@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skystats
+  labels:
+    app.kubernetes.io/name: skystats
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: skystats
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: skystats
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: skystats
+          image: ghcr.io/tomcarman/skystats:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: READSB_AIRCRAFT_JSON
+              value: "http://readsb/data/aircraft.json"
+            - name: DB_HOST
+              value: "skystats-db"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: "skystats"
+            - name: DB_NAME
+              value: "skystats_db"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: skystats-secret
+                  key: DB_PASSWORD
+            - name: LAT
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LAT
+            - name: LON
+              valueFrom:
+                secretKeyRef:
+                  name: adsb-config
+                  key: FEEDER_LONG
+            - name: RADIUS
+              value: "500"
+            - name: ABOVE_RADIUS
+              value: "20"
+            - name: DOMESTIC_COUNTRY_ISO
+              value: "NL"
+            - name: LOG_LEVEL
+              value: "INFO"
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              cpu: "0.2"
+              memory: "256Mi"
+            requests:
+              cpu: "0.02"
+              memory: "64Mi"

@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Smart Home
-    gethomepage.dev/icon: sh-esphome.svg
+    gethomepage.dev/icon: esphome
     gethomepage.dev/name: ESPHome
     gethomepage.dev/app: esphome
 spec:

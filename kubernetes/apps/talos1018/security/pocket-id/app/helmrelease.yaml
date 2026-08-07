@@ -86,7 +86,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/description: Identity provider
           gethomepage.dev/group: Apps
-          gethomepage.dev/icon: sh-pocket-id.svg
+          gethomepage.dev/icon: sh-pocket-id
           gethomepage.dev/name: Pocket ID
           gethomepage.dev/app: pocket-id
         parentRefs:
