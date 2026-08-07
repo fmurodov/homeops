@@ -18,18 +18,14 @@ spec:
       labels:
         app.kubernetes.io/name: skystats
     spec:
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
       containers:
         - name: skystats
           image: ghcr.io/tomcarman/skystats:latest
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
-            runAsNonRoot: true
             capabilities:
+              add: [SETUID, SETGID, CHOWN]
               drop: [ALL]
             seccompProfile:
               type: RuntimeDefault
