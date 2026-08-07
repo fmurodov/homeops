@@ -18,6 +18,14 @@ spec:
       labels:
         app.kubernetes.io/name: skystats
     spec:
+      # adsb-api's Service is named "api", so Kubernetes' Docker-links-style
+      # service env injection sets API_PORT=tcp://<clusterIP>:80 on every
+      # pod in this namespace. skystats reads its own listen port from
+      # API_PORT too (Dockerfile default 8080), gets that URL instead, and
+      # gin.Run() fails to parse it - silently, since the app never checks
+      # the error. Disabling service links is the only fix short of
+      # patching the binary.
+      enableServiceLinks: false
       containers:
         - name: skystats
           image: ghcr.io/tomcarman/skystats:latest
