@@ -35,7 +35,7 @@ spec:
               type: RuntimeDefault
           env:
             - name: READSB_AIRCRAFT_JSON
-              value: "http://readsb.adsb.svc.cluster.local/data/aircraft.json"
+              value: "http://readsb/data/aircraft.json"
             - name: DB_HOST
               value: "skystats-db"
             - name: DB_PORT
@@ -64,7 +64,7 @@ spec:
             - name: ABOVE_RADIUS
               value: "20"
             - name: DOMESTIC_COUNTRY_ISO
-              value: "CHANGEME"
+              value: "NL"
             - name: LOG_LEVEL
               value: "INFO"
           ports:

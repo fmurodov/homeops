@@ -21,7 +21,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: postgres
-          image: postgres:17
+          image: postgres:18
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
