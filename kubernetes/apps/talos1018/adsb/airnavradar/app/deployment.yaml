@@ -3,24 +3,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: radarbox
+  name: airnavradar
   labels:
-    app.kubernetes.io/name: radarbox
+    app.kubernetes.io/name: airnavradar
   annotations:
     reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: radarbox
+      app.kubernetes.io/name: airnavradar
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: radarbox
+        app.kubernetes.io/name: airnavradar
     spec:
       containers:
-        - name: radarbox
-          image: ghcr.io/sdr-enthusiasts/docker-radarbox:latest-build-715
+        - name: airnavradar
+          image: ghcr.io/sdr-enthusiasts/docker-airnavradar:latest-build-883
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
@@ -54,8 +54,8 @@ spec:
             - name: SHARING_KEY
               valueFrom:
                 secretKeyRef:
-                  name: radarbox-config
-                  key: RADARBOX_SHARING_KEY
+                  name: airnavradar-config
+                  key: AIRNAVRADAR_SHARING_KEY
             - name: ENABLE_MLAT
               value: "true"
           resources:

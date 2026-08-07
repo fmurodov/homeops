@@ -84,8 +84,12 @@ spec:
                 secretKeyRef:
                   name: adsb-config
                   key: FEEDER_SITENAME
+            # Non-profit aggregators the ultrafeeder image can feed directly
+            # (beast_reduce_plus_out + mlat-client), no separate container
+            # needed: adsb.fi, planespotters.net, adsb.lol, airplanes.live,
+            # theairtraffic.com, avdelphi.com (no MLAT).
             - name: ULTRAFEEDER_CONFIG
-              value: "adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090;adsb,feed.planespotters.net,30004,beast_reduce_plus_out;mlat,mlat.planespotters.net,31090;adsb,in.adsb.lol,30004,beast_reduce_plus_out;mlat,in.adsb.lol,31090"
+              value: "adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090;adsb,feed.planespotters.net,30004,beast_reduce_plus_out;mlat,mlat.planespotters.net,31090;adsb,in.adsb.lol,30004,beast_reduce_plus_out;mlat,in.adsb.lol,31090;adsb,feed.airplanes.live,30004,beast_reduce_plus_out;mlat,feed.airplanes.live,31090;adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out;mlat,mlat.theairtraffic.com,31090;adsb,data.avdelphi.com,24999,beast_reduce_plus_out"
             - name: TAR1090_USEROUTEAPI
               value: "true"
             # Enables type/registration fields in aircraft.json, used by skystats.
@@ -129,6 +133,8 @@ spec:
               name: net-api
             - containerPort: 30005
               name: beast-out
+            - containerPort: 30003
+              name: sbs-out
             - containerPort: 80
               name: http
           resources:
