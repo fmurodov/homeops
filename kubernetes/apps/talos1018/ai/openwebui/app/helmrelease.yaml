@@ -26,7 +26,7 @@ spec:
               HOST: "::"
               PORT: "8080"
               # Backend
-              OLLAMA_BASE_URL: http://ollama.ai.svc.cluster.local:11434
+              OLLAMA_BASE_URL: http://ollama:11434
               WEBUI_URL: https://openwebui.${CLUSTER_DOMAIN}
               # Disable local signups — auth via Pocket ID only
               WEBUI_AUTH: "true"
@@ -121,7 +121,7 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: AI
-          gethomepage.dev/icon: open-webui.png
+          gethomepage.dev/icon: sh-open-webui
           gethomepage.dev/name: Open WebUI
           gethomepage.dev/app: openwebui
           gethomepage.dev/description: Chat UI for local LLMs

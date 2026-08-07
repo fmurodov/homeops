@@ -48,7 +48,7 @@ spec:
               type: RuntimeDefault
           env:
             - name: ADSBLOL_REAPI_ENDPOINT
-              value: "http://readsb.adsb.svc.cluster.local:30152/"
+              value: "http://readsb:30152/"
             - name: ADSBLOL_REDIS_HOST
               value: "redis://redis:6379"
             # Tasks reach for adsb.lol's own Kubernetes infra (feeder/mlat

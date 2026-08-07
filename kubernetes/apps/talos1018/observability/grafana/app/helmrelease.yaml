@@ -76,18 +76,18 @@ spec:
         datasources:
           - name: VictoriaMetrics
             type: prometheus
-            url: http://victoria-metrics-victoria-metrics-single-server.observability.svc.cluster.local:8428
+            url: http://victoria-metrics-victoria-metrics-single-server:8428
             isDefault: true
             jsonData:
               timeInterval: "30s"
           - name: VictoriaLogs
             type: victoriametrics-logs-datasource
-            url: http://victoria-logs-victoria-logs-single-server.observability.svc.cluster.local:9428
+            url: http://victoria-logs-victoria-logs-single-server:9428
             jsonData:
               maxLines: 1000
           - name: Alertmanager
             type: alertmanager
-            url: http://alertmanager.observability.svc.cluster.local:9093
+            url: http://alertmanager:9093
             jsonData:
               implementation: prometheus
 

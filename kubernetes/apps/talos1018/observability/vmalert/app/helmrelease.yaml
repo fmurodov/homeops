@@ -21,13 +21,13 @@ spec:
         httpListenAddr: "[::]:8880"
         enableTCP6: "true"
       datasource:
-        url: http://victoria-metrics-victoria-metrics-single-server.observability.svc.cluster.local:8428
+        url: http://victoria-metrics-victoria-metrics-single-server:8428
       remote:
         write:
-          url: http://victoria-metrics-victoria-metrics-single-server.observability.svc.cluster.local:8428
+          url: http://victoria-metrics-victoria-metrics-single-server:8428
       notifier:
         alertmanager:
-          url: http://alertmanager.observability.svc.cluster.local:9093
+          url: http://alertmanager:9093
       resources:
         requests:
           cpu: 50m

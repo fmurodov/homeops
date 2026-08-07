@@ -13,5 +13,5 @@ data:
       noTLSVerify: true
     ingress:
       - hostname: "*.${DOMAIN}"
-        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
+        service: https://cilium-gateway-main-gateway
       - service: http_status:404

@@ -21,7 +21,7 @@ spec:
           image: ollama/ollama:0.32.5
           env:
             - name: OLLAMA_HOST
-              value: http://ollama.ai.svc.cluster.local:11434
+              value: http://ollama:11434
             - name: MODELS
               value: "llama3.1:8b"
           command:

@@ -31,7 +31,7 @@ spec:
               type: RuntimeDefault
           env:
             - name: BEASTHOST
-              value: "readsb.adsb.svc.cluster.local"
+              value: "readsb"
             - name: LAT
               valueFrom:
                 secretKeyRef:
