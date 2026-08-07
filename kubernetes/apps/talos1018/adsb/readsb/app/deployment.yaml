@@ -86,6 +86,9 @@ spec:
               value: "adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090;adsb,feed.planespotters.net,30004,beast_reduce_plus_out;mlat,mlat.planespotters.net,31090;adsb,in.adsb.lol,30004,beast_reduce_plus_out;mlat,in.adsb.lol,31090"
             - name: TAR1090_USEROUTEAPI
               value: "true"
+            # Enables type/registration fields in aircraft.json, used by skystats.
+            - name: TAR1090_ENABLE_AC_DB
+              value: "true"
             - name: GRAPHS1090_DARKMODE
               value: "true"
             # Quotes are part of the value: this gets echoed unquoted into
@@ -129,7 +132,7 @@ spec:
           resources:
             limits:
               cpu: "0.4"
-              memory: "350Mi"
+              memory: "420Mi"
             requests:
               cpu: "0.02"
               memory: "100Mi"
