@@ -29,6 +29,31 @@ spec:
               drop: [ALL]
             seccompProfile:
               type: RuntimeDefault
+          lifecycle:
+            # The image's bundled /etc/nginx/nginx.conf hardcodes
+            # `listen 80 default_server;` only - no IPv6 variant, no
+            # runtime guard generating it either (unlike readsb's
+            # tar1090 template). This cluster's Services are IPv6-only,
+            # so the Gateway can't reach it without also binding [::].
+            # Patch it in once nginx is confirmed up (editing before
+            # `nginx -s reload` finds no service to reload). Never fails
+            # the hook - a failed postStart kills and restarts the
+            # container, which would turn "IPv6 still off" into a crash
+            # loop for no gain.
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - |
+                    for i in $(seq 1 30); do
+                      s6-svstat /run/service/nginx 2>/dev/null | grep -q '^up' && break
+                      sleep 1
+                    done
+                    if [ -f /etc/nginx/nginx.conf ] && ! grep -q 'listen \[::\]' /etc/nginx/nginx.conf; then
+                      sed -i '/listen 80 default_server;/a\    listen [::]:80 default_server;' /etc/nginx/nginx.conf && nginx -s reload
+                    fi
+                    exit 0
           env:
             - name: READSB_AIRCRAFT_JSON
               value: "http://readsb/data/aircraft.json"
