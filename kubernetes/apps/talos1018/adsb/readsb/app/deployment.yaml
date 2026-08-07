@@ -40,6 +40,8 @@ spec:
           env:
             - name: READSB_NET_ONLY
               value: "true"
+            - name: LOGLEVEL
+              value: "error"
             - name: BEASTHOST
               valueFrom:
                 secretKeyRef:
