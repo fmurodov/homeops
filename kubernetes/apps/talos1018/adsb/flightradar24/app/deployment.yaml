@@ -41,6 +41,10 @@ spec:
                 secretKeyRef:
                   name: flightradar24-config
                   key: FR24_SHARING_KEY
+            # fr24feed's web UI otherwise refuses non-private-network
+            # source IPs - our IPv6 ULA range isn't recognized as private.
+            - name: BIND_INTERFACE
+              value: "0.0.0.0"
           ports:
             - containerPort: 8754
           resources:
