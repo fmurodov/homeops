@@ -19,6 +19,7 @@ spec:
   parentRefs:
     - name: main-gateway
       namespace: network
+      sectionName: https-external
   hostnames:
     - "recipe.${DOMAIN}"
   rules:
@@ -26,6 +27,12 @@ spec:
         - path:
             type: PathPrefix
             value: /
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Strict-Transport-Security
+                value: max-age=31536000
       backendRefs:
         - name: mealie-http
           port: 9000

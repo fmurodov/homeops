@@ -63,6 +63,10 @@ spec:
         parentRefs:
           - name: main-gateway
             namespace: network
+            sectionName: https-internal
+          - name: main-gateway
+            namespace: network
+            sectionName: https-external
         hostnames:
           - "hass.${CLUSTER_DOMAIN}"
           - "hass.${DOMAIN}"
@@ -71,6 +75,12 @@ spec:
               - path:
                   type: PathPrefix
                   value: /
+            filters:
+              - type: ResponseHeaderModifier
+                responseHeaderModifier:
+                  set:
+                    - name: Strict-Transport-Security
+                      value: max-age=31536000
             backendRefs:
               - identifier: app
                 port: 8123
