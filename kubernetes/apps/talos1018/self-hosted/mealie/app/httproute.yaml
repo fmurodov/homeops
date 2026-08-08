@@ -12,7 +12,7 @@ metadata:
     gethomepage.dev/app: mealie
     gethomepage.dev/description: Recipe manager
     gethomepage.dev/widget.type: mealie
-    gethomepage.dev/widget.url: http://mealie-http.mealie.svc.cluster.local:9000
+    gethomepage.dev/widget.url: http://mealie-http.self-hosted.svc.cluster.local:9000
     gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_MEALIE_APIKEY}}"
     gethomepage.dev/widget.version: "2"
 spec:
