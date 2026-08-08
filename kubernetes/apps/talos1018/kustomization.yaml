@@ -24,7 +24,6 @@ resources:
 
   # Web Services and Apps
   - ./homepage/ks.yaml
-  - ./mealie/ks.yaml
   - ./homebox/ks.yaml
   - ./bricktracker/ks.yaml
 

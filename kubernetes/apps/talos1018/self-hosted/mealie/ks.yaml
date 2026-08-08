@@ -4,9 +4,12 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: mealie-app
+  name: mealie
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infra-longhorn-config
+      namespace: flux-system
   decryption:
     provider: sops
     secretRef:
@@ -17,10 +20,11 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/apps/talos1018/mealie/app
+    namespace: flux-system
+  path: ./kubernetes/apps/talos1018/self-hosted/mealie/app
   prune: true
-  wait: true
   postBuild:
     substituteFrom:
       - kind: Secret
         name: cluster-secrets
+  wait: true
