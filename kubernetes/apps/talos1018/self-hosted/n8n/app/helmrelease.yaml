@@ -84,6 +84,7 @@ spec:
         parentRefs:
           - name: main-gateway
             namespace: network
+            sectionName: https-internal
         hostnames:
           - *hostName
         rules:
@@ -91,6 +92,12 @@ spec:
               - path:
                   type: PathPrefix
                   value: /
+            filters:
+              - type: ResponseHeaderModifier
+                responseHeaderModifier:
+                  set:
+                    - name: Strict-Transport-Security
+                      value: max-age=31536000
             backendRefs:
               - identifier: app
                 port: *port
@@ -99,6 +106,7 @@ spec:
         parentRefs:
           - name: main-gateway
             namespace: network
+            sectionName: https-external
         hostnames:
           - "n8n-webhook.${DOMAIN}"
         rules:
@@ -106,6 +114,12 @@ spec:
               - path:
                   type: PathPrefix
                   value: /
+            filters:
+              - type: ResponseHeaderModifier
+                responseHeaderModifier:
+                  set:
+                    - name: Strict-Transport-Security
+                      value: max-age=31536000
             backendRefs:
               - identifier: app
                 port: *port

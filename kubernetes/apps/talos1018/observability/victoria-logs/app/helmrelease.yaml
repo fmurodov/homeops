@@ -45,5 +45,12 @@ spec:
         parentRefs:
           - name: main-gateway
             namespace: network
+            sectionName: https-internal
         hostnames:
           - "vlogs.${CLUSTER_DOMAIN}"
+        filters:
+          - type: ResponseHeaderModifier
+            responseHeaderModifier:
+              set:
+                - name: Strict-Transport-Security
+                  value: max-age=31536000

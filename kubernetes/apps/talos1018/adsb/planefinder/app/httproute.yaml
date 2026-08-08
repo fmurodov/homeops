@@ -13,6 +13,7 @@ spec:
   parentRefs:
     - name: main-gateway
       namespace: network
+      sectionName: https-internal
   hostnames:
     - "planefinder.${CLUSTER_DOMAIN}"
   rules:
@@ -20,6 +21,12 @@ spec:
         - path:
             type: PathPrefix
             value: /
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Strict-Transport-Security
+                value: max-age=31536000
       backendRefs:
         - name: planefinder
           port: 30053

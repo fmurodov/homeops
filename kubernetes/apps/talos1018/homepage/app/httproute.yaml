@@ -8,14 +8,20 @@ spec:
   parentRefs:
     - name: main-gateway
       namespace: network
+      sectionName: https-internal
   hostnames:
-    - "${CLUSTER_DOMAIN}"
     - "home.${CLUSTER_DOMAIN}"
   rules:
     - matches:
         - path:
             type: PathPrefix
             value: /
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Strict-Transport-Security
+                value: max-age=31536000
       backendRefs:
         - name: homepage
           port: 3000

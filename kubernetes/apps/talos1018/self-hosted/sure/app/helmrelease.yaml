@@ -242,6 +242,7 @@ spec:
         parentRefs:
           - name: main-gateway
             namespace: network
+            sectionName: https-internal
         hostnames:
           - *host
         rules:
@@ -249,6 +250,12 @@ spec:
               - path:
                   type: PathPrefix
                   value: /
+            filters:
+              - type: ResponseHeaderModifier
+                responseHeaderModifier:
+                  set:
+                    - name: Strict-Transport-Security
+                      value: max-age=31536000
             backendRefs:
               - identifier: app
                 port: 3000
