@@ -5,6 +5,10 @@ kind: Service
 metadata:
   name: piaware
 spec:
+  # piaware's web/mgmt servers bind IPv4-only (0.0.0.0); dual-stack so the
+  # Gateway can actually reach them, same as readsb.
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies: [IPv6, IPv4]
   selector:
     app.kubernetes.io/name: piaware
   ports:
