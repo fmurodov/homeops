@@ -45,7 +45,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: adsb-config
-                  key: FEEDER_ALT
+                  key: FEEDER_ALT_M
             - name: RV_CONTRIB_NAME
               valueFrom:
                 secretKeyRef:
