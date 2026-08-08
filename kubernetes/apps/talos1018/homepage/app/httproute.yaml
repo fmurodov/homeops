@@ -10,7 +10,6 @@ spec:
       namespace: network
       sectionName: https-internal
   hostnames:
-    - "${CLUSTER_DOMAIN}"
     - "home.${CLUSTER_DOMAIN}"
   rules:
     - matches:
