@@ -4,6 +4,11 @@ kind: Service
 metadata:
   name: readsb
 spec:
+  # dual-stack: adsbhub's image hardcodes an IPv4-only socat connection
+  # (TCP4:...) with no way to override it, so readsb needs an A record
+  # alongside the cluster's usual IPv6-only ClusterIP.
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies: [IPv6, IPv4]
   selector:
     app.kubernetes.io/name: readsb
   ports:

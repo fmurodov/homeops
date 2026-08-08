@@ -26,9 +26,11 @@ spec:
             readOnlyRootFilesystem: false
             capabilities:
               # s6-applyuidgid (drops from root to the runtime user) needs
-              # these to call setuid()/setgroups() - without them it fails
-              # with "unable to set supplementary group list".
-              add: [SETUID, SETGID]
+              # SETUID/SETGID to call setuid()/setgroups(). CHOWN is needed
+              # too - rbfeeder chowns /var/log/rbfeeder to the runtime user
+              # before s6-log starts writing to it; without it, s6-log
+              # fails with "unable to open /var/log/rbfeeder/lock".
+              add: [SETUID, SETGID, CHOWN]
               drop: [ALL]
             seccompProfile:
               type: RuntimeDefault
