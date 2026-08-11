@@ -20,10 +20,38 @@ spec:
       labels:
         app.kubernetes.io/name: bricktracker
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        # The app never creates its image folders; it writes straight into them
+        # (rebrickable_image.download, instructions). Pre-create them on the
+        # fresh volume so the first download does not hit FileNotFoundError.
+        - name: init-data-dirs
+          image: "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.4.2"
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - mkdir -p /app/data/sets /app/data/parts /app/data/minifigures /app/data/instructions
+          volumeMounts:
+            - mountPath: /app/data
+              name: data
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
       containers:
         - name: bricktracker
-          image: "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.4.0"
-          imagePullPolicy: Always
+          image: "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.4.2"
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 3333
@@ -37,20 +65,38 @@ spec:
             - secretRef:
                 name: bricktracker-secret
           volumeMounts:
-            - mountPath: /data
+            - mountPath: /app/data
               name: data
-            - mountPath: /app/static/instructions
-              subPath: instructions
-              name: static
-            - mountPath: /app/static/minifigs
-              subPath: minifigs
-              name: static
-            - mountPath: /app/static/parts
-              subPath: parts
-              name: static
-            - mountPath: /app/static/sets
-              subPath: sets
-              name: static
+            # gunicorn worker heartbeat + peeron PDF tempfiles land in /tmp.
+            - mountPath: /tmp
+              name: tmp
+            # Peeron instruction scraper caches under /app/static/images, which
+            # is read-only in the image; give it a writable, ephemeral mount.
+            - mountPath: /app/static/images
+              name: static-images
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           resources:
             limits:
               cpu: "2"
@@ -62,6 +108,7 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: bricktracker-data
-        - name: static
-          persistentVolumeClaim:
-            claimName: bricktracker-static
+        - name: tmp
+          emptyDir: {}
+        - name: static-images
+          emptyDir: {}

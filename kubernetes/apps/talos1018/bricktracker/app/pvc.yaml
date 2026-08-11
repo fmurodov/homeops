@@ -12,19 +12,4 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 500Mi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: bricktracker-static
-  labels:
-    recurring-job.longhorn.io/source: enabled
-    recurring-job.longhorn.io/daily-backup: enabled
-spec:
-  storageClassName: longhorn
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 500Mi
+      storage: 2Gi
