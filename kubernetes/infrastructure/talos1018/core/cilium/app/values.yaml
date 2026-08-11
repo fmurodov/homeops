@@ -63,6 +63,11 @@ enableIPv4Masquerade: true
 prometheus:
   enabled: true
 
+# Prometheus metrics for Cilium operator (:9963)
+operator:
+  prometheus:
+    enabled: true
+
 # Hubble observability
 hubble:
   enabled: true

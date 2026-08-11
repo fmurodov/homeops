@@ -22,7 +22,7 @@ spec:
       extraArgs:
         httpListenAddr: "[::]:8428"
         enableTCP6: "true"
-      retentionPeriod: "7d"
+      retentionPeriod: "30d"
       persistentVolume:
         enabled: true
         existingClaim: victoria-metrics-data
@@ -205,6 +205,76 @@ spec:
                     - __meta_kubernetes_endpoint_port_name
                   action: keep
                   regex: readsb;http
+
+            # CoreDNS (Talos-managed, kube-system) — metrics on :9153
+            - job_name: coredns
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names:
+                      - kube-system
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_label_k8s_app
+                  action: keep
+                  regex: kube-dns
+                - source_labels:
+                    - __meta_kubernetes_pod_container_port_number
+                  action: keep
+                  regex: "9153"
+
+            # VictoriaMetrics single — self metrics (vm_*, up)
+            - job_name: victoria-metrics
+              static_configs:
+                - targets:
+                    - localhost:8428
+
+            # Control plane — requires the Talos bind-address / listen-metrics-urls
+            # change. All nodes are control plane, so the node role suffices.
+            - job_name: kube-controller-manager
+              scheme: https
+              kubernetes_sd_configs:
+                - role: node
+              tls_config:
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:10257"
+
+            - job_name: kube-scheduler
+              scheme: https
+              kubernetes_sd_configs:
+                - role: node
+              tls_config:
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:10259"
+
+            - job_name: etcd
+              scheme: http
+              kubernetes_sd_configs:
+                - role: node
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:2381"
       route:
         enabled: true
         annotations:

@@ -239,6 +239,18 @@ controlPlane:
           advertisedSubnets:
             - fd00:1018:0:5::/64
             - 10.18.6.0/24
+          extraArgs:
+            listen-metrics-urls: "http://[::]:2381"
+
+    # Expose control-plane component metrics for scraping
+    - |-
+      cluster:
+        controllerManager:
+          extraArgs:
+            bind-address: "::"
+        scheduler:
+          extraArgs:
+            bind-address: "::"
 
     # Extra manifests
     - |-

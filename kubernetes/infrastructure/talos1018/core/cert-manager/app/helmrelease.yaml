@@ -26,3 +26,7 @@ spec:
       enabled: true
     config:
       enableGatewayAPI: true
+    # Expose controller metrics (:9402) to the annotation-based scrape job
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9402"
