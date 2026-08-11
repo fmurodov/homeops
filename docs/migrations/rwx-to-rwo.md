@@ -1,4 +1,4 @@
-# Migrate `n8n-data` and `paperless-data` from RWX to RWO
+# Migrate `n8n-data` and `paperless-data` off Longhorn RWX
 
 ## Why
 
@@ -6,53 +6,43 @@
 Longhorn implements RWX with an in-cluster **NFS share** (a `share-manager` pod
 exposed as a `longhorn-system` ClusterIP on `:2049`). When a node running a pod
 that mounts an RWX volume reboots, the NFS mount can hang (server unreachable
-during the shutdown/networking teardown), Talos cannot unmount it, and the node
-**wedges mid-reboot**. This is what stuck nodes 2 and 3 during the control-plane
-maintenance (`kern: nfs: server ... not responding, timed out`).
+during shutdown), Talos cannot unmount it, and the node **wedges mid-reboot**
+(`kern: nfs: server ... not responding, timed out`). This stuck nodes 2 and 3
+during the control-plane maintenance.
 
-Both apps are **single-replica** and do not need RWX. Moving them to
-**ReadWriteOnce (RWO)** removes the NFS share-managers and the reboot hang.
+**RWO (ReadWriteOnce) has no NFS layer**, so it does not hang on reboot. RWO
+means "one node" — multiple pods on the *same* node can still share it; only
+multi-*node* concurrent access needs RWX.
 
-Volumes to migrate:
+| PVC | NS | Size | Consumers | Plan |
+|---|---|---|---|---|
+| `n8n-data` | `self-hosted` | 1Gi | single pod (n8n) | → **RWO**, clean |
+| `paperless-data` | `self-hosted` | 20Gi | **two**: paperless pod **+** `paperless-backup` CronJob (2 AM), both RW concurrently | see paperless section |
+| `paperless-redis-data` | `self-hosted` | 1Gi | — | already RWO, leave it |
 
-| PVC | Namespace | Size | Access |
-|---|---|---|---|
-| `n8n-data` | `self-hosted` | 1Gi | RWX → RWO |
-| `paperless-data` | `self-hosted` | 20Gi | RWX → RWO |
+> ⚠️ `paperless-data` is RWX **for a reason**: the daily `paperless-backup`
+> CronJob (`backup-cronjob.yaml`, `exporter` container) mounts it RW at the same
+> time as the running paperless pod. Going to RWO requires making both land on
+> the **same node** (see paperless section) — it is not a drop-in like n8n.
 
-`paperless-redis-data` is already RWO — leave it.
-
-## Approach
-
-**Copy-once, new name, keep the source until verified.** For each app: create a
-new RWO PVC, copy the data in with a one-off Job, point the app at it, verify,
-then delete the old RWX PVC. The old volume is never touched until the very end,
-so rollback is trivial. Both volumes also have Longhorn daily backups as a
-second safety net.
-
-Do **one app at a time**, fully, before starting the next.
+General approach: copy-once, new name, keep the source until verified. Longhorn
+daily backups on both volumes are the second safety net. Do one app fully,
+verify, then the next.
 
 ---
 
-## Runbook (per app)
+## Part A — n8n (straightforward)
 
-Shown for **n8n**. For **paperless**, substitute: `NS=self-hosted`,
-`APP=paperless`, `OLD=paperless-data`, `NEW=paperless-data-rwo`, `SIZE=20Gi`,
-and bump the copy Job wait timeout (20Gi takes longer).
+Single consumer, so a plain RWO swap.
 
-### 0. Safety check
-- Confirm a recent Longhorn backup exists for the volume (Longhorn UI → Backup).
-- Note the controller/pod name: `kubectl -n self-hosted get deploy` (expect `n8n`, `paperless`).
-
-### 1. Quiesce the app and stop Flux from fighting the migration
+### 1. Quiesce + stop Flux fighting the migration
 ```bash
 flux suspend kustomization n8n
 kubectl -n self-hosted scale deploy/n8n --replicas=0
-# ensure the old RWX volume is released (no more consumers)
 kubectl -n self-hosted wait --for=delete pod -l app.kubernetes.io/name=n8n --timeout=180s
 ```
 
-### 2. Create the new RWO PVC
+### 2. New RWO PVC
 ```bash
 kubectl -n self-hosted apply -f - <<'EOF'
 apiVersion: v1
@@ -71,7 +61,7 @@ spec:
 EOF
 ```
 
-### 3. Copy data old → new (one-off Job that mounts both)
+### 3. Copy old → new
 ```bash
 kubectl -n self-hosted apply -f - <<'EOF'
 apiVersion: batch/v1
@@ -91,58 +81,86 @@ spec:
             - { name: old, mountPath: /old }
             - { name: new, mountPath: /new }
       volumes:
-        - name: old
-          persistentVolumeClaim: { claimName: n8n-data }
-        - name: new
-          persistentVolumeClaim: { claimName: n8n-data-rwo }
+        - { name: old, persistentVolumeClaim: { claimName: n8n-data } }
+        - { name: new, persistentVolumeClaim: { claimName: n8n-data-rwo } }
 EOF
-
 kubectl -n self-hosted wait --for=condition=complete job/migrate-n8n-data --timeout=600s
-kubectl -n self-hosted logs job/migrate-n8n-data   # verify COPY_DONE and matching du sizes
+kubectl -n self-hosted logs job/migrate-n8n-data     # COPY_DONE + matching du
 kubectl -n self-hosted delete job migrate-n8n-data
 ```
 
-### 4. Point the app at the new PVC (git)
-Edit the app and merge via your normal branch + PR flow:
+### 4. Repoint the app (git → merge)
+- `n8n/app/helmrelease.yaml`: `persistence.data.existingClaim: n8n-data` → `n8n-data-rwo`
+- `n8n/app/pvc.yaml`: add the `n8n-data-rwo` PVC (keep old `n8n-data` for now)
 
-- `kubernetes/apps/talos1018/self-hosted/n8n/app/helmrelease.yaml`
-  `persistence.data.existingClaim: n8n-data` → `n8n-data-rwo`
-- `kubernetes/apps/talos1018/self-hosted/n8n/app/pvc.yaml`
-  add the `n8n-data-rwo` RWO PVC (same YAML as step 2). **Keep the old
-  `n8n-data` PVC in this file for now** — it is removed in step 6.
-
-### 5. Resume Flux and bring the app back on RWO
+### 5. Resume + verify
 ```bash
 flux resume kustomization n8n
 flux reconcile kustomization n8n --with-source
-kubectl -n self-hosted get pods -l app.kubernetes.io/name=n8n   # Running on the new volume
 ```
-Verify the app end-to-end: data present, workflows/UI work.
+Verify n8n works (data + workflows). Roll back any time before step 6 by
+reverting `existingClaim` to `n8n-data` (still intact).
 
-### 6. Decommission the old RWX volume (only once you're happy)
-Remove the old `n8n-data` PVC from `pvc.yaml` (git) and merge → Flux prune
-deletes the PVC → Longhorn deletes the RWX volume **and** its NFS share-manager.
+### 6. Decommission old volume
+Remove the old `n8n-data` PVC from `pvc.yaml` (git) → Flux prune deletes it →
+Longhorn removes the RWX volume + share-manager.
 
 ---
 
-## Rollback (any time before step 6)
-The old `n8n-data` volume is untouched, so:
+## Part B — paperless (needs backup handling)
+
+Because the backup CronJob also mounts `paperless-data`, pick one:
+
+### Option B1 — RWO + co-locate the backup (removes the hang) — recommended
+Migrate `paperless-data` to RWO exactly like n8n (Part A steps, with
+`paperless`/`paperless-data`/`paperless-data-rwo`/`20Gi`, and a longer copy
+timeout, e.g. `--timeout=1800s`), **plus**:
+
+- **Before migrating**, suspend the backup so it can't fire mid-copy:
+  ```bash
+  kubectl -n self-hosted patch cronjob paperless-backup -p '{"spec":{"suspend":true}}'
+  kubectl -n self-hosted get pods -l app=paperless-backup   # ensure none running
+  ```
+- **Make the backup share the RWO volume** by pinning it to the paperless node.
+  In `backup-cronjob.yaml`, add to the job pod spec (confirm the paperless pod
+  label first with `kubectl -n self-hosted get pod -l app.kubernetes.io/name=paperless --show-labels`):
+  ```yaml
+  spec:            # jobTemplate.spec.template.spec
+    affinity:
+      podAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: paperless
+            topologyKey: kubernetes.io/hostname
+  ```
+  Longhorn RWO allows multiple pods on the **same** node, and RWO has no NFS, so
+  no reboot hang. (Trade-off: the backup only runs when it can land on the
+  paperless node; with `concurrencyPolicy: Forbid` it just retries next day.)
+- Un-suspend the backup once done:
+  ```bash
+  kubectl -n self-hosted patch cronjob paperless-backup -p '{"spec":{"suspend":false}}'
+  ```
+
+### Option B2 — keep `paperless-data` RWX (simplest)
+RWX is arguably correct here (two concurrent consumers). Keep it, and just use
+the interim mitigation below before any node reboot. No migration, no backup
+changes — you accept that paperless is the one thing to scale down before
+maintenance.
+
+---
+
+## Interim mitigation (until/if you migrate)
+Before rebooting any node, release the RWX mounts so the node can unmount:
 ```bash
-kubectl -n self-hosted scale deploy/n8n --replicas=0
-# revert existingClaim back to n8n-data in git, reconcile
-flux reconcile kustomization n8n --with-source
+kubectl -n self-hosted patch cronjob paperless-backup -p '{"spec":{"suspend":true}}'
+kubectl -n self-hosted scale deploy/n8n paperless --replicas=0
+# reboot node, wait Ready
+kubectl -n self-hosted scale deploy/n8n paperless --replicas=1
+kubectl -n self-hosted patch cronjob paperless-backup -p '{"spec":{"suspend":false}}'
 ```
 
 ## Done when
 ```bash
-kubectl -n longhorn-system get svc | grep 2049   # no RWX share-manager services left
-```
-No node will hang on an NFS unmount during future reboots/upgrades.
-
-## Interim mitigation (until this is done)
-Before rebooting any node, release the RWX mounts first:
-```bash
-kubectl -n self-hosted scale deploy/n8n paperless --replicas=0
-# reboot the node, wait Ready
-kubectl -n self-hosted scale deploy/n8n paperless --replicas=1
+kubectl -n longhorn-system get svc | grep 2049   # empty for whatever you migrated
 ```
