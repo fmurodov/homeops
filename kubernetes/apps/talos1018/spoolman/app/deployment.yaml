@@ -23,7 +23,7 @@ spec:
       containers:
         - name: spoolman
           image: "ghcr.io/donkie/spoolman:0.26.0"
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8000
