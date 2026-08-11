@@ -439,3 +439,30 @@ spec:
                     severity: critical
                   annotations:
                     summary: "Cloudflare tunnel has no active edge connections"
+
+            # ----------------------------------------------------------------
+            # RIPE Database NRTMv3 probe (nrtm-check CronJob, every 5m)
+            # ----------------------------------------------------------------
+            - name: whois-nrtm
+              rules:
+                # The probe pushes success=0 on any logical failure (mirroring
+                # disabled, missing %START/%END markers, NRTM port unreachable).
+                # 15m ≈ 3 consecutive failures — rides out transient RIPE blips.
+                - alert: NrtmCheckFailing
+                  expr: 'nrtm_check_success == 0'
+                  for: 15m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "RIPE NRTMv3 check for {{ $labels.source }} is failing"
+
+                # No sample for 20m → the CronJob isn't running or can't reach VM.
+                # absent() catches full disappearance that `== 0` cannot: a stale
+                # series simply drops out of instant queries.
+                - alert: NrtmCheckAbsent
+                  expr: 'absent(nrtm_check_success{source="RIPE"})'
+                  for: 20m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "RIPE NRTMv3 check has reported no data for over 20m"
