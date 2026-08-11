@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ntfy-config
+  labels:
+    app.kubernetes.io/name: ntfy
+data:
+  server.yml: |
+    base-url: "https://ntfy.${DOMAIN}"
+    listen-http: "[::]:8080"
+    auth-file: "/var/lib/ntfy/user.db"
+    auth-default-access: "deny-all"
+    cache-file: "/var/lib/ntfy/cache.db"
+    cache-duration: "12h"
+    behind-proxy: true
