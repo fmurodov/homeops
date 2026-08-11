@@ -61,13 +61,15 @@ spec:
             # ----------------------------------------------------------------
             - name: node
               rules:
+                # Sourced from kube-state-metrics (a healthy node), so it fires
+                # reliably even when the down node itself can't be scraped.
                 - alert: NodeDown
-                  expr: 'absent(up{job="kubernetes-kubelet"}) or up{job="kubernetes-kubelet"} == 0'
+                  expr: 'kube_node_status_condition{condition="Ready",status="true"} == 0'
                   for: 5m
                   labels:
                     severity: critical
                   annotations:
-                    summary: "Node {{ $labels.instance }} is down"
+                    summary: "Node {{ $labels.node }} is NotReady"
 
                 - alert: NodeHighCPU
                   expr: '1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) > 0.85'
