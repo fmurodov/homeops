@@ -23,7 +23,7 @@ spec:
       containers:
         - name: esphome
           image: "ghcr.io/esphome/esphome:2026.7.4"
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: ["esphome-device-builder"]
           args: ["--host", "::", "/config"]
           ports:

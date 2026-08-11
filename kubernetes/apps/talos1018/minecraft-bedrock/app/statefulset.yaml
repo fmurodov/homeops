@@ -25,7 +25,7 @@ spec:
       containers:
         - name: main
           image: "itzg/minecraft-bedrock-server:2026.8.0"
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
                 name: minecraft-bedrock
