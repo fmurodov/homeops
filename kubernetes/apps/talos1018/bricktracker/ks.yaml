@@ -7,6 +7,9 @@ metadata:
   name: bricktracker-app
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infra-longhorn-config
+      namespace: flux-system
   decryption:
     provider: sops
     secretRef:
