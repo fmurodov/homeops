@@ -17,6 +17,7 @@ resources:
   - ./ntfy/ks.yaml
   - ./alertmanager/ks.yaml
   - ./vmalert/ks.yaml
+  - ./flux-alerts/ks.yaml
 
   # Log collection
   - ./fluent-bit/ks.yaml
