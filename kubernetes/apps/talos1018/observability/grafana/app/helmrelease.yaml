@@ -178,6 +178,24 @@ spec:
           gnetId: 17813
           revision: 2
           datasource: VictoriaMetrics
+        kubernetes-system-coredns:
+          gnetId: 15762
+          revision: 22
+          datasource: VictoriaMetrics
+        kubernetes-system-apiserver:
+          gnetId: 15761
+          revision: 21
+          datasource: VictoriaMetrics
+        victoriametrics-single:
+          gnetId: 10229
+          revision: 56
+          datasource: VictoriaMetrics
+        etcd:
+          gnetId: 3070
+          revision: 3
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
         victorialogs-explorer:
           gnetId: 22759
           revision: 9
