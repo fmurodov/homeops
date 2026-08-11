@@ -16,6 +16,9 @@ spec:
     podAnnotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "9093"
+    # Links in notifications point at the real UI, not the pod hostname
+    extraArgs:
+      web.external-url: https://alertmanager.${CLUSTER_DOMAIN}
     resources:
       requests:
         cpu: 25m
