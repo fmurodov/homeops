@@ -20,6 +20,8 @@ spec:
       extraArgs:
         httpListenAddr: "[::]:8880"
         enableTCP6: "true"
+        # Alert "Source" links point at the real UI, not the pod hostname
+        external.url: "https://vmalert.${CLUSTER_DOMAIN}"
       datasource:
         url: http://victoria-metrics-victoria-metrics-single-server:8428
       remote:
