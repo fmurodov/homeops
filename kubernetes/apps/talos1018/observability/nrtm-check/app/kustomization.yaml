@@ -4,5 +4,13 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: observability
 resources:
-  - ./configmap.yaml
   - ./cronjob.yaml
+configMapGenerator:
+  - name: nrtm-check-script
+    files:
+      - nrtm_check.sh
+    options:
+      disableNameSuffixHash: true
+      # Script uses ${VAR:-default} shell syntax; keep Flux postBuild out of it
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
