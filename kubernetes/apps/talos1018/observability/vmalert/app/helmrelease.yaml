@@ -40,9 +40,25 @@ spec:
       config:
         alerts:
           groups:
-            - name: basic
+            # ----------------------------------------------------------------
+            # Watchdog — always firing. Routed by Alertmanager to healthchecks.io
+            # as a dead-man's-switch: if this stops arriving, the whole pipeline
+            # (scrape → vmalert → alertmanager → egress) is broken.
+            # ----------------------------------------------------------------
+            - name: watchdog
               rules:
-                # A node has not reported in for 5 minutes
+                - alert: Watchdog
+                  expr: vector(1)
+                  labels:
+                    severity: none
+                  annotations:
+                    summary: "Alerting pipeline is alive"
+
+            # ----------------------------------------------------------------
+            # Nodes
+            # ----------------------------------------------------------------
+            - name: node
+              rules:
                 - alert: NodeDown
                   expr: 'absent(up{job="kubernetes-kubelet"}) or up{job="kubernetes-kubelet"} == 0'
                   for: 5m
@@ -51,16 +67,6 @@ spec:
                   annotations:
                     summary: "Node {{ $labels.instance }} is down"
 
-                # A container has restarted more than 3 times in the last hour
-                - alert: PodCrashLooping
-                  expr: 'increase(kube_pod_container_status_restarts_total[1h]) > 3'
-                  for: 15m
-                  labels:
-                    severity: warning
-                  annotations:
-                    summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} container {{ $labels.container }} is CrashLooping"
-
-                # Node CPU usage above 85%
                 - alert: NodeHighCPU
                   expr: '1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) > 0.85'
                   for: 10m
@@ -69,7 +75,6 @@ spec:
                   annotations:
                     summary: "Node {{ $labels.instance }} CPU usage above 85%"
 
-                # Node memory usage above 85%
                 - alert: NodeHighMemory
                   expr: '(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.85'
                   for: 10m
@@ -78,7 +83,6 @@ spec:
                   annotations:
                     summary: "Node {{ $labels.instance }} memory usage above 85%"
 
-                # Any filesystem above 85% (excluding tmpfs/overlay)
                 - alert: NodeDiskSpaceLow
                   expr: '(node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} - node_filesystem_free_bytes{fstype!~"tmpfs|overlay"}) / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} > 0.85'
                   for: 10m
@@ -86,3 +90,328 @@ spec:
                     severity: warning
                   annotations:
                     summary: "Node {{ $labels.instance }} disk {{ $labels.mountpoint }} usage above 85%"
+
+                # Extrapolate free space; fires if a filesystem trends to full within 24h
+                - alert: NodeDiskWillFillIn24h
+                  expr: 'predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}[6h], 24 * 3600) < 0'
+                  for: 1h
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Node {{ $labels.instance }} disk {{ $labels.mountpoint }} predicted to fill within 24h"
+
+                - alert: NodeInodesLow
+                  expr: 'node_filesystem_files_free{fstype!~"tmpfs|overlay"} / node_filesystem_files{fstype!~"tmpfs|overlay"} < 0.10'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Node {{ $labels.instance }} inodes on {{ $labels.mountpoint }} below 10%"
+
+                - alert: NodeHighLoad
+                  expr: 'node_load15 / count by (instance) (node_cpu_seconds_total{mode="idle"}) > 2'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Node {{ $labels.instance }} 15m load is more than 2x core count"
+
+                - alert: NodeClockSkew
+                  expr: 'abs(node_timex_offset_seconds) > 0.05'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Node {{ $labels.instance }} clock is skewed by more than 50ms"
+
+            # ----------------------------------------------------------------
+            # Kubernetes workloads (kube-state-metrics)
+            # ----------------------------------------------------------------
+            - name: kubernetes-workloads
+              rules:
+                - alert: KubePodCrashLooping
+                  expr: 'increase(kube_pod_container_status_restarts_total[15m]) > 3'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} container {{ $labels.container }} is crash looping"
+
+                - alert: KubePodNotReady
+                  expr: 'sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"}) > 0'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been non-ready for 15m"
+
+                - alert: KubeContainerOOMKilled
+                  expr: 'kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1'
+                  for: 1m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} was OOMKilled"
+
+                - alert: KubeContainerWaiting
+                  expr: 'sum by (namespace, pod, container) (kube_pod_container_status_waiting_reason{reason!~"ContainerCreating|PodInitializing"}) > 0'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} stuck waiting ({{ $labels.reason }})"
+
+                - alert: KubeDeploymentReplicasMismatch
+                  expr: 'kube_deployment_status_replicas_available < kube_deployment_spec_replicas'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has fewer available replicas than desired"
+
+                - alert: KubeStatefulSetReplicasMismatch
+                  expr: 'kube_statefulset_status_replicas_ready < kube_statefulset_replicas'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has fewer ready replicas than desired"
+
+                - alert: KubeDaemonSetNotReady
+                  expr: 'kube_daemonset_status_number_ready < kube_daemonset_status_desired_number_scheduled'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} is not fully scheduled"
+
+                - alert: KubeJobFailed
+                  expr: 'kube_job_status_failed > 0'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Job {{ $labels.namespace }}/{{ $labels.job_name }} failed"
+
+            # ----------------------------------------------------------------
+            # Storage (kubelet volume stats + Longhorn)
+            # ----------------------------------------------------------------
+            - name: storage
+              rules:
+                - alert: KubePersistentVolumeFillingUp
+                  expr: 'kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes < 0.10'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} has less than 10% free"
+
+                - alert: KubePersistentVolumeCritical
+                  expr: 'kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes < 0.03'
+                  for: 5m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} has less than 3% free"
+
+                - alert: KubePVCPending
+                  expr: 'kube_persistentvolumeclaim_status_phase{phase="Pending"} == 1'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is stuck Pending"
+
+                - alert: LonghornVolumeDegraded
+                  expr: 'longhorn_volume_robustness == 2'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Longhorn volume {{ $labels.volume }} is degraded"
+
+                - alert: LonghornVolumeFaulted
+                  expr: 'longhorn_volume_robustness == 3'
+                  for: 1m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Longhorn volume {{ $labels.volume }} is faulted"
+
+                - alert: LonghornNodeNotReady
+                  expr: 'longhorn_node_status{condition="ready"} == 0'
+                  for: 5m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Longhorn node {{ $labels.node }} is not ready"
+
+                - alert: LonghornDiskSpaceLow
+                  expr: 'longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes > 0.85'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Longhorn disk on node {{ $labels.node }} is above 85% usage"
+
+            # ----------------------------------------------------------------
+            # Certificates (cert-manager) — requires cert-manager scraping
+            # ----------------------------------------------------------------
+            - name: certificates
+              rules:
+                - alert: CertManagerCertExpiringSoon
+                  expr: 'certmanager_certificate_expiration_timestamp_seconds - time() < 21 * 24 * 3600'
+                  for: 1h
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Certificate {{ $labels.namespace }}/{{ $labels.name }} expires in less than 21 days"
+
+                - alert: CertManagerCertExpiringCritical
+                  expr: 'certmanager_certificate_expiration_timestamp_seconds - time() < 7 * 24 * 3600'
+                  for: 1h
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Certificate {{ $labels.namespace }}/{{ $labels.name }} expires in less than 7 days"
+
+                - alert: CertManagerCertNotReady
+                  expr: 'certmanager_certificate_ready_status{condition="True"} == 0'
+                  for: 1h
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Certificate {{ $labels.namespace }}/{{ $labels.name }} is not ready"
+
+            # ----------------------------------------------------------------
+            # Control plane (etcd / apiserver / scheduler / controller-manager)
+            # requires the Talos control-plane metrics change
+            # ----------------------------------------------------------------
+            - name: control-plane
+              rules:
+                - alert: EtcdNoLeader
+                  expr: 'etcd_server_has_leader == 0'
+                  for: 1m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "etcd member {{ $labels.instance }} has no leader"
+
+                - alert: EtcdHighLeaderChanges
+                  expr: 'increase(etcd_server_leader_changes_seen_total[15m]) > 3'
+                  for: 5m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "etcd has had more than 3 leader changes in 15m"
+
+                - alert: EtcdHighFsyncLatency
+                  expr: 'histogram_quantile(0.99, sum by (instance, le) (rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m]))) > 0.5'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "etcd WAL fsync p99 latency on {{ $labels.instance }} above 500ms"
+
+                - alert: EtcdHighCommitLatency
+                  expr: 'histogram_quantile(0.99, sum by (instance, le) (rate(etcd_disk_backend_commit_duration_seconds_bucket[5m]))) > 0.25'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "etcd backend commit p99 latency on {{ $labels.instance }} above 250ms"
+
+                - alert: KubeAPIServerHighErrorRate
+                  expr: 'sum(rate(apiserver_request_total{job="kubernetes-api-server",code=~"5.."}[5m])) / sum(rate(apiserver_request_total{job="kubernetes-api-server"}[5m])) > 0.05'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "API server 5xx error rate above 5%"
+
+                - alert: KubeSchedulerDown
+                  expr: 'up{job="kube-scheduler"} == 0'
+                  for: 10m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "kube-scheduler {{ $labels.instance }} is down"
+
+                - alert: KubeControllerManagerDown
+                  expr: 'up{job="kube-controller-manager"} == 0'
+                  for: 10m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "kube-controller-manager {{ $labels.instance }} is down"
+
+            # ----------------------------------------------------------------
+            # CoreDNS — requires coredns scraping
+            # ----------------------------------------------------------------
+            - name: coredns
+              rules:
+                - alert: CoreDNSDown
+                  expr: 'up{job="coredns"} == 0'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "CoreDNS instance {{ $labels.instance }} is down"
+
+                - alert: CoreDNSHighServfail
+                  expr: 'sum(rate(coredns_dns_responses_total{rcode="SERVFAIL"}[5m])) / sum(rate(coredns_dns_responses_total[5m])) > 0.05'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "CoreDNS SERVFAIL rate above 5%"
+
+            # ----------------------------------------------------------------
+            # Observability self-monitoring
+            # ----------------------------------------------------------------
+            - name: observability
+              rules:
+                - alert: TargetDown
+                  expr: 'up{job=~"kubernetes-api-server|kubernetes-kubelet|kube-state-metrics|node-exporter|longhorn"} == 0'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Scrape target {{ $labels.job }} / {{ $labels.instance }} is down"
+
+                - alert: VMLowDiskSpace
+                  expr: 'vm_free_disk_space_bytes < 2e9'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "VictoriaMetrics has less than 2GB free disk on {{ $labels.instance }}"
+
+                - alert: AlertmanagerNotificationsFailing
+                  expr: 'rate(alertmanager_notifications_failed_total[10m]) > 0'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Alertmanager is failing to deliver notifications ({{ $labels.integration }})"
+
+                - alert: FluentBitOutputErrors
+                  expr: 'rate(fluentbit_output_errors_total[10m]) > 0'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "fluent-bit is failing to ship logs"
+
+            # ----------------------------------------------------------------
+            # Ingress / Cloudflare tunnel
+            # ----------------------------------------------------------------
+            - name: tunnel
+              rules:
+                - alert: CloudflaredTunnelDown
+                  expr: 'cloudflared_tunnel_ha_connections == 0'
+                  for: 5m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Cloudflare tunnel has no active edge connections"

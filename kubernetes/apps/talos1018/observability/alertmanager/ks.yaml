@@ -8,8 +8,13 @@ metadata:
   name: alertmanager
   namespace: flux-system
 spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   dependsOn:
     - name: kube-state-metrics
+    - name: ntfy
   interval: 1h
   retryInterval: 1m
   timeout: 5m
