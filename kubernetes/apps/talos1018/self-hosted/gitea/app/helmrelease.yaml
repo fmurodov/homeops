@@ -47,6 +47,12 @@ spec:
           DB_TYPE: sqlite3
         service:
           DISABLE_REGISTRATION: true
+        # DISABLE_REGISTRATION blocks local/manual signup; it also blocks the
+        # OIDC "Register New Account" confirmation step unless auto-registration
+        # is explicitly enabled here, so trusted Pocket ID logins need this to
+        # provision an account on first sign-in.
+        oauth2_client:
+          ENABLE_AUTO_REGISTRATION: true
         # File-backed sessions survive pod restarts without needing Redis/Valkey
         # (cache stays memory, queue stays level — both fine for a single replica).
         session:
