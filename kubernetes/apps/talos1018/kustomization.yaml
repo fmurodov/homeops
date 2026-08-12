@@ -19,6 +19,9 @@ resources:
   # Self Hosted
   - ./self-hosted
 
+  # Developer Tools
+  - ./dev
+
   # AI / LLM
   - ./ai
 
