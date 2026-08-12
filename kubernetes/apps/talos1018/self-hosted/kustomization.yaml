@@ -6,7 +6,6 @@ resources:
   - ./namespace.yaml
   - ./ocirepository.yaml
   - ./changedetection/ks.yaml
-  - ./gitea/ks.yaml
   - ./mealie/ks.yaml
   - ./paperless/ks.yaml
   - ./n8n/ks.yaml
