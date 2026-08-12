@@ -15,6 +15,12 @@ spec:
   values:
     replicaCount: 1
 
+    # Default RollingUpdate (maxSurge 100%) starts the new pod before killing
+    # the old one; both would fight over the same RWO volume's LevelDB queue
+    # lock at /data/queues, so the new pod fails to start. Recreate avoids that.
+    strategy:
+      type: Recreate
+
     resources:
       requests:
         cpu: 100m
