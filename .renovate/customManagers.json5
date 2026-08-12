@@ -16,6 +16,9 @@
         // # renovate: datasource=docker depName=ghcr.io/foo/bar
         // FOOBAR_VERSION=v1.0.0
         "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+(:\\s|=)(&\\S+\\s)?(?<currentValue>\\S+)",
+        // # renovate: datasource=github-releases depName=foo/bar
+        // - https://github.com/foo/bar/releases/download/v1.0.0/install.yaml
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*/download/(?<currentValue>\\S+?)/",
       ],
       datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
     },
