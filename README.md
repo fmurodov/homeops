@@ -1,5 +1,7 @@
 # HomeOps
 
+![Alertmanager Status](https://healthchecks.io/b/2/d11b9303-5549-4751-9af4-50d1c8a8f018.svg)
+
 Infrastructure as Code repository for home infrastructure management.
 
 ![Cluster Photo](docs/images/cluster-photo.jpeg)
