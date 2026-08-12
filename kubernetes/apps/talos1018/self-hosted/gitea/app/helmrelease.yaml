@@ -47,6 +47,10 @@ spec:
           DB_TYPE: sqlite3
         service:
           DISABLE_REGISTRATION: true
+        # File-backed sessions survive pod restarts without needing Redis/Valkey
+        # (cache stays memory, queue stays level — both fine for a single replica).
+        session:
+          PROVIDER: file
 
       oauth:
         - name: "Pocket ID"
