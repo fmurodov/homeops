@@ -44,8 +44,15 @@ spec:
               volumeMounts:
                 - name: script
                   mountPath: /scripts
+                # bash writes here-doc/here-string temp files under /tmp;
+                # the root filesystem is read-only, so give it a writable one
+                - name: tmp
+                  mountPath: /tmp
           volumes:
             - name: script
               configMap:
                 name: nrtm-check-script
                 defaultMode: 0755
+            - name: tmp
+              emptyDir:
+                sizeLimit: 16Mi
