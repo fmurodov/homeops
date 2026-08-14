@@ -54,7 +54,7 @@ spec:
             - name: OIDC_GROUPS_CLAIM
               value: groups
             - name: OIDC_ADMIN_GROUP
-              value: "mealie_admins"
+              value: "mealie-admin"
             - name: OIDC_AUTO_REDIRECT
               value: "true"
             - name: OIDC_CLIENT_ID
