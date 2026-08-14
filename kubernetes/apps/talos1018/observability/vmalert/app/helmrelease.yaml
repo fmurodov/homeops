@@ -276,6 +276,37 @@ spec:
                   annotations:
                     summary: "Longhorn disk on node {{ $labels.node }} is above 85% usage"
 
+                # The daily-backup recurring job runs to completion before its
+                # CronJob records success, so last-success time is a heartbeat for
+                # "backups finished shipping to B2". 26h ≈ one daily cycle + grace.
+                - alert: LonghornBackupStale
+                  expr: 'time() - max(kube_cronjob_status_last_successful_time{namespace="longhorn-system", cronjob="daily-backup"}) > 26 * 3600'
+                  for: 30m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Longhorn daily backup has not completed successfully in over 26h"
+
+                # max() yields nothing when the series is gone, so the staleness
+                # rule above can't fire if the CronJob is deleted or KSM stops
+                # scraping. absent() catches that full disappearance.
+                - alert: LonghornBackupAbsent
+                  expr: 'absent(kube_cronjob_status_last_successful_time{namespace="longhorn-system", cronjob="daily-backup"})'
+                  for: 1h
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Longhorn daily backup heartbeat is missing (CronJob or kube-state-metrics gone)"
+
+                # State 4 = Error in Longhorn's backup exporter.
+                - alert: LonghornBackupFailed
+                  expr: 'longhorn_backup_state == 4'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Longhorn backup {{ $labels.backup }} for volume {{ $labels.volume }} is in Error state"
+
             # ----------------------------------------------------------------
             # Certificates (cert-manager) — requires cert-manager scraping
             # ----------------------------------------------------------------
