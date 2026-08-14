@@ -71,7 +71,7 @@ spec:
           autoDiscoverUrl: https://pid.${CLUSTER_DOMAIN}/.well-known/openid-configuration
           scopes: "openid profile email groups"
           groupClaimName: groups
-          adminGroup: gitea_admins
+          adminGroup: gitea-admin
 
     gatewayAPI:
       enabled: true
