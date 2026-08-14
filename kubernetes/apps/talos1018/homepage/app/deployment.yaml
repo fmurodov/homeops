@@ -32,6 +32,13 @@ spec:
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: ${CLUSTER_DOMAIN},home.${CLUSTER_DOMAIN}
+            # v2's Kubernetes client builds https://$HOST:$PORT without bracketing
+            # the IPv6 KUBERNETES_SERVICE_HOST, yielding a malformed URL on this
+            # IPv6-only kubernetes Service. Use the DNS name so discovery works.
+            - name: KUBERNETES_SERVICE_HOST
+              value: kubernetes.default.svc.cluster.local
+            - name: KUBERNETES_SERVICE_PORT
+              value: "443"
           envFrom:
             - secretRef:
                 name: homepage-secret
