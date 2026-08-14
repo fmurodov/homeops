@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: cloudflared
-  replicas: 1 # You could also consider elastic scaling for this deployment
+  replicas: 2
   template:
     metadata:
       labels:
@@ -21,6 +21,13 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "2000"
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: cloudflared
+              topologyKey: kubernetes.io/hostname
       securityContext:
         runAsUser: 65532
         runAsGroup: 65532
