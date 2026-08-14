@@ -7,5 +7,13 @@
       matchPackageNames: ["/factory\\.talos\\.dev/"],
       overridePackageName: "ghcr.io/siderolabs/installer",
     },
+    {
+      // sdr-enthusiasts images publish monotonic "latest-build-N" tags that
+      // the default docker versioning can't parse; compare by build number.
+      description: "Track sdr-enthusiasts latest-build-N tags by build number",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder"],
+      versioning: "regex:^latest-build-(?<major>\\d+)$",
+    },
   ],
 }
