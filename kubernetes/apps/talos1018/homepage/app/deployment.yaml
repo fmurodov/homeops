@@ -39,6 +39,14 @@ spec:
               value: kubernetes.default.svc.cluster.local
             - name: KUBERNETES_SERVICE_PORT
               value: "443"
+            - name: HOMEPAGE_AUTH_ENABLED
+              value: "true"
+            - name: HOMEPAGE_EXTERNAL_URL
+              value: https://home.${CLUSTER_DOMAIN}
+            - name: HOMEPAGE_OIDC_ISSUER
+              value: https://pid.${DOMAIN}
+            - name: HOMEPAGE_OIDC_NAME
+              value: Pocket ID
           envFrom:
             - secretRef:
                 name: homepage-secret
