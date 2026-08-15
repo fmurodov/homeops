@@ -65,7 +65,7 @@ spec:
                 memory: 6Gi
               limits:
                 cpu: "3"
-                memory: 8Gi
+                memory: 10Gi
         pod:
           securityContext:
             runAsUser: 1000
