@@ -19,6 +19,8 @@ spec:
     namespace: flux-system
   path: ./kubernetes/apps/talos1018/ai/ollama/app
   prune: true
+  # Recreate the immutable model-pull Job on image bumps instead of erroring.
+  force: true
   postBuild:
     substituteFrom:
       - kind: Secret
