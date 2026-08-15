@@ -22,7 +22,7 @@ spec:
               LISTEN_HOST: "::"
               PORT: &port 5000
               USE_X_SETTINGS: 1
-              PLAYWRIGHT_DRIVER_URL: ws://localhost:3000/chrome
+              PLAYWRIGHT_DRIVER_URL: ws://localhost:3000/chrome?headless=false&stealth=true&blockAds=true
           browser:
             image:
               repository: ghcr.io/browserless/chrome
@@ -40,6 +40,7 @@ spec:
               - { name: CHROME_REFRESH_TIME, value: "600000" }
               - { name: DEFAULT_BLOCK_ADS, value: "true" }
               - { name: DEFAULT_STEALTH, value: "true" }
+              - { name: DEFAULT_HEADLESS, value: "false" }
     service:
       app:
         controller: changedetection
