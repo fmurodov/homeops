@@ -73,6 +73,10 @@ spec:
               PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS: "false"
               PAPERLESS_DISABLE_REGULAR_LOGIN: "true"
               PAPERLESS_REDIRECT_LOGIN_TO_SSO: "true"
+              # Sync only adds/removes membership; matching-named groups must
+              # already exist in Paperless. Needs the groups scope below so
+              # Pocket ID emits the claim.
+              PAPERLESS_SOCIAL_ACCOUNT_SYNC_GROUPS: "true"
               PAPERLESS_SOCIALACCOUNT_PROVIDERS: |
                 {
                   "openid_connect": {
@@ -86,7 +90,8 @@ spec:
                           "server_url": "https://pid.${CLUSTER_DOMAIN}/.well-known/openid-configuration"
                         }
                       }
-                    ]
+                    ],
+                    "SCOPE": ["openid", "profile", "email", "groups"]
                   }
                 }
               PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_ID:
