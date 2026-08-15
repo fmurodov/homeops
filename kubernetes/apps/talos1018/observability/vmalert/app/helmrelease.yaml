@@ -57,6 +57,22 @@ spec:
                     summary: "Alerting pipeline is alive"
 
             # ----------------------------------------------------------------
+            # Daily heartbeat — a dead-man's-switch you actually see. Fires
+            # critical for ~5 min once a day so a real notification lands in
+            # email + ntfy; if the morning ping stops, delivery is broken.
+            # hour()/minute() are UTC (vmalert has no timezone), so this is
+            # pinned to 07:00 UTC = 09:00 CEST (summer) / 08:00 CET (winter).
+            # ----------------------------------------------------------------
+            - name: heartbeat
+              rules:
+                - alert: DailyHeartbeat
+                  expr: hour() == 7 and minute() < 5
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Daily alerting heartbeat — notification delivery is working"
+
+            # ----------------------------------------------------------------
             # Nodes
             # ----------------------------------------------------------------
             - name: node
