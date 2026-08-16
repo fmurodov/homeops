@@ -28,7 +28,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: skystats
-          image: ghcr.io/tomcarman/skystats:latest
+          image: ghcr.io/fmurodov/skystats:test@sha256:936e7132329f3905f294dceac8f873230ce938e17042f8dce8cda8c94d2caef9
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
