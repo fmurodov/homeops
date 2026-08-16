@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app spegel
+spec:
+  chart:
+    spec:
+      chart: *app
+      sourceRef:
+        kind: HelmRepository
+        name: *app
+  interval: 1h0m0s
+  values:
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9090"
+    service:
+      registry:
+        # In hostPort mode the chart passes two --mirror-targets but Spegel only
+        # IPv6-brackets the first, so the second fails to parse against this
+        # cluster's IPv6 node IPs. This mode passes a single target instead.
+        usePreferSameNodeTrafficDistribution: true
+    spegel:
+      containerdRegistryConfigPath: /etc/cri/conf.d/hosts

@@ -270,3 +270,13 @@ controlPlane:
         udev:
           rules:
             - SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="thread0", MODE="0666"
+
+    # Keep compressed layers after unpacking so Spegel has blobs to serve to peers
+    - |-
+      machine:
+        files:
+          - path: /etc/cri/conf.d/20-customization.part
+            op: create
+            content: |
+              [plugins."io.containerd.cri.v1.images"]
+                discard_unpacked_layers = false
