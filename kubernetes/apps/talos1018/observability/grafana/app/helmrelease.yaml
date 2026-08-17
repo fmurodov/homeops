@@ -90,6 +90,15 @@ spec:
             url: http://alertmanager:9093
             jsonData:
               implementation: prometheus
+          # Read-only rules source: vmalert serves the Prometheus /api/v1/rules
+          # API (the VictoriaMetrics TSDB does not), so Grafana's Alerting → Alert
+          # rules page and the Alert list panel can display the vmalert rules.
+          # Not for querying — use VictoriaMetrics for that.
+          - name: vmalert
+            type: prometheus
+            url: http://vmalert-victoria-metrics-alert-server:8880
+            jsonData:
+              manageAlerts: true
 
     # Dashboards
     dashboardProviders:
