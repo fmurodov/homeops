@@ -260,37 +260,83 @@ spec:
                   annotations:
                     summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is stuck Pending"
 
-                - alert: LonghornVolumeDegraded
-                  expr: 'longhorn_volume_robustness == 2'
-                  for: 10m
+                # Names/exprs/thresholds track the official Longhorn
+                # alert-rules-example (docs archive 1.3.1) so they line up with
+                # what the Longhorn UI documents. Thin-provisioned volumes can be
+                # near-full at the Longhorn layer while kubelet_volume_stats (the
+                # filesystem view behind KubePersistentVolumeFillingUp) still looks
+                # fine — this actual-space rule is the only one that catches that.
+                - alert: LonghornVolumeActualSpaceUsedWarning
+                  expr: '(longhorn_volume_actual_size_bytes / longhorn_volume_capacity_bytes) * 100 > 90'
+                  for: 5m
                   labels:
                     severity: warning
                   annotations:
-                    summary: "Longhorn volume {{ $labels.volume }} is degraded"
+                    summary: "The actual used space of Longhorn volume is over 90% of the capacity."
+                    description: "The actual space used by Longhorn volume {{ $labels.volume }} on {{ $labels.node }} is at {{ $value }}% capacity for more than 5 minutes."
 
-                - alert: LonghornVolumeFaulted
+                - alert: LonghornVolumeStatusCritical
                   expr: 'longhorn_volume_robustness == 3'
-                  for: 1m
+                  for: 5m
                   labels:
                     severity: critical
                   annotations:
-                    summary: "Longhorn volume {{ $labels.volume }} is faulted"
+                    summary: "Longhorn volume {{ $labels.volume }} is Fault"
+                    description: "Longhorn volume {{ $labels.volume }} on {{ $labels.node }} is Fault for more than 2 minutes."
 
-                - alert: LonghornNodeNotReady
-                  expr: 'longhorn_node_status{condition="ready"} == 0'
-                  for: 15m
-                  labels:
-                    severity: critical
-                  annotations:
-                    summary: "Longhorn node {{ $labels.node }} is not ready"
-
-                - alert: LonghornDiskSpaceLow
-                  expr: 'longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes > 0.85'
-                  for: 10m
+                - alert: LonghornVolumeStatusWarning
+                  expr: 'longhorn_volume_robustness == 2'
+                  for: 5m
                   labels:
                     severity: warning
                   annotations:
-                    summary: "Longhorn disk on node {{ $labels.node }} is above 85% usage"
+                    summary: "Longhorn volume {{ $labels.volume }} is Degraded"
+                    description: "Longhorn volume {{ $labels.volume }} on {{ $labels.node }} is Degraded for more than 5 minutes."
+
+                - alert: LonghornNodeStorageWarning
+                  expr: '(longhorn_node_storage_usage_bytes / longhorn_node_storage_capacity_bytes) * 100 > 70'
+                  for: 5m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "The used storage of node is over 70% of the capacity."
+                    description: "The used storage of node {{ $labels.node }} is at {{ $value }}% capacity for more than 5 minutes."
+
+                - alert: LonghornDiskStorageWarning
+                  expr: '(longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes) * 100 > 70'
+                  for: 5m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "The used storage of disk is over 70% of the capacity."
+                    description: "The used storage of disk {{ $labels.disk }} on node {{ $labels.node }} is at {{ $value }}% capacity for more than 5 minutes."
+
+                - alert: LonghornNodeDown
+                  expr: '(avg(longhorn_node_count_total) or on() vector(0)) - (count(longhorn_node_status{condition="ready"} == 1) or on() vector(0)) > 0'
+                  for: 5m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Longhorn nodes is offline"
+                    description: "There are {{ $value }} Longhorn nodes which have been offline for more than 5 minutes."
+
+                - alert: LonghornInstanceManagerCPUUsageWarning
+                  expr: '(longhorn_instance_manager_cpu_usage_millicpu / longhorn_instance_manager_cpu_requests_millicpu) * 100 > 300'
+                  for: 5m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Longhorn instance manager {{ $labels.instance_manager }} on {{ $labels.node }} has CPU Usage / CPU request is over 300%."
+                    description: "Longhorn instance manager {{ $labels.instance_manager }} on {{ $labels.node }} has CPU Usage / CPU request is {{ $value }}% for more than 5 minutes."
+
+                - alert: LonghornNodeCPUUsageWarning
+                  expr: '(longhorn_node_cpu_usage_millicpu / longhorn_node_cpu_capacity_millicpu) * 100 > 90'
+                  for: 5m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Longhorn node {{ $labels.node }} experiences high CPU pressure for more than 5m."
+                    description: "Longhorn node {{ $labels.node }} has CPU Usage / CPU capacity is {{ $value }}% for more than 5 minutes."
 
                 # The daily-backup recurring job runs to completion before its
                 # CronJob records success, so last-success time is a heartbeat for
