@@ -19,10 +19,6 @@ clusterSvcNets:
 cniConfig:
   name: none
 
-# Disable kube-proxy (Cilium kube-proxy replacement)
-proxy:
-  disabled: true
-
 additionalApiServerCertSans:
   - ::1
   - fd00:1018:0:5:10:18:6:91
@@ -239,6 +235,21 @@ controlPlane:
               - os:admin
             allowedKubernetesNamespaces:
               - system-upgrade
+
+    # Bootstrap add-ons Talos should not manage.
+    #
+    # kube-proxy: replaced by Cilium's kube-proxy replacement.
+    #
+    # coreDNS: Talos always renders the kube-dns Service IPv4-primary
+    # regardless of serviceSubnets order, so on a v6-primary cluster every
+    # `upgrade-k8s` aborts on the immutable clusterIPs/ipFamilies fields and no
+    # bootstrap manifest gets applied. Flux owns CoreDNS instead.
+    - |-
+      cluster:
+        coreDNS:
+          disabled: true
+        proxy:
+          disabled: true
 
     # Etcd configuration
     - |-

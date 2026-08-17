@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: coredns-app
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/talos1018/kube-system/coredns/app
+  prune: true
+  wait: true
+  # Adopts objects Talos originally created with client-side apply
+  force: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
