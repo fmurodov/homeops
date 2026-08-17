@@ -1,0 +1,27 @@
+---
+apiVersion: tuppr.home-operations.com/v1alpha1
+kind: TalosUpgrade
+metadata:
+  name: cluster
+spec:
+  talos:
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    version: v1.13.5
+  policy:
+    debug: false
+    # Longhorn RWX volumes have wedged reboots before by leaving an orphaned NFS
+    # mount; drain and wait for detach instead of racing the reboot
+    waitForVolumeDetach: true
+  healthChecks:
+    - apiVersion: v1
+      kind: Node
+      description: All nodes Ready
+      expr: status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 10m
+    - apiVersion: longhorn.io/v1beta2
+      kind: Volume
+      namespace: longhorn-system
+      description: No Longhorn volume rebuilding from the previous node
+      # "unknown" is a detached volume; "degraded" means replicas are still rebuilding
+      expr: status.robustness in ["healthy", "unknown"]
+      timeout: 30m

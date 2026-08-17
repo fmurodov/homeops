@@ -15,7 +15,9 @@
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
-      minimumGroupSize: 5,
+      // talconfig.yaml and the KubernetesUpgrade both pin ghcr.io/siderolabs/kubelet;
+      // Talos derives the other component images from kubernetesVersion itself
+      minimumGroupSize: 2,
     },
     {
       description: "Talos Group",
