@@ -22,8 +22,10 @@
     {
       description: "Talos Group",
       groupName: "talos",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/installer/"],
+      // github-releases so PRs carry the Talos release notes; the kubelet/installer
+      // images publish no release bodies of their own
+      matchDatasources: ["docker", "github-releases"],
+      matchPackageNames: ["/installer/", "siderolabs/talos"],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
