@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: CoreDNS
+spec:
+  # These are the .10 of each entry in talconfig clusterSvcNets and must keep
+  # matching it — kubelet's clusterDNS is derived from the same source. IPv6
+  # stays first here; Talos would render this Service IPv4-primary, and both
+  # fields are immutable once the Service exists.
+  clusterIP: fd00:1018:2000::a
+  clusterIPs:
+    - fd00:1018:2000::a
+    - 10.96.0.10
+  ipFamilies:
+    - IPv6
+    - IPv4
+  ipFamilyPolicy: PreferDualStack
+  selector:
+    k8s-app: kube-dns
+  ports:
+    - name: dns
+      port: 53
+      protocol: UDP
+      targetPort: 53
+    - name: dns-tcp
+      port: 53
+      protocol: TCP
+      targetPort: 53
+    - name: metrics
+      port: 9153
+      protocol: TCP
+      targetPort: 9153
