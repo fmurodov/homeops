@@ -6,5 +6,13 @@
       matchPackageNames: ["/cloudflared/"],
       changelogUrl: "https://github.com/cloudflare/cloudflared/blob/master/RELEASE_NOTES",
     },
+    {
+      // siderolabs/kubelet tags releases with empty bodies, so Renovate has nothing
+      // to render; point at the upstream Kubernetes changelog instead
+      description: "Changelog URL for the Talos kubelet image",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
+      changelogUrl: "https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG",
+    },
   ],
 }
