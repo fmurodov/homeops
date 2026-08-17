@@ -7,6 +7,14 @@ l2announcements:
 
 kubeProxyReplacement: true
 
+# Cilium is what resolves ClusterIPs, so it cannot reach the API server through
+# the kubernetes ClusterIP that kubelet injects — on a rebooting node that
+# deadlocks and the agent never starts. KubePrism proxies to the control plane on
+# node-local loopback; it listens on IPv4 only, so the literal address is
+# required rather than "localhost".
+k8sServiceHost: 127.0.0.1
+k8sServicePort: 7445
+
 # Gateway API support
 gatewayAPI:
   enabled: true
