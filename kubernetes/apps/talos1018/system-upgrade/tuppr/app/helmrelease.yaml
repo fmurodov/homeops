@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app tuppr
+spec:
+  chart:
+    spec:
+      chart: *app
+      sourceRef:
+        kind: HelmRepository
+        name: home-operations
+  interval: 1h0m0s
+  install:
+    crds: Create
+  upgrade:
+    # The chart ships CRDs under crds/, which Helm never updates on its own
+    crds: CreateReplace
+  values:
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8081"
+    controller:
+      logLevel: info
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi

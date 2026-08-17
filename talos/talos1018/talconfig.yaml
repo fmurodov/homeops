@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
 clusterName: talos1018
-# renovate: datasource=github-releases depName=siderolabs/talos
+# renovate: datasource=docker depName=ghcr.io/siderolabs/installer
 talosVersion: v1.13.5
 # renovate: datasource=github-releases depName=siderolabs/kubelet
 kubernetesVersion: v1.36.2
@@ -231,6 +231,14 @@ controlPlane:
           hostDNS:
             enabled: true
             forwardKubeDNSToHost: true
+          # Lets tuppr drive node upgrades over the Talos API. Scoped to the
+          # single namespace it runs in — os:admin is full control of the node.
+          kubernetesTalosAPIAccess:
+            enabled: true
+            allowedRoles:
+              - os:admin
+            allowedKubernetesNamespaces:
+              - system-upgrade
 
     # Etcd configuration
     - |-
