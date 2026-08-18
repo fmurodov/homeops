@@ -209,6 +209,16 @@ spec:
           gnetId: 22759
           revision: 9
           datasource: VictoriaLogs
+        # Pulled from upstream rather than grafana.com: the only Flux2 entry
+        # there (16714) is still at revision 1 and predates gotk_resource_info.
+        # Pinned to a commit so a pod restart cannot change the dashboard.
+        # Both carry a DS_PROMETHEUS *template variable* rather than a
+        # __inputs block, so the chart's datasource: override does not apply —
+        # they fall back to the default datasource, VictoriaMetrics.
+        flux-cluster:
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/14129216b7e43db91c49bf0cd6b588360e4aa953/monitoring/configs/dashboards/cluster.json
+        flux-control-plane:
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/14129216b7e43db91c49bf0cd6b588360e4aa953/monitoring/configs/dashboards/control-plane.json
 
     ingress:
       enabled: false
