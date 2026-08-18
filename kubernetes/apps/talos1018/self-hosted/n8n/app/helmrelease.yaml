@@ -14,6 +14,7 @@ spec:
       n8n:
         annotations:
           reloader.stakater.com/auto: "true"
+        strategy: Recreate
         containers:
           app:
             image:
@@ -126,7 +127,7 @@ spec:
 
     persistence:
       data:
-        existingClaim: n8n-data
+        existingClaim: n8n-data-rwo
         advancedMounts:
           n8n:
             app:
