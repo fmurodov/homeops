@@ -57,7 +57,7 @@ spec:
   accessModes: [ReadWriteOnce]
   resources:
     requests:
-      storage: 1Gi
+      storage: 512Mi
 EOF
 ```
 
@@ -89,11 +89,26 @@ kubectl -n self-hosted logs job/migrate-n8n-data     # COPY_DONE + matching du
 kubectl -n self-hosted delete job migrate-n8n-data
 ```
 
+Don't trust Longhorn's `actualSize` to confirm the copy — the source carries
+months of snapshot history, so the two volumes legitimately differ there.
+Compare the filesystems instead: mount both read-only in a throwaway pod and
+diff `find -type f | md5sum` over each side.
+
 ### 4. Repoint the app (git → merge)
 - `n8n/app/helmrelease.yaml`: `persistence.data.existingClaim: n8n-data` → `n8n-data-rwo`
-- `n8n/app/pvc.yaml`: add the `n8n-data-rwo` PVC (keep old `n8n-data` for now)
+- `n8n/app/pvc.yaml`: **add** the `n8n-data-rwo` PVC — keep the old `n8n-data`
+  PVC in the file. The Kustomization is `prune: true`, so dropping it from git
+  deletes the volume the moment Flux resumes, destroying the rollback source
+  before anything has been verified. It goes away in step 6, not here.
+- `n8n/app/helmrelease.yaml`: set `strategy: Recreate` on the controller. RWX
+  tolerated the default `RollingUpdate` because the new and old pods could
+  mount the volume at once; on RWO the new pod blocks forever waiting for the
+  old one to release it, wedging every future image bump.
 
-### 5. Resume + verify
+### 5. Merge first, then resume
+Flux reconciles from `master`, so **resume only after the change is merged** —
+resuming while the change sits on a branch reapplies the old `existingClaim`
+and starts n8n back up on the RWX volume.
 ```bash
 flux resume kustomization n8n
 flux reconcile kustomization n8n --with-source
