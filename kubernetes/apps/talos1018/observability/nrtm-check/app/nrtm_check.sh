@@ -47,6 +47,9 @@ nrtm_check_timestamp{$LABELS,source="$SOURCE"} $(date +%s)
 EOF
 }
 
+# Stops at the first occurrence of "$terminator", so it has to cover every byte a
+# later check needs: a short terminator can be satisfied by a partial line and cut
+# the rest of it off. Pass an empty terminator to read until the server closes.
 nrtm_query() {
     local host="$1" port="$2" payload="$3" terminator="$4" timeout="$5" max_seconds="$6"
     python3 - "$host" "$port" "$payload" "$terminator" "$timeout" "$max_seconds" <<'PYEOF'
@@ -66,7 +69,7 @@ try:
         if not chunk:
             break
         data += chunk
-        if terminator.encode() in data:
+        if terminator and terminator.encode() in data:
             break
         if time.time() - start > max_seconds:
             break
@@ -78,7 +81,7 @@ sys.stdout.write(data.decode(errors="replace"))
 PYEOF
 }
 
-RAW_SOURCES_RESPONSE=$(nrtm_query "$HOST" "$PORT" "-q sources" "$SOURCE:3:" "$TIMEOUT" "$MAX_SECONDS")
+RAW_SOURCES_RESPONSE=$(nrtm_query "$HOST" "$PORT" "-q sources" "" "$TIMEOUT" "$MAX_SECONDS")
 debug "$RAW_SOURCES_RESPONSE"
 SOURCE_QUERY_RESPONSE=$(echo "$RAW_SOURCES_RESPONSE" | grep "^$SOURCE:3:" || true)
 [[ -z "$SOURCE_QUERY_RESPONSE" ]] && fail "no sources response for $SOURCE"
@@ -89,7 +92,7 @@ MIRROR_FLAG=$(echo "$SOURCE_QUERY_RESPONSE" | awk -F: '{print $3}')
 END_SERIAL=$(echo "$SOURCE_QUERY_RESPONSE" | awk -F: '{print $4}' | cut -d- -f2)
 BEGIN_SERIAL=$((END_SERIAL - RANGE_SIZE))
 
-RANGE_QUERY_RESPONSE=$(nrtm_query "$HOST" "$PORT" "-g $SOURCE:3:$BEGIN_SERIAL-$END_SERIAL" "%END" "$TIMEOUT" "$MAX_SECONDS")
+RANGE_QUERY_RESPONSE=$(nrtm_query "$HOST" "$PORT" "-g $SOURCE:3:$BEGIN_SERIAL-$END_SERIAL" "%END $SOURCE"$'\n' "$TIMEOUT" "$MAX_SECONDS")
 debug "$RANGE_QUERY_RESPONSE"
 
 grep -q "^%START Version: 3 $SOURCE" <<< "$RANGE_QUERY_RESPONSE" || fail "no %START marker"
