@@ -5,8 +5,11 @@
 
 set -e
 
-# Move to repository root
-cd "$(git rev-parse --show-toplevel)" || exit 1
+# Derived from this script's location, not `git rev-parse`: git sets GIT_DIR
+# for hooks without GIT_WORK_TREE, which makes --show-toplevel return the
+# current directory instead of the repo root.
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT" || exit 1
 
 VALIDATION_FAILED=0
 
