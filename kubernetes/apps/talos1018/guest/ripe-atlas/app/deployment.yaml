@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: ripe-atlas
-          image: ghcr.io/jamesits/ripe-atlas:5120
+          image: ghcr.io/jamesits/ripe-atlas:5130
           securityContext:
             runAsUser: 0
             capabilities:
