@@ -1,12 +1,16 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# flux-alerts - report Flux reconciliation failures to Alertmanager
+# flux-alerts - Flux failures to Alertmanager, deploy events to Discord
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: flux-alerts
   namespace: flux-system
 spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   dependsOn:
     - name: alertmanager
   interval: 1h
