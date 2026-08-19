@@ -8,7 +8,7 @@ set -e
 echo "Running pre-commit validation..."
 
 # Move to repository root
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
 # Run the unified validation script

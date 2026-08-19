@@ -31,8 +31,12 @@ echo "🔍 Validating Flux/Kubernetes Manifests"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Change to kubernetes directory
-cd "$(git rev-parse --show-toplevel)/kubernetes" || exit 1
+# Derived from this script's location, not `git rev-parse`: git sets GIT_DIR
+# for hooks without GIT_WORK_TREE, which makes --show-toplevel return the
+# current directory instead of the repo root.
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+cd "$REPO_ROOT/kubernetes" || exit 1
 
 # mirror kustomize-controller build options
 kustomize_flags=("--load-restrictor=LoadRestrictionsNone")
@@ -45,14 +49,14 @@ kubeconform_config=("-strict" "-ignore-missing-schemas" "-schema-location" "defa
 # Run yamllint if available
 if command -v yamllint &> /dev/null; then
     echo "INFO - Running yamllint"
-    cd "$(git rev-parse --show-toplevel)" || exit 1
+    cd "$REPO_ROOT" || exit 1
     if ! yamllint -c .yamllint.yaml kubernetes/ talos/; then
         echo "❌ yamllint found errors"
         exit 1
     fi
     echo "✅ yamllint passed"
     echo ""
-    cd "$(git rev-parse --show-toplevel)/kubernetes" || exit 1
+    cd "$REPO_ROOT/kubernetes" || exit 1
 else
     echo "INFO - yamllint not found, skipping lint"
 fi
