@@ -58,8 +58,10 @@ spec:
 
             # ----------------------------------------------------------------
             # Daily heartbeat — a dead-man's-switch you actually see. Fires
-            # critical for ~5 min once a day so a real notification lands in
-            # email + ntfy; if the morning ping stops, delivery is broken.
+            # for ~5 min once a day so a real notification lands in the muted
+            # Discord #heartbeat channel; if the morning ping stops, delivery
+            # is broken. Alertmanager routes it by alertname, ahead of the
+            # severity="critical" route, so it never pages.
             # hour()/minute() are UTC (vmalert has no timezone), so this is
             # pinned to 07:00 UTC = 09:00 CEST (summer) / 08:00 CET (winter).
             # ----------------------------------------------------------------

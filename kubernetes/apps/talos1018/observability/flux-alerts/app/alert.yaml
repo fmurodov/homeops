@@ -19,3 +19,22 @@ spec:
       name: "*"
     - kind: HelmRepository
       name: "*"
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/notification.toolkit.fluxcd.io/alert_v1beta3.json
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: flux-deploys
+spec:
+  providerRef:
+    name: discord-deploys
+  # info is a floor, not an exact match: this carries errors too, so #deploys
+  # reads as the full change log. Paging still happens via alertmanager above.
+  eventSeverity: info
+  # Sources deliberately narrower than the alertmanager Alert: source kinds
+  # emit on every artifact revision, which is churn rather than a deploy.
+  eventSources:
+    - kind: Kustomization
+      name: "*"
+    - kind: HelmRelease
+      name: "*"
