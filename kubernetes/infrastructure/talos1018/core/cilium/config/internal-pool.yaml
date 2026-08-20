@@ -10,8 +10,8 @@ spec:
     # L2/NDP announcements make these reachable without router static routes.
     # Must not overlap clusterSvcNets (fd00:1018:2000::/96, 10.96.0.0/12).
     - cidr: "fd00:1018:0:5:3000::/96"
-    - start: "10.18.6.30"
-      stop: "10.18.6.39"
+    - start: "10.18.6.40"
+      stop: "10.18.6.69"
   serviceSelector:
     matchLabels:
       service.kubernetes.io/topology: internal
