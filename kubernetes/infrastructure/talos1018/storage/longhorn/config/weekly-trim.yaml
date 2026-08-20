@@ -1,0 +1,17 @@
+---
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: weekly-trim
+  namespace: longhorn-system
+spec:
+  # Trim can only reclaim from the volume head, so with
+  # remove-snapshots-during-filesystem-trim enabled each run collapses the local
+  # snapshot chain and the next backup falls back to a full scan. Weekly, and
+  # opt-in per volume, keeps that cost off volumes that do not churn.
+  cron: "0 4 * * 0"
+  task: "filesystem-trim"
+  retain: 0
+  concurrency: 1
+  labels:
+    schedule: "weekly"
