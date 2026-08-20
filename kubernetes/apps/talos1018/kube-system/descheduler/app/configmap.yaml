@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: descheduler-policy
+data:
+  policy.yaml: |
+    apiVersion: descheduler/v1alpha2
+    kind: DeschedulerPolicy
+    maxNoOfPodsToEvictPerNode: 3
+    profiles:
+      - name: rebalance
+        pluginConfig:
+          - name: DefaultEvictor
+            args:
+              # Without this a packed cluster evicts in a loop.
+              nodeFit: true
+              # Longhorn attach/detach is fragile here; stateless pods suffice.
+              podProtections:
+                extraEnabled:
+                  - PodsWithPVC
+          - name: LowNodeUtilization
+            args:
+              # Donor when under every threshold; target when over any.
+              thresholds:
+                cpu: 60
+                memory: 50
+                pods: 45
+              targetThresholds:
+                cpu: 80
+                memory: 65
+                pods: 50
+              evictableNamespaces:
+                exclude:
+                  - kube-system
+                  - longhorn-system
+                  - flux-system
+        plugins:
+          balance:
+            enabled:
+              - LowNodeUtilization
