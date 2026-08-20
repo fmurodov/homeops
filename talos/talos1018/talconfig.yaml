@@ -183,6 +183,13 @@ controlPlane:
         kubelet:
           extraArgs:
             rotate-server-certificates: "true"
+          # /var/lib/longhorn shares the EPHEMERAL partition with the containerd
+          # image store, and Longhorn marks a disk unschedulable below its 30%
+          # reserve. Prune well before that, since kubelet defaults to 85%.
+          extraConfig:
+            imageGCHighThresholdPercent: 55
+            imageGCLowThresholdPercent: 45
+            imageMaximumGCAge: 168h
           extraMounts:
             - destination: /var/lib/longhorn
               type: bind
