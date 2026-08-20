@@ -20,6 +20,18 @@ spec:
       extraArgs:
         httpListenAddr: "[::]:9428"
         enableTCP6: "true"
+      # RFC3164 carries no year or timezone, so stamp on ingest.
+      syslog:
+        udp:
+          - name: syslog-udp
+            value: "[::]:5514"
+            useLocalTimestamp: true
+            useRemoteIP: true
+        tcp:
+          - name: syslog-tcp
+            value: "[::]:5514"
+            useLocalTimestamp: true
+            useRemoteIP: true
       retentionPeriod: "7d"
       persistentVolume:
         enabled: true

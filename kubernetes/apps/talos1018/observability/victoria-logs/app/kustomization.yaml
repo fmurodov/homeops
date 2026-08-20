@@ -6,3 +6,4 @@ namespace: observability
 resources:
   - ./pvc.yaml
   - ./helmrelease.yaml
+  - ./syslog-service.yaml
