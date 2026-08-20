@@ -9,9 +9,7 @@ spec:
     kind: OCIRepository
     name: app-template
   interval: 1h
-  # Startup runs ~7m on an image bump (large pull, then model load with
-  # KEEP_ALIVE=-1), overrunning Helm's 5m default. Without retries a single
-  # overrun stalls the release permanently and blocks openwebui behind it.
+  # Image bumps pull ~5GB and overrun Helm's 5m default, stalling openwebui.
   timeout: 15m
   install:
     remediation:
@@ -33,7 +31,7 @@ spec:
               OLLAMA_HOST: "[::]:11434"
               OLLAMA_MODELS: /data/models
               HOME: /data
-              OLLAMA_KEEP_ALIVE: "-1"
+              OLLAMA_KEEP_ALIVE: "15m"
               OLLAMA_MAX_LOADED_MODELS: "1"
               OLLAMA_NUM_PARALLEL: "1"
             probes:
@@ -70,12 +68,13 @@ spec:
                   periodSeconds: 5
                   failureThreshold: 60
             resources:
+              # llama3.1:8b is ~8.7Gi resident at 4096 context on CPU.
               requests:
                 cpu: "1"
-                memory: 6Gi
+                memory: 9Gi
               limits:
                 cpu: "3"
-                memory: 10Gi
+                memory: 12Gi
         pod:
           securityContext:
             runAsUser: 1000

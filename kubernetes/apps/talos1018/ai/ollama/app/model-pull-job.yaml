@@ -38,8 +38,6 @@ spec:
                 ollama pull "$model"
                 echo "Verifying $model is present..."
                 ollama list | awk '{print $1}' | grep -Fxq "$model"
-                echo "Preloading $model into memory..."
-                ollama run "$model" "" >/dev/null 2>&1 || true
               done
               echo "Done."
           resources:
