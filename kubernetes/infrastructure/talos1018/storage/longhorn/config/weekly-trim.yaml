@@ -5,10 +5,12 @@ metadata:
   name: weekly-trim
   namespace: longhorn-system
 spec:
-  # Trim can only reclaim from the volume head, so with
-  # remove-snapshots-during-filesystem-trim enabled each run collapses the local
-  # snapshot chain and the next backup falls back to a full scan. Weekly, and
-  # opt-in per volume, keeps that cost off volumes that do not churn.
+  # Longhorn only reclaims blocks once the filesystem discards them, so
+  # actualSize otherwise grows with churn until a volume trips
+  # LonghornVolumeActualSpaceUsedWarning. With removeSnapshotsDuringFilesystemTrim
+  # each run also collapses the snapshot chain, costing the next backup a full
+  # scan -- weekly keeps that cheap. Volumes opt in by label; RWX is excluded
+  # because trim there goes through share-manager, not a block device.
   cron: "0 4 * * 0"
   task: "filesystem-trim"
   retain: 0
