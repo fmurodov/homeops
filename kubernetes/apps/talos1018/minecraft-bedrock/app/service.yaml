@@ -7,7 +7,7 @@ metadata:
   labels:
     service.kubernetes.io/topology: external
   annotations:
-    io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:2000:0:6:12,10.18.6.12"
+    io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:5:2000:0:6:12,10.18.6.12"
 spec:
   selector:
     app: bds
