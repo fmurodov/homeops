@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# akvorado inlet/outlet/console - all three pull their configuration from the
-# orchestrator at startup
+# akvorado inlet/outlet/console - configured by the orchestrator
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

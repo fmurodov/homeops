@@ -1,7 +1,5 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kubernetes
-# Metadata cache and flow state. Losing these only costs the flows received
-# while the caches refill, so they are not worth backing up.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
