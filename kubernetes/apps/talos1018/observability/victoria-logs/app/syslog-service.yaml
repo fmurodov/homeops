@@ -11,11 +11,15 @@ metadata:
     service.kubernetes.io/topology: internal
   annotations:
     io.cilium/lb-ipam-ips: "fd00:1018:0:5:3000::40,10.18.6.40"
+    # DSR preserves the sender's address, which SNAT would otherwise replace
+    # with the ingress node's IP.
+    service.cilium.io/forwarding-mode: dsr
 spec:
   type: LoadBalancer
   ipFamilyPolicy: PreferDualStack
-  # Keeps the sender address intact for useRemoteIP.
-  externalTrafficPolicy: Local
+  # Cilium's L2 announcer does not follow the backend node, so Local blackholes
+  # traffic whenever the lease lands on a node without the single pod.
+  externalTrafficPolicy: Cluster
   ports:
     - port: 514
       targetPort: syslog-udp

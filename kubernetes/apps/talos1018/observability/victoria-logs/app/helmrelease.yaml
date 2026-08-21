@@ -27,9 +27,11 @@ spec:
             value: "[::]:5514"
             useLocalTimestamp: true
             useRemoteIP: true
+        # Distinct port from UDP: the chart keys container ports by number, so
+        # sharing 5514 collapses both into one entry with the wrong protocol.
         tcp:
           - name: syslog-tcp
-            value: "[::]:5514"
+            value: "[::]:5515"
             useLocalTimestamp: true
             useRemoteIP: true
       retentionPeriod: "7d"
