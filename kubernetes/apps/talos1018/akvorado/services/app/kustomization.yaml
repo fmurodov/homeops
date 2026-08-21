@@ -10,5 +10,6 @@ resources:
   - outlet.yaml
   - console.yaml
   - akvorado-oauth2-proxy-secret.sops.yaml
+  - akvorado-geoip-secret.sops.yaml
   - oauth2-proxy.yaml
   - httproute.yaml

@@ -61,6 +61,10 @@ data:
         listen: "[::]:8080"
       geoip:
         optional: true
+        asn-database:
+          - /usr/share/GeoIP/GeoLite2-ASN.mmdb
+        geo-database:
+          - /usr/share/GeoIP/GeoLite2-City.mmdb
       flow:
         state-persist-file: /run/akvorado/flow.state
       metadata:
