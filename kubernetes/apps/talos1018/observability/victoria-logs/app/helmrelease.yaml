@@ -34,10 +34,13 @@ spec:
             value: "[::]:5515"
             useLocalTimestamp: true
             useRemoteIP: true
-      retentionPeriod: "7d"
+      retentionPeriod: "365d"
+      # Size backstop: evicts oldest-first so a noisy log source cannot fill the
+      # volume and wedge the pod. Leaves headroom for background merges.
+      retentionDiskSpaceUsage: "25GiB"
       persistentVolume:
         enabled: true
-        existingClaim: victoria-logs-data
+        existingClaim: victoria-logs-data-v2
       resources:
         requests:
           cpu: 100m

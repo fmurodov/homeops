@@ -1,16 +1,19 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+# Successor to victoria-logs-data. storageClassName is immutable, so moving to
+# two replicas needs a new claim; log data is reconstructible enough that the
+# third replica is not worth ~30 GiB across the nodes.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: victoria-logs-data
+  name: victoria-logs-data-v2
   labels:
     recurring-job.longhorn.io/source: enabled
     recurring-job.longhorn.io/weekly-trim: enabled
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: longhorn
+  storageClassName: longhorn-2replicas
   resources:
     requests:
-      storage: 15Gi
+      storage: 30Gi
