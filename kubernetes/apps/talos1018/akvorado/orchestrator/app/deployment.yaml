@@ -1,0 +1,89 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akvorado-orchestrator
+  labels:
+    app.kubernetes.io/name: akvorado-orchestrator
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: akvorado-orchestrator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: akvorado-orchestrator
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: /api/v0/metrics
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: orchestrator
+          image: quay.io/akvorado/akvorado:2026.8.0
+          args:
+            - orchestrator
+            - /etc/akvorado/akvorado.yaml
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/akvorado
+              readOnly: true
+          startupProbe:
+            httpGet:
+              path: /api/v0/healthcheck
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /api/v0/healthcheck
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v0/healthcheck
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              memory: "256Mi"
+            requests:
+              cpu: "10m"
+              memory: "64Mi"
+      volumes:
+        # akvorado.yaml pulls in the SNMP community with a `!include`, which
+        # resolves relative to the config file, so both have to surface in the
+        # same directory.
+        - name: config
+          projected:
+            sources:
+              - configMap:
+                  name: akvorado-config
+              - secret:
+                  name: akvorado-snmp-secret

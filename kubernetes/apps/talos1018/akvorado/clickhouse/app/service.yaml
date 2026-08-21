@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: akvorado-clickhouse
+  labels:
+    app.kubernetes.io/name: akvorado-clickhouse
+spec:
+  ipFamilyPolicy: PreferDualStack
+  ports:
+    - port: 9000
+      targetPort: native
+      protocol: TCP
+      name: native
+    - port: 8123
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: akvorado-clickhouse
