@@ -30,8 +30,6 @@ spec:
         - name: kafka
           image: apache/kafka:4.3.1
           env:
-            # KRaft formats the log directory once against this id; changing it
-            # later orphans the existing volume.
             - name: CLUSTER_ID
               value: WRrU3wkDSNWJ3OkNJ2XZdA
             - name: KAFKA_NODE_ID
@@ -60,9 +58,7 @@ spec:
               value: "1"
             - name: KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR
               value: "1"
-            # A subdirectory, not the volume root: Longhorn hands over an
-            # ext4 filesystem with a lost+found, and Kafka refuses to start
-            # when its log dir holds anything that is not a topic-partition.
+            # Not the volume root: Kafka rejects Longhorn's ext4 lost+found.
             - name: KAFKA_LOG_DIRS
               value: /var/lib/kafka/data/logs
             - name: KAFKA_HEAP_OPTS

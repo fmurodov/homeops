@@ -30,7 +30,6 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
-      # Kafka keeps the backlog while the outlet finishes its in-flight batch.
       terminationGracePeriodSeconds: 40
       containers:
         - name: outlet

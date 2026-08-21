@@ -14,8 +14,6 @@ data:
       brokers:
         - akvorado-kafka:9092
       topic-configuration:
-        # More partitions than the outlet will ever need workers, so the topic
-        # never has to be recreated to scale the outlet up.
         num-partitions: 4
         replication-factor: 1
         config-entries:
@@ -66,11 +64,7 @@ data:
       flow:
         state-persist-file: /run/akvorado/flow.state
       metadata:
-        # Flows whose interfaces are not in the cache are dropped. Gateway
-        # interfaces are effectively static, so re-poll a live entry only once
-        # a day: an SNMP outage then has to last a very long time before it
-        # costs any traffic. cache-duration is idle eviction and must not
-        # exceed cache-refresh.
+        # cache-refresh must be >= cache-duration, which is idle eviction.
         cache-duration: 1h
         cache-refresh: 24h
         cache-persist-file: /run/akvorado/metadata.cache
@@ -95,20 +89,12 @@ data:
           "${IPV6_PREFIX_GUA}:6::/64": {name: lan6, role: clients}
           fd00:1018:0:5::/64: {name: srv, role: servers}
       core:
-        # Only used when the exporter does not advertise its own rate. Leaving
-        # it at 1 reports raw counts: wrong in an obvious way if UniFi turns
-        # out to sample, rather than silently inflating every figure 1000x.
         default-sampling-rate: 1
         interface-classifiers:
-          # ppp0 is the PPPoE session to the ISP, the one real edge of the
-          # network. The console's stock filters and every top-talker widget
-          # key off an external boundary, so this rule is what makes them work.
           - |
             (Interface.Name == "ppp0" || Interface.Description == "ppp0") &&
             ClassifyConnectivity("internet") &&
             ClassifyExternal()
-          # The WireGuard tunnel also leaves the premises; counting it as LAN
-          # would hide it from those same views.
           - |
             (Interface.Name startsWith "wg" || Interface.Description contains "WG") &&
             ClassifyConnectivity("vpn") &&

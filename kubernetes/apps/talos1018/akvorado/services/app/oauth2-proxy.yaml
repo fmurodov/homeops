@@ -40,8 +40,6 @@ spec:
             - --cookie-name=_oauth2_proxy_akvorado
             - --silence-ping-logging=true
             - --code-challenge-method=S256
-            # The console has no user store of its own; it reads the login,
-            # name and email straight off these headers.
             - --pass-basic-auth=false
             - --pass-user-headers=true
           env:

@@ -77,9 +77,7 @@ spec:
               cpu: "10m"
               memory: "64Mi"
       volumes:
-        # akvorado.yaml pulls in the SNMP community with a `!include`, which
-        # resolves relative to the config file, so both have to surface in the
-        # same directory.
+        # akvorado.yaml `!include`s the secret, so both need one directory.
         - name: config
           projected:
             sources:

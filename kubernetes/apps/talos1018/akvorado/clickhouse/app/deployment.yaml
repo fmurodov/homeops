@@ -34,12 +34,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: clickhouse
-          # x.3 and x.8 are the ClickHouse LTS lines, and the only ones
-          # akvorado itself tracks. Check a Renovate bump off those.
           image: clickhouse/clickhouse-server:26.3
           env:
-            # No user provisioning: the only clients are in-namespace akvorado
-            # services reaching the default user over the pod network.
             - name: CLICKHOUSE_SKIP_USER_SETUP
               value: "1"
           ports:

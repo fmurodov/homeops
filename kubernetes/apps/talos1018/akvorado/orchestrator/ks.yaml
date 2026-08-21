@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# akvorado orchestrator - owns the ClickHouse schema, the Kafka topic and the
-# configuration served to the inlet, outlet and console
+# akvorado orchestrator - owns the ClickHouse schema and Kafka topic
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
