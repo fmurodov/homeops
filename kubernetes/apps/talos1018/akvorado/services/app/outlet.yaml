@@ -44,6 +44,9 @@ spec:
           volumeMounts:
             - name: state
               mountPath: /run/akvorado
+            - name: geoip
+              mountPath: /usr/share/GeoIP
+              readOnly: true
           startupProbe:
             httpGet:
               path: /api/v0/healthcheck
@@ -76,10 +79,51 @@ spec:
             requests:
               cpu: "50m"
               memory: "256Mi"
+        # A plain sidecar, not an init container: bad credentials must degrade
+        # to no geo data, never stop the outlet from consuming flows.
+        - name: geoipupdate
+          image: ghcr.io/maxmind/geoipupdate:v7
+          env:
+            - name: GEOIPUPDATE_EDITION_IDS
+              value: GeoLite2-ASN GeoLite2-City
+            - name: GEOIPUPDATE_FREQUENCY
+              value: "72"
+            - name: GEOIPUPDATE_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: akvorado-geoip-secret
+                  key: GEOIPUPDATE_ACCOUNT_ID
+            - name: GEOIPUPDATE_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: akvorado-geoip-secret
+                  key: GEOIPUPDATE_LICENSE_KEY
+          volumeMounts:
+            - name: geoip
+              mountPath: /usr/share/GeoIP
+            - name: tmp
+              mountPath: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              memory: "256Mi"
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
       volumes:
         - name: state
           persistentVolumeClaim:
             claimName: akvorado-outlet-state
+        - name: geoip
+          emptyDir:
+            sizeLimit: 500Mi
+        - name: tmp
+          emptyDir: {}
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kubernetes
 apiVersion: v1

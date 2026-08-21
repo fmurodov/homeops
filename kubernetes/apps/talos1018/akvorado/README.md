@@ -68,10 +68,20 @@ from `ifName`. Whichever way round the gateway reports it, one branch matches.
 `${IPV6_PREFIX_GUA}`, which is the site **/48** — `:5` is the SRV VLAN the
 cluster nodes live on.
 
-**GeoIP** is not configured, so `SrcCountry`/`DstCountry` stay empty and ASNs
-come only from what the exporter puts in the flow. Enabling it means mounting
-MaxMind or IPinfo databases into the outlet at the paths named under `geoip` and
-dropping `optional: true`.
+**GeoIP** fills `SrcAS`/`DstAS`, `SrcCountry`/`DstCountry`,
+`SrcGeoCity`/`DstGeoCity` and `SrcGeoState`/`DstGeoState`. A `geoipupdate`
+sidecar in the outlet pod pulls GeoLite2-ASN and GeoLite2-City from MaxMind into
+a shared `emptyDir` every 72 hours, and the outlet reloads them through fsnotify
+without restarting. Credentials live in `akvorado-geoip-secret`.
+
+It is a plain sidecar rather than an init container on purpose: bad or missing
+MaxMind credentials degrade to no geo data instead of stopping the outlet from
+consuming flows. The databases are a cache, so they are re-fetched on every pod
+restart rather than kept on a volume.
+
+Note `SrcGeoState` (from GeoIP, e.g. `ENG`) is not `SrcNetRegion` — the latter
+comes from the `region` attribute on the `networks` entries below, which only
+covers the local VLANs.
 
 ## Before this can reconcile
 
@@ -80,6 +90,11 @@ Traffic Logging → NetFlow (IPFIX), collector `10.18.6.41`, port 4739.
 
 SNMP must stay enabled on the gateway (v2c, community `public`) or the outlet
 drops every flow once the metadata cache expires.
+
+Put a MaxMind account id and license key into `akvorado-geoip-secret`
+(`sops kubernetes/apps/talos1018/akvorado/services/app/akvorado-geoip-secret.sops.yaml`).
+A free GeoLite2 account is enough. Without them the stack still collects flows,
+just with no AS or geo columns.
 
 ## Calibrate the sampling rate
 
