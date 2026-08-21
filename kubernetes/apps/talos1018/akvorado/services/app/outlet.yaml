@@ -82,7 +82,7 @@ spec:
         # A plain sidecar, not an init container: bad credentials must degrade
         # to no geo data, never stop the outlet from consuming flows.
         - name: geoipupdate
-          image: ghcr.io/maxmind/geoipupdate:v7
+          image: ghcr.io/maxmind/geoipupdate:v8
           env:
             - name: GEOIPUPDATE_EDITION_IDS
               value: GeoLite2-ASN GeoLite2-City
