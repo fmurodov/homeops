@@ -1,0 +1,33 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: akvorado
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Network
+    gethomepage.dev/icon: mdi-chart-sankey
+    gethomepage.dev/name: Akvorado
+    gethomepage.dev/app: akvorado-console
+    gethomepage.dev/description: NetFlow analytics
+spec:
+  parentRefs:
+    - name: main-gateway
+      namespace: network
+      sectionName: https-internal
+  hostnames:
+    - "akvorado.${CLUSTER_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Strict-Transport-Security
+                value: max-age=31536000
+      backendRefs:
+        - name: oauth2-proxy
+          port: 4180

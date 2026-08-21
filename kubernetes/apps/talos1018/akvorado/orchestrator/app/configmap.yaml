@@ -1,0 +1,128 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: akvorado-config
+  labels:
+    app.kubernetes.io/name: akvorado
+data:
+  akvorado.yaml: |
+    ---
+    kafka:
+      topic: flows
+      brokers:
+        - akvorado-kafka:9092
+      topic-configuration:
+        # More partitions than the outlet will ever need workers, so the topic
+        # never has to be recreated to scale the outlet up.
+        num-partitions: 4
+        replication-factor: 1
+        config-entries:
+          segment.bytes: 268435456
+          retention.ms: 86400000
+          cleanup.policy: delete
+          compression.type: producer
+
+    clickhousedb:
+      servers:
+        - akvorado-clickhouse:9000
+
+    clickhouse:
+      orchestrator-url: http://akvorado-orchestrator:8080
+      resolutions:
+        - interval: 0
+          ttl: 168h
+        - interval: 1m
+          ttl: 720h
+        - interval: 5m
+          ttl: 2160h
+        - interval: 1h
+          ttl: 8760h
+
+    inlet:
+      http:
+        listen: "[::]:8080"
+      flow:
+        inputs:
+          - type: udp
+            decoder: netflow
+            listen: "[::]:2055"
+            workers: 2
+          - type: udp
+            decoder: netflow
+            listen: "[::]:4739"
+            workers: 2
+          - type: udp
+            decoder: sflow
+            listen: "[::]:6343"
+            workers: 2
+
+    outlet:
+      http:
+        listen: "[::]:8080"
+      geoip:
+        optional: true
+      flow:
+        state-persist-file: /run/akvorado/flow.state
+      metadata:
+        # Flows whose interfaces are not in the cache are dropped. Gateway
+        # interfaces are effectively static, so re-poll a live entry only once
+        # a day: an SNMP outage then has to last a very long time before it
+        # costs any traffic. cache-duration is idle eviction and must not
+        # exceed cache-refresh.
+        cache-duration: 1h
+        cache-refresh: 24h
+        cache-persist-file: /run/akvorado/metadata.cache
+        providers:
+          - type: snmp
+            credentials: !include "snmp-credentials.yaml"
+      networks:
+        networks:
+          10.18.1.0/24: {name: core, role: core}
+          10.18.2.0/24: {name: lan, role: clients}
+          10.18.3.0/24: {name: iot, role: iot}
+          10.18.4.0/24: {name: guest, role: guest}
+          10.18.5.0/24: {name: security, role: security}
+          10.18.6.0/24: {name: srv, role: servers}
+          10.18.7.0/24: {name: lan6, role: clients}
+          "${IPV6_PREFIX_GUA}::/64": {name: core, role: core}
+          "${IPV6_PREFIX_GUA}:1::/64": {name: lan, role: clients}
+          "${IPV6_PREFIX_GUA}:2::/64": {name: iot, role: iot}
+          "${IPV6_PREFIX_GUA}:3::/64": {name: guest, role: guest}
+          "${IPV6_PREFIX_GUA}:4::/64": {name: security, role: security}
+          "${IPV6_PREFIX_GUA}:5::/64": {name: srv, role: servers}
+          "${IPV6_PREFIX_GUA}:6::/64": {name: lan6, role: clients}
+          fd00:1018:0:5::/64: {name: srv, role: servers}
+      core:
+        # Only used when the exporter does not advertise its own rate. Leaving
+        # it at 1 reports raw counts: wrong in an obvious way if UniFi turns
+        # out to sample, rather than silently inflating every figure 1000x.
+        default-sampling-rate: 1
+        interface-classifiers:
+          # ppp0 is the PPPoE session to the ISP, the one real edge of the
+          # network. The console's stock filters and every top-talker widget
+          # key off an external boundary, so this rule is what makes them work.
+          - |
+            (Interface.Name == "ppp0" || Interface.Description == "ppp0") &&
+            ClassifyConnectivity("internet") &&
+            ClassifyExternal()
+          # The WireGuard tunnel also leaves the premises; counting it as LAN
+          # would hide it from those same views.
+          - |
+            (Interface.Name startsWith "wg" || Interface.Description contains "WG") &&
+            ClassifyConnectivity("vpn") &&
+            ClassifyExternal()
+          - ClassifyInternal()
+
+    console:
+      http:
+        listen: "[::]:8080"
+      database:
+        driver: sqlite
+        dsn: /var/lib/akvorado/console.sqlite
+      auth:
+        headers:
+          login: X-Forwarded-User
+          name: X-Forwarded-Preferred-Username
+          email: X-Forwarded-Email

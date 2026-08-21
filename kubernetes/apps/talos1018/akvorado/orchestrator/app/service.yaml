@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: akvorado-orchestrator
+  labels:
+    app.kubernetes.io/name: akvorado-orchestrator
+spec:
+  ipFamilyPolicy: PreferDualStack
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: akvorado-orchestrator

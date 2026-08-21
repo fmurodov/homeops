@@ -43,6 +43,9 @@ resources:
   # ADSB / Flight Tracking
   - ./adsb
 
+  # NetFlow / traffic analytics
+  - ./akvorado
+
   # Development and Testing
   - ./podinfo/ks.yaml
 

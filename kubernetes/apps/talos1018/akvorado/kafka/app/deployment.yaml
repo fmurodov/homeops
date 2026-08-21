@@ -1,0 +1,110 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akvorado-kafka
+  labels:
+    app.kubernetes.io/name: akvorado-kafka
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: akvorado-kafka
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: akvorado-kafka
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: kafka
+          image: apache/kafka:4.3.1
+          env:
+            # KRaft formats the log directory once against this id; changing it
+            # later orphans the existing volume.
+            - name: CLUSTER_ID
+              value: WRrU3wkDSNWJ3OkNJ2XZdA
+            - name: KAFKA_NODE_ID
+              value: "1"
+            - name: KAFKA_PROCESS_ROLES
+              value: controller,broker
+            - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+              value: 1@localhost:9093
+            - name: KAFKA_LISTENERS
+              value: CLIENT://:9092,CONTROLLER://:9093
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: CLIENT:PLAINTEXT,CONTROLLER:PLAINTEXT
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: CLIENT://akvorado-kafka.akvorado.svc.cluster.local:9092
+            - name: KAFKA_CONTROLLER_LISTENER_NAMES
+              value: CONTROLLER
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: CLIENT
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+              value: "1"
+            - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR
+              value: "1"
+            - name: KAFKA_LOG_DIRS
+              value: /var/lib/kafka/data
+            - name: KAFKA_HEAP_OPTS
+              value: -Xms512m -Xmx1g
+          ports:
+            - name: client
+              containerPort: 9092
+              protocol: TCP
+            - name: controller
+              containerPort: 9093
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/kafka/data
+          startupProbe:
+            tcpSocket:
+              port: client
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket:
+              port: client
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: client
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            # The entrypoint renders server.properties into /opt/kafka/config.
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              memory: "2Gi"
+            requests:
+              cpu: "50m"
+              memory: "1Gi"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: kafka-data

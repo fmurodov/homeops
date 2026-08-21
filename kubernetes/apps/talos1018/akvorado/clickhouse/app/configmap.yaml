@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-config
+  labels:
+    app.kubernetes.io/name: akvorado-clickhouse
+data:
+  akvorado.xml: |
+    <clickhouse>
+      <logger>
+        <level>warning</level>
+        <console>1</console>
+        <log remove="1"/>
+        <errorlog remove="1"/>
+      </logger>
+      <prometheus>
+        <endpoint>/metrics</endpoint>
+        <metrics>true</metrics>
+        <events>true</events>
+        <asynchronous_metrics>true</asynchronous_metrics>
+      </prometheus>
+      <max_server_memory_usage_to_ram_ratio>0.8</max_server_memory_usage_to_ram_ratio>
+      <mark_cache_size>536870912</mark_cache_size>
+      <uncompressed_cache_size>0</uncompressed_cache_size>
+      <!-- The system.*_log tables are unbounded by default and would outgrow
+           the flow tables they are meant to help debug. -->
+      <asynchronous_metric_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></asynchronous_metric_log>
+      <metric_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></metric_log>
+      <part_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></part_log>
+      <text_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></text_log>
+      <query_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></query_log>
+      <query_thread_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></query_thread_log>
+      <query_metric_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></query_metric_log>
+      <query_views_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></query_views_log>
+      <trace_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></trace_log>
+      <error_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></error_log>
+      <latency_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></latency_log>
+    </clickhouse>

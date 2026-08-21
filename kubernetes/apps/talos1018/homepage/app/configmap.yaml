@@ -83,7 +83,7 @@ data:
         columns: 4
       Network:
         style: row
-        columns: 2
+        columns: 3
       ADSB:
         style: row
         columns: 3

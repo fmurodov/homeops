@@ -1,0 +1,96 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akvorado-inlet
+  labels:
+    app.kubernetes.io/name: akvorado-inlet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: akvorado-inlet
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: akvorado-inlet
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: /api/v0/metrics
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: inlet
+          image: quay.io/akvorado/akvorado:2026.8.0
+          args:
+            - inlet
+            - http://akvorado-orchestrator:8080
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: netflow
+              containerPort: 2055
+              protocol: UDP
+            - name: ipfix
+              containerPort: 4739
+              protocol: UDP
+            - name: sflow
+              containerPort: 6343
+              protocol: UDP
+          startupProbe:
+            httpGet:
+              path: /api/v0/healthcheck
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /api/v0/healthcheck
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v0/healthcheck
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              memory: "512Mi"
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: akvorado-inlet
+  labels:
+    app.kubernetes.io/name: akvorado-inlet
+spec:
+  ipFamilyPolicy: PreferDualStack
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: akvorado-inlet
