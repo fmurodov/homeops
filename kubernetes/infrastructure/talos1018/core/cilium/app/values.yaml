@@ -64,7 +64,10 @@ ipv6NativeRoutingCIDR: "fd00:1018:1000::/56"
 # Masquerade is essential for ULA pods to reach the Internet
 enableIPv6Masquerade: true
 enableIPv4Masquerade: true
-# bpf:
+# Enables the per-service service.cilium.io/forwarding-mode annotation. Services
+# without it keep the default SNAT, so this is inert until a service opts in.
+bpf:
+  lbModeAnnotation: true
 #   masquerade: true
 
 # Prometheus metrics for Cilium agent
