@@ -124,16 +124,33 @@ TTL` and logs `raw flows table already exists, skip migration`; every row
 survives. Verified on `2026.8.0` when these four TTLs were raised.
 
 > [!WARNING]
-> `ALTER` cannot change `PARTITION BY`, so **the partition key is left derived
-> from the old TTL** and nothing warns you. After the raise to `8760h` the tables
-> kept 3.36h / 14.4h / 43.2h intervals (old TTL / 50), against the 7.3 days the
-> new TTL implies. `flows` is therefore heading for **~2,600 partitions instead
-> of ~50**, which stays invisible until the year fills.
+> `ALTER` cannot change `PARTITION BY`, so a TTL change leaves **the partition
+> key derived from the old TTL**, and nothing warns you. After the raise to
+> `8760h` the tables kept their 3.36h / 14.4h / 43.2h intervals (old TTL / 50)
+> against the 7.3 days the new TTL implies — `flows` was heading for ~2,600
+> partitions instead of ~50, invisibly, until the year filled.
 >
-> Correcting it means dropping the tables and letting the orchestrator recreate
-> them — *that* is the operation that loses history, and it is cheap only while
-> the history is short. Check with `SHOW CREATE TABLE flows` and compare
+> Check it after any TTL change: `SHOW CREATE TABLE flows`, and compare
 > `toIntervalSecond(N)` against the new TTL divided by 50.
+
+All four tables were dropped and rebuilt on 2026-08-22 to pick up the correct
+key, so they now partition at 7.3 days and expire at 1 year — 50 partitions each.
+The stored history went with them, which was cheap at 20 hours and would not have
+been later; it also spanned three sampling regimes, so it was not worth keeping.
+
+Rebuilding is the one operation here that does lose flows, and the order matters.
+`flows` is the hub: the three rollup consumers and `exporters_consumer` read from
+it, while `flows_<schemahash>_raw_consumer` writes into it from a `Null`-engine
+table. **Drop the materialized views before the tables**, keep the five
+dictionaries, then restart the orchestrator — its migration is existence-based,
+so it recreates whatever is missing.
+
+Scale the outlet to zero first and back up afterwards. Kafka keeps buffering and
+the consumer-group offset survives, so no live flows are lost across the window —
+only the already-stored history. Expect transient `cannot open geo database`
+afterwards: the GeoIP databases sit in an `emptyDir` and are re-fetched on every
+pod start. Confirm recovery with `countIf(SrcAS != 0)` rather than by listing the
+directory — the outlet image is distroless and has no `ls`.
 
 ## Before this can reconcile
 
