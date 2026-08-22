@@ -25,10 +25,13 @@ jobs:
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
+        # The review is advisory, not a merge gate - a run that exhausts its
+        # turns should not put a red X on the PR.
+        continue-on-error: true
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
-            --max-turns 10
+            --max-turns 30
             --allowedTools "Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*)"
           prompt: |
             Review this pull request. Focus on:
