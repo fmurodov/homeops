@@ -30,7 +30,64 @@ spec:
         runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        # Seed the dictionary before the orchestrator reads it. Exits 0 even if
+        # UniFi is unreachable, writing an empty CSV instead of blocking start.
+        - name: devices-seed
+          image: python:3.13-alpine
+          command: ["python3", "/opt/sync/devices_sync.py", "--once"]
+          env:
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+          envFrom:
+            - secretRef:
+                name: akvorado-unifi-secret
+          volumeMounts:
+            - name: devices-sync
+              mountPath: /opt/sync
+              readOnly: true
+            - name: devices
+              mountPath: /run/akvorado-dict
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              memory: "128Mi"
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
       containers:
+        - name: devices-sync
+          image: python:3.13-alpine
+          command: ["python3", "/opt/sync/devices_sync.py"]
+          env:
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+          envFrom:
+            - secretRef:
+                name: akvorado-unifi-secret
+          volumeMounts:
+            - name: devices-sync
+              mountPath: /opt/sync
+              readOnly: true
+            - name: devices
+              mountPath: /run/akvorado-dict
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              memory: "128Mi"
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
         - name: orchestrator
           image: quay.io/akvorado/akvorado:2026.8.0
           args:
@@ -43,6 +100,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/akvorado
+              readOnly: true
+            - name: devices
+              mountPath: /run/akvorado-dict
               readOnly: true
           startupProbe:
             httpGet:
@@ -85,3 +145,8 @@ spec:
                   name: akvorado-config
               - secret:
                   name: akvorado-snmp-secret
+        - name: devices
+          emptyDir: {}
+        - name: devices-sync
+          configMap:
+            name: akvorado-devices-sync
