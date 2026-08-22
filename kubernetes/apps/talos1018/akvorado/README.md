@@ -90,6 +90,24 @@ and `GOMEMLIMIT` together.
 promptly, so without a ceiling each refresh ratchets RSS up until the pod is
 OOMKilled — which is exactly how this was found.
 
+## Retention
+
+All four resolutions are kept for **1 year** (`8760h`). One year of high-fidelity
+flows is worth more here than five years of a 1:512 sample, and both cost about
+the same volume — so the storage budget goes into [sampling](#sampling) instead of
+into time. See [what it costs](#what-it-costs) for what that works out to at the
+sampling rate actually in use.
+
+Akvorado derives the ClickHouse partition interval from the TTL (TTL/50), so this
+also widens partitions from 3.4 hours to ~7 days. The rollups no longer earn
+their place on retention — they all expire together now — but they still decide
+how fast a year-wide query answers, so they stay.
+
+> [!WARNING]
+> Changing a resolution's TTL changes the partition key, and Akvorado's migration
+> recreates the table rather than rewriting it. Existing flows are lost. That is
+> cheap to do early and expensive to do late.
+
 ## Before this can reconcile
 
 Point the gateway at the collector: UniFi Network → Settings → CyberSecure →
@@ -103,21 +121,102 @@ Put a MaxMind account id and license key into `akvorado-geoip-secret`
 A free GeoLite2 account is enough. Without them the stack still collects flows,
 just with no AS or geo columns.
 
-## Calibrate the sampling rate
+## Sampling
 
-`core.default-sampling-rate` is `1`, which reports raw counts. It is only used
-when the exporter does not advertise a rate of its own. UniFi describes its
-export as *sampled*, so check what actually arrives:
+The gateway samples. UniFi Network → Settings → CyberSecure → Traffic Logging:
+
+| Setting | Value |
+| --- | --- |
+| NetFlow (IPFIX) | enabled on all 7 networks |
+| Version | 10 (IPFIX) |
+| **Sampling Mode** | **Random** |
+| **Sampling Rate** | **16** |
+| Timeout Rate | 5 minutes |
+| Refresh Rate | 20 packets |
+
+**The rate is never advertised in the export** — every record arrives with
+`SamplingRate = 1`, in Random mode exactly as in Hash. Left uncorrected, Akvorado
+reports raw counts and understates every byte and packet figure by 16x.
+
+`core.default-sampling-rate: 16` supplies the missing number. It and the UniFi setting
+are two halves of the same value: change one without the other and every byte figure
+is silently scaled by the ratio. Verify the export still advertises nothing:
 
 ```bash
 kubectl -n akvorado exec deploy/akvorado-clickhouse -- clickhouse-client --query "SELECT DISTINCT SamplingRate FROM flows"
 ```
 
-If that returns something other than 1, UniFi is advertising its rate and the
-setting is unused — nothing to do. If it returns 1, compare Akvorado's
-throughput against the UniFi dashboard for the same window and set
-`default-sampling-rate` to the ratio. Getting this wrong scales every byte and
-packet figure by a constant.
+If that ever returns something other than 1, UniFi has started advertising its own
+rate and `default-sampling-rate` is unused.
+
+### Why Random, and why 16
+
+The gateway ran **Hash at 1:512** until 2026-08-22. Both halves of that were wrong for
+this network.
+
+In **Hash** mode the selector runs over flow-invariant header fields, so every packet
+of a 5-tuple hashes the same way: a flow is either exported in full or missing
+entirely. It is not a 1-in-512 sample of each flow's packets. Measured with four
+controlled downloads through `ppp0`, varying rate (1.6 to 119 Mbps), duration (7s to
+120s), destination AS and protocol:
+
+| Test | Size | Rate | Duration | Records |
+| --- | --- | --- | --- | --- |
+| A | 100 MiB | 119 Mbps | 7.1s | 0 |
+| B | 20 MiB | 12 Mbps | 13.7s | 0 |
+| C | 24 MiB | 1.6 Mbps | 120.1s | 0 |
+| D | 25 MiB | 25 Mbps | 8.2s | 0 |
+
+168 MiB, ~120k packets, **zero records**. Per-packet sampling at 1:512 would have
+produced ~235. Four independent flows each missing is exactly what hash selection
+predicts — `(511/512)^4` is 99.2%.
+
+That distortion reached every view the console offered. Aggregate totals were sound
+once scaled, because they average over very many flows, but anything scoped to one
+host, one session or one short window was present at full weight or absent entirely on
+a 1-in-512 coin flip. It was also the whole explanation for two long-standing
+puzzles: **zero inter-VLAN records** despite all 7 networks being selected for export
+(inter-VLAN traffic covers few distinct 5-tuples here, so the expected count rounded to
+zero — no hardware offload needed as an explanation), and **92% of all records being
+NTP**, the public [chrony](../network/chrony) service on `10.18.6.13`, whose enormous
+count of distinct 5-tuples let it survive hash selection far better than anything else.
+
+**Random** fixes the mode: selection becomes per-packet, large flows are represented
+proportionally, and `default-sampling-rate` is valid per-flow rather than only in
+aggregate. **1:16** then buys back fidelity that was never being spent on anything —
+the inlet receives 0.078 packets/s and drops nothing, so 1:512 was reserving headroom
+this network has no use for. A 1 MB transfer now lands ~45 samples instead of a coin
+flip.
+
+### What it costs
+
+Measured on the live stack across the 2026-08-22 switchover:
+
+| | Hash 1:512 | Random 1:16 |
+| --- | --- | --- |
+| Flow records | 86/min | 3,284/min |
+| `flows` on disk | ~13 bytes/row | ~13 bytes/row |
+
+**38x more records, not the 32x the rate change alone implies** — Random also picks up
+the flows Hash was discarding wholesale. Against a **30 GiB** volume, and allowing for
+the overnight lull (the Hash-era daily average ran ~11% below its midday rate):
+
+| | Raw | With the three rollups |
+| --- | --- | --- |
+| Per day | ~55 MB | ~75 MB |
+| 1 year of [retention](#retention) | ~19 GiB | **~25 GiB** |
+
+> [!WARNING]
+> That is ~84% of the volume, and ClickHouse wants free space to merge into. 1:16 and
+> a 1-year TTL on all four resolutions fit, but with little margin for traffic growth.
+> If it turns out too tight, the levers are 1:32 (roughly halves it), a shorter TTL on
+> the raw table with the rollups kept long, or a larger PVC — and the first two are
+> much cheaper decided early, per the TTL warning above.
+
+For reference, raw growth scales close to linearly with the rate: ~1.4 MB/day at
+1:512, ~11 MB/day at 1:64, ~55 MB/day at 1:16, and ~717 MB/day at 1:1 — full capture
+would need ~256 GiB for a year and is not on the table without growing the PVC by an
+order of magnitude.
 
 ## Troubleshooting
 
