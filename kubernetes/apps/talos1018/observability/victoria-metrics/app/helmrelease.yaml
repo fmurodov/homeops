@@ -257,6 +257,24 @@ spec:
                   action: keep
                   regex: "9153"
 
+            # Hubble (:9965). The agent's prometheus.io/port is 9962, so
+            # annotation discovery never reaches this port.
+            - job_name: hubble
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names:
+                      - kube-system
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_label_k8s_app
+                  action: keep
+                  regex: cilium
+                - source_labels:
+                    - __meta_kubernetes_pod_container_port_number
+                  action: keep
+                  regex: "9965"
+
             # VictoriaMetrics single — self metrics (vm_*, up)
             - job_name: victoria-metrics
               static_configs:
