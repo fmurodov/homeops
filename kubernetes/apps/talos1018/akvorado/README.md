@@ -218,12 +218,22 @@ predicts — `(511/512)^4` is 99.2%.
 That distortion reached every view the console offered. Aggregate totals were sound
 once scaled, because they average over very many flows, but anything scoped to one
 host, one session or one short window was present at full weight or absent entirely on
-a 1-in-512 coin flip. It was also the whole explanation for two long-standing
-puzzles: **zero inter-VLAN records** despite all 7 networks being selected for export
-(inter-VLAN traffic covers few distinct 5-tuples here, so the expected count rounded to
-zero — no hardware offload needed as an explanation), and **92% of all records being
-NTP**, the public [chrony](../network/chrony) service on `10.18.6.13`, whose enormous
-count of distinct 5-tuples let it survive hash selection far better than anything else.
+a 1-in-512 coin flip.
+
+Two things it did **not** explain, contrary to what this file claimed until
+2026-08-22:
+
+- **Zero inter-VLAN records is architectural, not sampling.** At 1:16 Random,
+  **713,468 of 713,468 records still have `ppp0` on one side** — no internal↔internal
+  flows at all, across seven VLANs. Sampling that fine would have surfaced them if the
+  gateway exported them. It does not export routed VLAN-to-VLAN traffic, so this is
+  the hardware-offload explanation originally dismissed. East-west visibility has to
+  come from [Hubble](../../../infrastructure/talos1018/core/cilium), not from here.
+- **NTP got worse, not better.** The public [chrony](../network/chrony) service is now
+  **97.7% of all records**, up from 92% under Hash. Per-packet selection represents
+  the dominant flow proportionally, so it crowds out everything else harder. Non-NTP
+  traffic is 2.25% of the store, which is worth knowing before reading any console
+  view — or any storage estimate below.
 
 **Random** fixes the mode: selection becomes per-packet, large flows are represented
 proportionally, and `default-sampling-rate` is valid per-flow rather than only in

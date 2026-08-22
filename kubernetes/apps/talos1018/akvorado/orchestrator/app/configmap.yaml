@@ -97,6 +97,10 @@ data:
         # The gateway never advertises its rate, so this must mirror the UniFi
         # setting by hand or every byte figure is scaled by the mismatch.
         default-sampling-rate: 16
+        # Defaults to flow, routing, networks. UniFi's IPFIX carries no AS
+        # numbers and there is no routing provider, so only networks can answer.
+        asn-providers:
+          - networks
         interface-classifiers:
           - |
             (Interface.Name == "ppp0" || Interface.Description == "ppp0") &&
