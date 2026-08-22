@@ -6,6 +6,8 @@ metadata:
   name: akvorado-outlet
   labels:
     app.kubernetes.io/name: akvorado-outlet
+  annotations:
+    configmap.reloader.stakater.com/reload: "akvorado-config"
 spec:
   replicas: 1
   strategy:

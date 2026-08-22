@@ -6,6 +6,8 @@ metadata:
   name: akvorado-inlet
   labels:
     app.kubernetes.io/name: akvorado-inlet
+  annotations:
+    configmap.reloader.stakater.com/reload: "akvorado-config"
 spec:
   replicas: 1
   selector:

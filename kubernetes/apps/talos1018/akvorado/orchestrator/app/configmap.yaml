@@ -28,11 +28,7 @@ data:
 
     clickhouse:
       orchestrator-url: http://akvorado-orchestrator:8080
-      # 8760h = 1y on every resolution. One year at a low sampling rate beats
-      # five years of a 1:512 sample, and the budget is the same volume either
-      # way. The rollups stay for query speed, not retention. Akvorado derives
-      # the partition interval from the TTL (TTL/50), so this also widens
-      # partitions from 3.4h to ~7d.
+      # The rollups stay for query speed, not retention — all four expire together.
       resolutions:
         - interval: 0
           ttl: 8760h
@@ -98,10 +94,8 @@ data:
           "${IPV6_PREFIX_GUA}:6::/64": {name: lan6, role: clients}
           fd00:1018:0:5::/64: {name: srv, role: servers}
       core:
-        # The gateway samples at 1:16 (UniFi -> CyberSecure -> Traffic Logging,
-        # Sampling Mode "Random") and never advertises the rate, so every record
-        # arrives claiming SamplingRate=1. Without this, all byte and packet
-        # figures are understated ~16x. Keep in step with the UniFi setting.
+        # The gateway never advertises its rate, so this must mirror the UniFi
+        # setting by hand or every byte figure is scaled by the mismatch.
         default-sampling-rate: 16
         interface-classifiers:
           - |
