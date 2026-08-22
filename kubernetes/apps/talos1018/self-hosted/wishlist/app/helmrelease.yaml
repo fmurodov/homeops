@@ -137,7 +137,17 @@ spec:
                 @unlogged path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.webp /wishlists/*/events /lists/*/events
 
                 log {
-                    format json
+                    format filter {
+                        wrap json
+                        fields {
+                            request>headers delete
+                            request>tls delete
+                            request>remote_port delete
+                            resp_headers delete
+                            bytes_read delete
+                            user_id delete
+                        }
+                    }
                 }
                 log_skip @unlogged
 
