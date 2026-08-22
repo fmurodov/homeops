@@ -56,6 +56,6 @@ spec:
             Match       *
             Host        victoria-logs-victoria-logs-single-server
             Port        9428
-            URI         /insert/loki/api/v1/push?_msg_field=log
+            URI         /insert/loki/api/v1/push?_msg_field=message,msg,log
             Labels      job=fluent-bit
             Label_Keys  $kubernetes['namespace_name'], $kubernetes['pod_name'], $kubernetes['container_name']
