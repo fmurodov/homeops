@@ -26,7 +26,23 @@ cache backend defaults to in-memory).
 
 All service configuration lives in one place: the `akvorado-config` ConfigMap in
 [orchestrator/app/configmap.yaml](orchestrator/app/configmap.yaml). The inlet,
-outlet and console have no config of their own.
+outlet and console have no config of their own — they fetch it from the
+orchestrator over HTTP **once, at startup**.
+
+That last detail is a trap. Only the orchestrator mounts the ConfigMap, so
+`reloader.stakater.com/auto` restarts only the orchestrator when the config
+changes, and the other three keep serving the previous settings indefinitely. The
+orchestrator visibly restarting is what makes the change look applied. All three
+therefore name the ConfigMap explicitly:
+
+```yaml
+configmap.reloader.stakater.com/reload: "akvorado-config"
+```
+
+Reloader restarts all four at once, so a service can in principle come back
+before the new orchestrator does and read the old config again. After changing
+anything that shows up in the data, confirm it in the data rather than in the
+ConfigMap — see [Sampling](#sampling) for the `SamplingRate` query.
 
 The SNMP community is the one thing that does not belong in a ConfigMap, so it
 lives in `akvorado-snmp-secret` and is pulled in with a YAML `!include`. That
@@ -98,15 +114,26 @@ the same volume — so the storage budget goes into [sampling](#sampling) instea
 into time. See [what it costs](#what-it-costs) for what that works out to at the
 sampling rate actually in use.
 
-Akvorado derives the ClickHouse partition interval from the TTL (TTL/50), so this
-also widens partitions from 3.4 hours to ~7 days. The rollups no longer earn
-their place on retention — they all expire together now — but they still decide
-how fast a year-wide query answers, so they stay.
+Akvorado sizes the ClickHouse partition interval from the TTL (TTL/50), aiming at
+~50 partitions per table. The rollups no longer earn their place on retention —
+they all expire together now — but they still decide how fast a year-wide query
+answers, so they stay.
+
+**Changing a TTL does not lose data.** Akvorado issues `ALTER TABLE ... MODIFY
+TTL` and logs `raw flows table already exists, skip migration`; every row
+survives. Verified on `2026.8.0` when these four TTLs were raised.
 
 > [!WARNING]
-> Changing a resolution's TTL changes the partition key, and Akvorado's migration
-> recreates the table rather than rewriting it. Existing flows are lost. That is
-> cheap to do early and expensive to do late.
+> `ALTER` cannot change `PARTITION BY`, so **the partition key is left derived
+> from the old TTL** and nothing warns you. After the raise to `8760h` the tables
+> kept 3.36h / 14.4h / 43.2h intervals (old TTL / 50), against the 7.3 days the
+> new TTL implies. `flows` is therefore heading for **~2,600 partitions instead
+> of ~50**, which stays invisible until the year fills.
+>
+> Correcting it means dropping the tables and letting the orchestrator recreate
+> them — *that* is the operation that loses history, and it is cheap only while
+> the history is short. Check with `SHOW CREATE TABLE flows` and compare
+> `toIntervalSecond(N)` against the new TTL divided by 50.
 
 ## Before this can reconcile
 
