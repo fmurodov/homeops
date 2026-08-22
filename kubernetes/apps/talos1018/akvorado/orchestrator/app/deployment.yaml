@@ -34,7 +34,7 @@ spec:
         # Seed the dictionary before the orchestrator reads it. Exits 0 even if
         # UniFi is unreachable, writing an empty CSV instead of blocking start.
         - name: devices-seed
-          image: python:3.13-alpine
+          image: python:3.14-alpine
           command: ["python3", "/opt/sync/devices_sync.py", "--once"]
           env:
             - name: PYTHONDONTWRITEBYTECODE
@@ -62,7 +62,7 @@ spec:
               memory: "32Mi"
       containers:
         - name: devices-sync
-          image: python:3.13-alpine
+          image: python:3.14-alpine
           command: ["python3", "/opt/sync/devices_sync.py"]
           env:
             - name: PYTHONDONTWRITEBYTECODE
