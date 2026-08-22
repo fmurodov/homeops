@@ -74,6 +74,26 @@ data:
         cache-refresh: 24h
         cache-persist-file: /run/akvorado/metadata.cache
         providers:
+          # The bridges and ppp0 are virtual, so the gateway reports ifSpeed 0
+          # for every interface flows actually traverse. Only static can decline
+          # a query, so it goes first; unlisted ifIndexes fall through to SNMP.
+          # ifIndexes are not stable across gateway reboots — re-check after one.
+          - type: static
+            exporters:
+              10.18.6.1/32:
+                name: 1018LC-GW-U-1
+                skip-missing-interfaces: true
+                ifindexes:
+                  24: {name: br0, description: core, speed: 1000}
+                  25: {name: br2, description: lan, speed: 1000}
+                  26: {name: br3, description: iot, speed: 1000}
+                  27: {name: br4, description: guest, speed: 1000}
+                  28: {name: br5, description: security, speed: 1000}
+                  29: {name: br6, description: srv, speed: 1000}
+                  30: {name: br7, description: lan6, speed: 1000}
+                  # 2.5G port, but the ISP hands over 1G — that is the ceiling
+                  # utilisation should be measured against.
+                  31: {name: ppp0, description: wan, speed: 1000}
           - type: snmp
             credentials: !include "snmp-credentials.yaml"
       networks:
