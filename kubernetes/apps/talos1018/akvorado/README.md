@@ -130,10 +130,16 @@ kubectl -n akvorado logs deploy/akvorado-outlet
 kubectl -n akvorado exec deploy/akvorado-clickhouse -- clickhouse-client --query "SELECT count() FROM flows"
 ```
 
-Nothing arriving at all is usually the exporter or the LoadBalancer path:
+Nothing arriving at all is usually the exporter or the LoadBalancer path. The
+akvorado image ships no shell utilities, so reach the metrics endpoint from
+outside the container:
 
 ```bash
-kubectl -n akvorado exec deploy/akvorado-inlet -- wget -qO- http://localhost:8080/api/v0/metrics | grep flow_input_udp
+kubectl -n akvorado port-forward deploy/akvorado-inlet 8080:8080
+```
+
+```bash
+curl -s http://127.0.0.1:8080/api/v0/metrics | grep flow_input_udp
 ```
 
 To check what SNMP resolved, and confirm the boundary split is right:

@@ -24,15 +24,17 @@ data:
       <max_server_memory_usage_to_ram_ratio>0.8</max_server_memory_usage_to_ram_ratio>
       <mark_cache_size>536870912</mark_cache_size>
       <uncompressed_cache_size>0</uncompressed_cache_size>
-      <asynchronous_metric_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></asynchronous_metric_log>
-      <metric_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></metric_log>
+      <!-- Nothing reads these and they outgrew the flow data 160x in a day.
+           The Prometheus endpoint reads the live views, not this history. -->
+      <asynchronous_metric_log remove="1"/>
+      <metric_log remove="1"/>
+      <trace_log remove="1"/>
+      <text_log remove="1"/>
       <part_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></part_log>
-      <text_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></text_log>
       <query_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></query_log>
       <query_thread_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></query_thread_log>
       <query_metric_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></query_metric_log>
       <query_views_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></query_views_log>
-      <trace_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></trace_log>
       <error_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></error_log>
       <latency_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></latency_log>
     </clickhouse>
