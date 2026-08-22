@@ -6,7 +6,7 @@ permissions:
 on:
   workflow_dispatch:
   push:
-    branches: ["*"]
+    branches: ["**"]
     tags-ignore: ["*"]
     paths:
       - "talos/**/*.yaml"
