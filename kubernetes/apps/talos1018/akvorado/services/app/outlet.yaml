@@ -37,6 +37,12 @@ spec:
           args:
             - outlet
             - http://akvorado-orchestrator:8080
+          env:
+            # Rebuilding the network trie briefly holds two copies. Without a
+            # ceiling the Go runtime keeps the freed one and RSS ratchets up
+            # on every GeoIP refresh until the pod is OOMKilled.
+            - name: GOMEMLIMIT
+              value: 1536MiB
           ports:
             - name: http
               containerPort: 8080
@@ -75,17 +81,17 @@ spec:
                 - ALL
           resources:
             limits:
-              memory: "1Gi"
+              memory: "2Gi"
             requests:
               cpu: "50m"
-              memory: "256Mi"
+              memory: "512Mi"
         # A plain sidecar, not an init container: bad credentials must degrade
         # to no geo data, never stop the outlet from consuming flows.
         - name: geoipupdate
           image: ghcr.io/maxmind/geoipupdate:v7
           env:
             - name: GEOIPUPDATE_EDITION_IDS
-              value: GeoLite2-ASN GeoLite2-City
+              value: GeoLite2-ASN GeoLite2-Country
             - name: GEOIPUPDATE_FREQUENCY
               value: "72"
             - name: GEOIPUPDATE_ACCOUNT_ID
@@ -121,7 +127,7 @@ spec:
             claimName: akvorado-outlet-state
         - name: geoip
           emptyDir:
-            sizeLimit: 500Mi
+            sizeLimit: 100Mi
         - name: tmp
           emptyDir: {}
 ---

@@ -68,20 +68,27 @@ from `ifName`. Whichever way round the gateway reports it, one branch matches.
 `${IPV6_PREFIX_GUA}`, which is the site **/48** — `:5` is the SRV VLAN the
 cluster nodes live on.
 
-**GeoIP** fills `SrcAS`/`DstAS`, `SrcCountry`/`DstCountry`,
-`SrcGeoCity`/`DstGeoCity` and `SrcGeoState`/`DstGeoState`. A `geoipupdate`
-sidecar in the outlet pod pulls GeoLite2-ASN and GeoLite2-City from MaxMind into
-a shared `emptyDir` every 72 hours, and the outlet reloads them through fsnotify
-without restarting. Credentials live in `akvorado-geoip-secret`.
+**GeoIP** fills `SrcAS`/`DstAS` and `SrcCountry`/`DstCountry`. A `geoipupdate`
+sidecar in the outlet pod pulls GeoLite2-ASN and GeoLite2-Country from MaxMind
+into a shared `emptyDir` every 72 hours, and the outlet reloads them through
+fsnotify without restarting. Credentials live in `akvorado-geoip-secret`.
 
 It is a plain sidecar rather than an init container on purpose: bad or missing
 MaxMind credentials degrade to no geo data instead of stopping the outlet from
 consuming flows. The databases are a cache, so they are re-fetched on every pod
 restart rather than kept on a volume.
 
-Note `SrcGeoState` (from GeoIP, e.g. `ENG`) is not `SrcNetRegion` — the latter
-comes from the `region` attribute on the `networks` entries below, which only
-covers the local VLANs.
+`SrcGeoCity` and `SrcGeoState` stay empty: they need GeoLite2-City, which is a
+deliberate trade. Akvorado loads the whole database into a prefix trie, and
+measured on this stack that costs **1.85 GiB** resident against **579 MiB** for
+Country — 3 GiB during a refresh, when the old and new tries briefly coexist.
+Country-only fits in a 2 GiB limit with room to spare. Swapping back means
+changing `GEOIPUPDATE_EDITION_IDS`, the `geo-database` path, the memory limit
+and `GOMEMLIMIT` together.
+
+`GOMEMLIMIT` is not optional here. Go does not return freed heap to the OS
+promptly, so without a ceiling each refresh ratchets RSS up until the pod is
+OOMKilled — which is exactly how this was found.
 
 ## Before this can reconcile
 
