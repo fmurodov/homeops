@@ -15,5 +15,12 @@
       matchPackageNames: ["ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder"],
       versioning: "regex:^latest-build-(?<major>\\d+)$",
     },
+    {
+      description:
+        "Keep ClickHouse on the x.3/x.8 LTS lines: regular stables lose support after a few releases, and akvorado only ever tests against LTS",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["clickhouse/clickhouse-server"],
+      allowedVersions: "/^\\d+\\.[38]$/",
+    },
   ],
 }
