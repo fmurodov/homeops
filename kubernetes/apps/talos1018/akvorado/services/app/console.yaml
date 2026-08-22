@@ -6,10 +6,6 @@ metadata:
   name: akvorado-console
   labels:
     app.kubernetes.io/name: akvorado-console
-  # inlet, outlet and console do not mount akvorado-config — they fetch it from
-  # the orchestrator over HTTP at startup — so reloader's "auto" never fires for
-  # them. Naming the ConfigMap explicitly is what makes a config change reach
-  # these three instead of only the orchestrator.
   annotations:
     configmap.reloader.stakater.com/reload: "akvorado-config"
 spec:
