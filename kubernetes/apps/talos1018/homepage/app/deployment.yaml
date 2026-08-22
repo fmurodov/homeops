@@ -27,17 +27,11 @@ spec:
       enableServiceLinks: true
       containers:
         - name: homepage
-          image: "ghcr.io/gethomepage/homepage:v2.0.0"
+          image: "ghcr.io/gethomepage/homepage:v2.1.2"
           imagePullPolicy: IfNotPresent
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: ${CLUSTER_DOMAIN},home.${CLUSTER_DOMAIN}
-            # Use the API DNS name: node-fetch fails TLS SAN matching for the
-            # IPv6-only kubernetes Service IP (compressed host vs expanded cert SAN).
-            - name: KUBERNETES_SERVICE_HOST
-              value: kubernetes.default.svc.cluster.local
-            - name: KUBERNETES_SERVICE_PORT
-              value: "443"
             - name: HOMEPAGE_AUTH_ENABLED
               value: "true"
             - name: HOMEPAGE_EXTERNAL_URL
