@@ -98,11 +98,11 @@ data:
           "${IPV6_PREFIX_GUA}:6::/64": {name: lan6, role: clients}
           fd00:1018:0:5::/64: {name: srv, role: servers}
       core:
-        # The gateway samples at 1:512 (UniFi -> CyberSecure -> Traffic Logging,
-        # Sampling Mode "Hash") and never advertises the rate, so every record
+        # The gateway samples at 1:16 (UniFi -> CyberSecure -> Traffic Logging,
+        # Sampling Mode "Random") and never advertises the rate, so every record
         # arrives claiming SamplingRate=1. Without this, all byte and packet
-        # figures are understated ~512x. Keep in step with the UniFi setting.
-        default-sampling-rate: 512
+        # figures are understated ~16x. Keep in step with the UniFi setting.
+        default-sampling-rate: 16
         interface-classifiers:
           - |
             (Interface.Name == "ppp0" || Interface.Description == "ppp0") &&
