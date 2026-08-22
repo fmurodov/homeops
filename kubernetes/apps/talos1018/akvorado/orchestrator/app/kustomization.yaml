@@ -6,5 +6,12 @@ namespace: akvorado
 resources:
   - configmap.yaml
   - akvorado-snmp-secret.sops.yaml
+  - akvorado-unifi-secret.sops.yaml
   - deployment.yaml
   - service.yaml
+configMapGenerator:
+  - name: akvorado-devices-sync
+    files:
+      - devices_sync.py
+    options:
+      disableNameSuffixHash: true

@@ -39,6 +39,23 @@ data:
         - interval: 1h
           ttl: 8760h
 
+    schema:
+      custom-dictionaries:
+        devices:
+          layout: complex_key_hashed
+          keys:
+            - name: addr
+              type: String
+          attributes:
+            - name: name
+              type: String
+              default: ""
+              label: DeviceName
+          source: /run/akvorado-dict/devices.csv
+          dimensions:
+            - SrcAddr
+            - DstAddr
+
     inlet:
       http:
         listen: "[::]:8080"
