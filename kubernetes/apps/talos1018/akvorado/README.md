@@ -90,6 +90,23 @@ and `GOMEMLIMIT` together.
 promptly, so without a ceiling each refresh ratchets RSS up until the pod is
 OOMKilled — which is exactly how this was found.
 
+## Retention
+
+All four resolutions are kept for **1 year** (`8760h`). One year of high-fidelity
+flows is worth more here than five years of a 1:512 sample, and both cost about
+the same volume — so the storage budget goes into [sampling](#capturing-more)
+instead of into time.
+
+Akvorado derives the ClickHouse partition interval from the TTL (TTL/50), so this
+also widens partitions from 3.4 hours to ~7 days. The rollups no longer earn
+their place on retention — they all expire together now — but they still decide
+how fast a year-wide query answers, so they stay.
+
+> [!WARNING]
+> Changing a resolution's TTL changes the partition key, and Akvorado's migration
+> recreates the table rather than rewriting it. Existing flows are lost. That is
+> cheap to do early and expensive to do late.
+
 ## Before this can reconcile
 
 Point the gateway at the collector: UniFi Network → Settings → CyberSecure →
@@ -103,21 +120,98 @@ Put a MaxMind account id and license key into `akvorado-geoip-secret`
 A free GeoLite2 account is enough. Without them the stack still collects flows,
 just with no AS or geo columns.
 
-## Calibrate the sampling rate
+## Sampling
 
-`core.default-sampling-rate` is `1`, which reports raw counts. It is only used
-when the exporter does not advertise a rate of its own. UniFi describes its
-export as *sampled*, so check what actually arrives:
+The gateway samples. UniFi Network → Settings → CyberSecure → Traffic Logging:
+
+| Setting | Value |
+| --- | --- |
+| NetFlow (IPFIX) | enabled on all 7 networks |
+| Version | 10 (IPFIX) |
+| **Sampling Mode** | **Hash** |
+| **Sampling Rate** | **512** |
+| Timeout Rate | 5 minutes |
+| Refresh Rate | 20 packets |
+
+**The rate is never advertised in the export** — every record arrives with
+`SamplingRate = 1`, so Akvorado reports raw counts and understates every byte and
+packet figure by roughly 512x. Measured against UniFi's own counters the gap is
+~1000x, the right order of magnitude for a 512 rate.
+
+`core.default-sampling-rate: 512` corrects the aggregates. Verify the export is
+still not advertising a rate before relying on it:
 
 ```bash
 kubectl -n akvorado exec deploy/akvorado-clickhouse -- clickhouse-client --query "SELECT DISTINCT SamplingRate FROM flows"
 ```
 
-If that returns something other than 1, UniFi is advertising its rate and the
-setting is unused — nothing to do. If it returns 1, compare Akvorado's
-throughput against the UniFi dashboard for the same window and set
-`default-sampling-rate` to the ratio. Getting this wrong scales every byte and
-packet figure by a constant.
+If that ever returns something other than 1, UniFi has started advertising and
+`default-sampling-rate` is unused.
+
+### Hash mode selects whole flows, not packets
+
+This is the part that bites. In **Hash** mode the selector runs over
+flow-invariant header fields, so every packet of a 5-tuple hashes the same way:
+a flow is either exported in full or missing entirely. It is not a 1-in-512
+sample of each flow's packets.
+
+Measured with four controlled downloads through `ppp0`, varying rate (1.6 to
+119 Mbps), duration (7s to 120s), destination AS and protocol:
+
+| Test | Size | Rate | Duration | Records |
+| --- | --- | --- | --- | --- |
+| A | 100 MiB | 119 Mbps | 7.1s | 0 |
+| B | 20 MiB | 12 Mbps | 13.7s | 0 |
+| C | 24 MiB | 1.6 Mbps | 120.1s | 0 |
+| D | 25 MiB | 25 Mbps | 8.2s | 0 |
+
+168 MiB, ~120k packets, **zero records**. Per-packet sampling at 1:512 would
+have produced ~235. Four independent flows each missing is exactly what hash
+selection predicts — `(511/512)^4` is 99.2%.
+
+The consequences are worth being explicit about:
+
+- **Aggregate totals are sound** once multiplied by 512, because they average
+  over a very large number of flows.
+- **Anything scoped to one host, one session or one short window is not.** That
+  traffic is present at full weight or absent entirely, on a 1-in-512 coin flip.
+- It also explains the **zero inter-VLAN records** despite all 7 networks being
+  selected for export. Inter-VLAN traffic covers few distinct 5-tuples here, so
+  the expected count at 1:512 rounds to zero. No need to reach for hardware
+  offload as an explanation.
+- **92% of all records are NTP** — the public [chrony](../network/chrony) service
+  on `10.18.6.13`, whose enormous count of distinct 5-tuples means it survives
+  sampling far better than anything else on the network does.
+
+### Capturing more
+
+This is a home network. The inlet receives 0.078 packets/s and drops nothing, so
+1:512 is buying headroom nobody needs. Two independent knobs:
+
+- **Sampling Mode → Random** makes selection per-packet, so large flows are
+  represented proportionally and `default-sampling-rate` becomes valid per-flow
+  rather than only in aggregate. Strictly better here, and free.
+- **Sampling Rate → lower** trades storage for fidelity, close to linearly. Raw
+  flows currently grow at ~1.4 MB/day at 1:512, so for the 1 year of
+  [retention](#retention) above, against a 30 GiB volume:
+
+| Rate | Raw growth | 1y raw | Share of volume |
+| --- | --- | --- | --- |
+| 512 (current) | ~1.4 MB/day | ~0.5 GiB | 2% |
+| 64 | ~11 MB/day | ~4 GiB | 13% |
+| **16** | **~45 MB/day** | **~16 GiB** | **55%** |
+| 4 | ~180 MB/day | ~64 GiB | does not fit |
+| 1 | ~717 MB/day | ~256 GiB | does not fit |
+
+**1:16 in Random mode** is the intended setting: it fits a year with room for
+rollups and ClickHouse merge headroom, and a 1 MB transfer lands ~45 samples
+instead of a coin flip. 1:32 halves the storage if the volume feels tight; full
+capture at 1:1 would need ~256 GiB and is not on the table without growing the
+PVC by an order of magnitude.
+
+`core.default-sampling-rate` must be changed in step with the UniFi setting —
+they are two halves of the same number, and a mismatch silently scales every
+byte figure.
 
 ## Troubleshooting
 
