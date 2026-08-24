@@ -26,6 +26,14 @@ spec:
       persistentVolume:
         enabled: true
         existingClaim: victoria-metrics-data
+      extraVolumes:
+        - name: ha-token
+          secret:
+            secretName: ha-token-secret
+      extraVolumeMounts:
+        - name: ha-token
+          mountPath: /etc/ha-token
+          readOnly: true
       resources:
         requests:
           cpu: 100m
@@ -239,6 +247,18 @@ spec:
                     - __meta_kubernetes_endpoint_port_name
                   action: keep
                   regex: readsb;http
+
+            # Home Assistant prometheus integration — needs a long-lived
+            # access token (ha-token-secret). The response is ~1MB, so scrape
+            # at half the global rate.
+            - job_name: home-assistant
+              metrics_path: /api/prometheus
+              scrape_interval: 60s
+              authorization:
+                credentials_file: /etc/ha-token/token
+              static_configs:
+                - targets:
+                    - home-assistant.home-automation.svc.cluster.local:8123
 
             # CoreDNS (kube-system) — metrics on :9153
             - job_name: coredns

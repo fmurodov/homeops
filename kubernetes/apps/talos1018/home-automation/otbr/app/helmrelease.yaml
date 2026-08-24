@@ -50,6 +50,24 @@ spec:
               capabilities:
                 add:
                   - NET_ADMIN
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    # SL-OT 2.4.4 RCP can wedge radio TX while otbr-agent keeps advertising
+                    # LAN routes; only a container restart (serial reopen) resets the dongle.
+                    # Ping the leader ALOC (own RLOC with last group fc00) — a real RF
+                    # round-trip; the neighbor check rejects a self-led singleton partition.
+                    command:
+                      - /bin/sh
+                      - -c
+                      - ot-ctl neighbor list | grep -q 0x && ot-ctl ping "$(ot-ctl ipaddr rloc | head -1 | tr -d '\r' | sed 's/:[^:]*$/:fc00/')" 16 3 | grep -q "[1-3] packets received"
+                  initialDelaySeconds: 120
+                  periodSeconds: 60
+                  timeoutSeconds: 15
+                  failureThreshold: 5
 
       otbr-2:
         type: deployment
