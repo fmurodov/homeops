@@ -6,4 +6,5 @@ namespace: observability
 resources:
   - ./helmrepository.yaml
   - ./pvc.yaml
+  - ./ha-token-secret.sops.yaml
   - ./helmrelease.yaml

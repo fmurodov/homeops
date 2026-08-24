@@ -491,7 +491,7 @@ spec:
             - name: observability
               rules:
                 - alert: TargetDown
-                  expr: 'up{job=~"kubernetes-api-server|kubernetes-kubelet|kube-state-metrics|node-exporter|longhorn"} == 0'
+                  expr: 'up{job=~"kubernetes-api-server|kubernetes-kubelet|kube-state-metrics|node-exporter|longhorn|home-assistant"} == 0'
                   for: 15m
                   labels:
                     severity: warning
@@ -561,3 +561,33 @@ spec:
                     severity: critical
                   annotations:
                     summary: "RIPE NRTMv3 check has reported no data for over 20m"
+
+            # ----------------------------------------------------------------
+            # Thread border routers
+            # ----------------------------------------------------------------
+            - name: thread
+              rules:
+                # Baseline is a few RCP crashes/day (SL-OT 2.4.4 firmware bug);
+                # the radio-TX liveness probe also lands here. A burst = mesh churn.
+                - alert: OtbrRestartStorm
+                  expr: 'increase(kube_pod_container_status_restarts_total{namespace="home-automation", pod=~"otbr-.*"}[1h]) > 2'
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "OTBR {{ $labels.pod }} restarted more than twice in the last hour"
+
+                # Each Matter node exposes exactly one update.*_firmware entity, so this
+                # counts devices, not entities. Baseline offline (dead batteries,
+                # wall-switched lamps) is ~1/3 of the fleet — 50% means a real outage.
+                - alert: MatterDevicesUnavailable
+                  expr: >-
+                    (
+                      count(homeassistant_entity_available{domain="update", entity=~".*_firmware"} == 0)
+                      /
+                      count(homeassistant_entity_available{domain="update", entity=~".*_firmware"})
+                    ) > 0.5
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "{{ $value | humanizePercentage }} of Matter devices are unavailable"
