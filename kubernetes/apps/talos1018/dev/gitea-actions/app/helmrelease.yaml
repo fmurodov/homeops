@@ -1,0 +1,76 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gitea-actions
+spec:
+  chart:
+    spec:
+      chart: actions
+      sourceRef:
+        kind: HelmRepository
+        name: gitea
+  interval: 1h
+  values:
+    enabled: true
+
+    # Not the in-cluster Service: job containers inherit this as
+    # GITHUB_SERVER_URL, and only the gateway name has a cert they trust.
+    giteaRootURL: https://gitea.${CLUSTER_DOMAIN}
+
+    existingSecret: gitea-runner-secret
+    existingSecretKey: token
+
+    global:
+      storageClass: longhorn
+
+    statefulset:
+      replicas: 1
+      timezone: ${TIMEZONE}
+
+      persistence:
+        size: 2Gi
+
+      # The chart leaves dockerd's image store on the container's writable layer,
+      # i.e. the node's containerd filesystem. A capped emptyDir evicts this pod
+      # instead of pushing the node into DiskPressure.
+      extraVolumes:
+        - name: docker-graph-storage
+          emptyDir:
+            sizeLimit: 20Gi
+
+      runner:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 512Mi
+        config: |
+          log:
+            level: info
+          runner:
+            capacity: 2
+            labels:
+              - "ubuntu-latest:docker://docker.gitea.com/runner-images:ubuntu-latest"
+              - "ubuntu-24.04:docker://docker.gitea.com/runner-images:ubuntu-24.04"
+              - "ubuntu-22.04:docker://docker.gitea.com/runner-images:ubuntu-22.04"
+          cache:
+            # Per-job docker networks can't reach the auto-detected cache address.
+            enabled: false
+          container:
+            require_docker: true
+            docker_timeout: 300s
+
+      dind:
+        extraVolumeMounts:
+          - name: docker-graph-storage
+            mountPath: /var/lib/docker
+        # Also the ceiling for job containers, nested cgroups under this one.
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            memory: 6Gi

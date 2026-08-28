@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# gitea-actions - CI runner for Gitea Actions
+# Uses the 'gitea' HelmRepository owned by the gitea component
+# PREREQUISITE: Mint a runner registration token before deploying, with
+#   kubectl -n dev exec deploy/gitea -c gitea -- gitea actions generate-runner-token
+#   Then fill it into gitea-runner-secret.sops.yaml and encrypt it with:
+#   sops --encrypt --in-place gitea-actions/app/gitea-runner-secret.sops.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gitea-actions
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: gitea
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  path: ./kubernetes/apps/talos1018/dev/gitea-actions/app
+  prune: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
+  wait: true
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: gitea-actions
+      namespace: dev
