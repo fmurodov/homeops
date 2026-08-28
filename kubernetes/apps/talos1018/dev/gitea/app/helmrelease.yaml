@@ -51,6 +51,13 @@ spec:
       config:
         database:
           DB_TYPE: sqlite3
+        # Retention is cut from the 365d/90d/400d defaults because run logs and
+        # artifacts share the repositories' 10Gi volume.
+        actions:
+          ENABLED: true
+          LOG_RETENTION_DAYS: 30
+          ARTIFACT_RETENTION_DAYS: 14
+          RUN_RETENTION_DAYS: 90
         service:
           DISABLE_REGISTRATION: true
         # DISABLE_REGISTRATION blocks local/manual signup; it also blocks the
