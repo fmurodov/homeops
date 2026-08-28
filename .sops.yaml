@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/sops
+# sops discovers this file by walking up from the *current* directory, not from
+# the file being encrypted, so kubernetes/.sops.yaml only applies when you are
+# already inside kubernetes/. These rules mirror it (and talos/talos1018) so the
+# same command works from the repo root. path_regex matches the resolved path.
+creation_rules:
+  - path_regex: talos/.*\.sops\.yaml$
+    key_groups:
+      - age:
+          - age1kesma5f5dadlzdl5lzgrtxl6e8z8frf7njsfnlnprzan0lmzgdmstnd39u
+  - path_regex: kubernetes/.*\.sops\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    mac_only_encrypted: true
+    key_groups:
+      - age:
+          - age1kesma5f5dadlzdl5lzgrtxl6e8z8frf7njsfnlnprzan0lmzgdmstnd39u
+stores:
+  yaml:
+    indent: 2

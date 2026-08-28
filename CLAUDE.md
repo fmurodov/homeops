@@ -66,10 +66,11 @@ component/
 
 All secrets use **SOPS + age** encryption.
 
-**Encryption rules** (`kubernetes/.sops.yaml`, `talos/talos1018/.sops.yaml`):
+**Encryption rules** (`.sops.yaml`, `kubernetes/.sops.yaml`, `talos/talos1018/.sops.yaml`):
 - Files must end with `.sops.yaml`
 - Only `data` and `stringData` fields are encrypted
 - Age public key is defined in `.sops.yaml` files (see those files for the key)
+- sops looks for `.sops.yaml` by walking up from your **current directory**, not from the file being encrypted; the root config makes the command work from anywhere in the repo
 
 **Variable substitution** - Secrets become cluster-wide variables:
 ```yaml
@@ -157,9 +158,8 @@ kubernetes/apps/talos1018/<category>/<app-name>/
 ├── secret.sops.yaml (if needed)
 └── kustomization.yaml
 
-# 2. Encrypt secrets (SOPS will use age key from .sops.yaml)
-sops --encrypt --encrypted-regex '^(data|stringData)$' \
-     --in-place secret.sops.yaml
+# 2. Encrypt secrets (rules and age key come from .sops.yaml)
+sops --encrypt --in-place kubernetes/apps/talos1018/<category>/<app>/app/secret.sops.yaml
 
 # 3. Add to kubernetes/apps/talos1018/kustomization.yaml
 # 4. Validate before commit
@@ -208,7 +208,7 @@ sops -d path/to/secret.sops.yaml
 - **Cluster-wide secrets**: `kubernetes/components/common/cluster-secrets.sops.yaml`
 - **Talos config**: `talos/talos1018/talconfig.yaml`
 - **Flux orchestration**: `kubernetes/clusters/talos1018/{cluster-config,infrastructure,apps}.yaml`
-- **SOPS config**: `kubernetes/.sops.yaml`, `talos/talos1018/.sops.yaml`
+- **SOPS config**: `.sops.yaml` (root, covers both trees), `kubernetes/.sops.yaml`, `talos/talos1018/.sops.yaml`
 - **Validation scripts**: `scripts/validate.sh`, `scripts/validate-flux.sh`
 
 ## Additional Resources
