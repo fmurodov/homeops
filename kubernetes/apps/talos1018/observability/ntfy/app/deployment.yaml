@@ -27,7 +27,7 @@ spec:
         runAsNonRoot: true
       containers:
         - name: ntfy
-          image: docker.io/binwiederhier/ntfy:v2.27.0
+          image: docker.io/binwiederhier/ntfy:v2.28.0
           args:
             - serve
           ports:
