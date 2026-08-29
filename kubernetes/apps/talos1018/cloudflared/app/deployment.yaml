@@ -47,7 +47,7 @@ spec:
             - tunnel
             - --no-autoupdate
             - --config
-            - /etc/cloudflared/config.yaml
+            - /etc/cloudflared/config/config.yaml
             - run
           env:
             - name: TUNNEL_EDGE_IP_VERSION
@@ -56,14 +56,12 @@ spec:
               value: "info"
             - name: TUNNEL_METRICS
               value: "0.0.0.0:2000"
-            - name: TUNNEL_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: cloudflared-secret
-                  key: TUNNEL_TOKEN
           volumeMounts:
             - name: config
-              mountPath: /etc/cloudflared
+              mountPath: /etc/cloudflared/config
+              readOnly: true
+            - name: credentials
+              mountPath: /etc/cloudflared/credentials
               readOnly: true
           ports:
             - name: metrics
@@ -97,3 +95,6 @@ spec:
         - name: config
           configMap:
             name: cloudflared-config
+        - name: credentials
+          secret:
+            secretName: cloudflared-secret

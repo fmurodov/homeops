@@ -6,6 +6,11 @@ metadata:
   name: cloudflared-config
 data:
   config.yaml: |
+    # The tunnel is locally-managed (config_src=local), so these rules are the
+    # only source of truth. A remotely-managed tunnel would silently overwrite
+    # them with whatever the Zero Trust dashboard holds.
+    tunnel: ${CLOUDFLARE_TUNNEL_ID}
+    credentials-file: /etc/cloudflared/credentials/credentials.json
     # originRequest applies to all ingress rules; override per-rule if needed.
     originRequest:
       http2Origin: true
@@ -13,5 +18,5 @@ data:
       noTLSVerify: true
     ingress:
       - hostname: "*.${DOMAIN}"
-        service: https://cilium-gateway-main-gateway
+        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
       - service: http_status:404

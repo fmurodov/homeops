@@ -8,6 +8,9 @@ resources:
   # Network and Infrastructure
   - ./network
 
+  # Cloudflare Tunnel (public ingress)
+  - ./cloudflared/ks.yaml
+
   - ./security
 
   # Cluster lifecycle
