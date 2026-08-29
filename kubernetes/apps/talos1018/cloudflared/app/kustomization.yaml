@@ -6,5 +6,6 @@ namespace: cloudflared
 resources:
   - namespace.yaml
   - deployment.yaml
+  - pdb.yaml
   - configmap.yaml
   - cloudflared-secret.sops.yaml
