@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloudflared
+  labels:
+    app.kubernetes.io/name: cloudflared
+    # The tunnel terminates all inbound public traffic, so it is kept out of the
+    # privileged `network` namespace it used to share with multus and chrony.
+    pod-security.kubernetes.io/enforce: restricted

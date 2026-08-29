@@ -17,7 +17,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  path: "./kubernetes/apps/talos1018/network/cloudflared/app"
+  path: "./kubernetes/apps/talos1018/cloudflared/app"
   prune: true
   wait: true
   postBuild:
@@ -25,7 +25,7 @@ spec:
       - kind: Secret
         name: cluster-secrets
   healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
+    - apiVersion: apps/v1
       kind: Deployment
       name: cloudflared
-      namespace: network
+      namespace: cloudflared
