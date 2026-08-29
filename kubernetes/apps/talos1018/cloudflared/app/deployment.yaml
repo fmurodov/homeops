@@ -55,7 +55,7 @@ spec:
             - name: TUNNEL_LOGLEVEL
               value: "info"
             - name: TUNNEL_METRICS
-              value: "0.0.0.0:2000"
+              value: "[::]:2000"
           volumeMounts:
             - name: config
               mountPath: /etc/cloudflared/config
