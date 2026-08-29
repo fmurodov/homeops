@@ -535,6 +535,30 @@ spec:
                   annotations:
                     summary: "Cloudflare tunnel has no active edge connections"
 
+                # The tunnel is up but cannot reach the gateway behind it —
+                # a different failure from the one above, and invisible to it.
+                # Clients cancelling SSE streams count as origin errors too, so
+                # this sits above that noise floor: it peaks at 0.013/s over a
+                # week, while a real outage tracks the request rate (~2/s).
+                - alert: CloudflaredOriginErrors
+                  expr: 'rate(cloudflared_tunnel_request_errors[10m]) > 0.1'
+                  for: 10m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Cloudflare tunnel is failing to proxy to the origin"
+
+                # The gauge is only ever set when the edge pushes a config, so
+                # anything above 0 means the tunnel went back to being remotely
+                # managed and the mounted config.yaml is being ignored again.
+                - alert: CloudflaredRemotelyManaged
+                  expr: 'cloudflared_orchestration_config_version > 0'
+                  for: 15m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Cloudflare tunnel is taking config from the dashboard, not git"
+
             # ----------------------------------------------------------------
             # RIPE Database NRTMv3 probe (nrtm-check CronJob, every 5m)
             # ----------------------------------------------------------------
