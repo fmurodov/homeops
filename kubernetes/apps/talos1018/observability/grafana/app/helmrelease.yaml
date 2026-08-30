@@ -122,7 +122,7 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/custom
-    # grafana.com 22759, with only the kubernetes.* field names changed.
+    # grafana.com 22759, with field names fixed and the app filter dropped.
     dashboardsConfigMaps:
       custom: grafana-dashboards-custom
     dashboards:
