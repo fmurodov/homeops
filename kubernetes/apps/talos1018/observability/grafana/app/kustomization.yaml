@@ -9,3 +9,9 @@ resources:
   - ./grafana-secret.sops.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
+configMapGenerator:
+  - name: grafana-dashboards-custom
+    files:
+      - dashboards/victorialogs-explorer.json
+    options:
+      disableNameSuffixHash: true
