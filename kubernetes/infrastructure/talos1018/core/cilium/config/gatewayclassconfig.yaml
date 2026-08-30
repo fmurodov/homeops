@@ -1,0 +1,57 @@
+---
+# Envoy access logs for Gateways on the `cilium` GatewayClass. Cilium turns
+# this into an Envoy access_log and ships it over xDS, so the lines appear on
+# cilium-envoy's stdout — already tailed by fluent-bit — without a restart.
+#
+# `spec.service` must stay unset: Cilium skips the service model when it is
+# nil, and anything set there starts rewriting the gateway's LoadBalancer
+# service and its pinned IPs.
+apiVersion: cilium.io/v2alpha1
+kind: CiliumGatewayClassConfig
+metadata:
+  name: gateway-access-logs
+  namespace: kube-system
+spec:
+  telemetry:
+    accessLogs:
+      # TCP would need a second entry; every listener here terminates TLS.
+      - format: JSON
+        targets:
+          - HTTP
+        json:
+          # Istio's canonical Envoy schema, so the fields match what Envoy
+          # runbooks and dashboards describe. Only %CILIUM_GATEWAY_*% is
+          # Cilium's; everything else reaches Envoy verbatim.
+          start_time: "%START_TIME%"
+          route_name: "%ROUTE_NAME%"
+          method: "%REQ(:METHOD)%"
+          path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+          protocol: "%PROTOCOL%"
+          response_code: "%RESPONSE_CODE%"
+          response_flags: "%RESPONSE_FLAGS%"
+          response_code_details: "%RESPONSE_CODE_DETAILS%"
+          connection_termination_details: "%CONNECTION_TERMINATION_DETAILS%"
+          bytes_received: "%BYTES_RECEIVED%"
+          bytes_sent: "%BYTES_SENT%"
+          duration: "%DURATION%"
+          upstream_service_time: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+          x_forwarded_for: "%REQ(X-FORWARDED-FOR)%"
+          user_agent: "%REQ(USER-AGENT)%"
+          request_id: "%REQ(X-REQUEST-ID)%"
+          authority: "%REQ(:AUTHORITY)%"
+          upstream_host: "%UPSTREAM_HOST%"
+          upstream_cluster: "%UPSTREAM_CLUSTER%"
+          upstream_local_address: "%UPSTREAM_LOCAL_ADDRESS%"
+          downstream_local_address: "%DOWNSTREAM_LOCAL_ADDRESS%"
+          downstream_remote_address: "%DOWNSTREAM_REMOTE_ADDRESS%"
+          requested_server_name: "%REQUESTED_SERVER_NAME%"
+          upstream_transport_failure_reason: "%UPSTREAM_TRANSPORT_FAILURE_REASON%"
+
+          # Beyond the standard schema.
+          gateway: "%CILIUM_GATEWAY_NAMESPACE%/%CILIUM_GATEWAY_NAME%"
+          # Cloudflare's header exists only for tunnelled traffic; the fallback
+          # covers clients reaching a listener directly over split DNS.
+          client_ip: "%REQ(CF-CONNECTING-IP?X-FORWARDED-FOR)%"
+          # Null for those direct clients, so this doubles as the
+          # tunnelled-vs-direct flag.
+          client_country: "%REQ(CF-IPCOUNTRY)%"
