@@ -1,0 +1,1194 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Envoy access logs from the Cilium Gateway API, as shipped to VictoriaLogs.",
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [],
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1
+    },
+    {
+      "type": "stat",
+      "title": "Requests",
+      "id": 2,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats count() requests",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Failed (5xx)",
+      "id": 3,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query response_code:range[500, 600) | stats count() errors",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Error rate",
+      "id": 4,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats count() total, count() if (response_code:range[500, 600)) errors | math errors / total * 100 as pct | fields pct",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Clients",
+      "id": 5,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats count_uniq(client_ip) clients",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "description": "Distinct client_ip: the Cloudflare visitor for tunnelled requests, the caller itself otherwise."
+    },
+    {
+      "type": "stat",
+      "title": "p95 latency",
+      "id": 6,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats quantile(0.95, duration) p95",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Sent",
+      "id": 7,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats sum(bytes_sent) bytes",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Over time",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 8
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests by status class",
+      "id": 9,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | extract_regexp '(?P<class>^.)' from response_code | stats by (class) count() c",
+          "queryType": "statsRange",
+          "refId": "A",
+          "legendFormat": "{{class}}xx"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 30,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "0xx is Envoy's code for a request that never got a response, usually a client disconnect."
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency percentiles",
+      "id": 10,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats quantile(0.5, duration) p50, quantile(0.95, duration) p95, quantile(0.99, duration) p99",
+          "queryType": "statsRange",
+          "refId": "A",
+          "legendFormat": "{{__name__}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests by host",
+      "id": 11,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (authority) count() c",
+          "queryType": "statsRange",
+          "refId": "A",
+          "legendFormat": "{{authority}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Breakdown",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 12
+    },
+    {
+      "type": "table",
+      "title": "Top paths",
+      "id": 13,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 15
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query NOT path:~'[.](ico|svg|css|png|jpg|jpeg|gif|woff2?|js|map|xml|txt)$' | stats by (path) count() c | sort by (c desc) | limit 20",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "renameByName": {
+              "Last *": "Requests"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Last *",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "align": "auto",
+            "filterable": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      },
+      "description": "Static assets excluded."
+    },
+    {
+      "type": "table",
+      "title": "Top clients",
+      "id": 14,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 15
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (client_ip, client_country) count() c | sort by (c desc) | limit 20",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "renameByName": {
+              "Last *": "Requests",
+              "client_country": "Country"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Last *",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "align": "auto",
+            "filterable": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      },
+      "description": "Country is empty for requests that did not come through Cloudflare."
+    },
+    {
+      "type": "table",
+      "title": "Top user agents",
+      "id": 15,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 15
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (user_agent) count() c | sort by (c desc) | limit 20",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "renameByName": {
+              "Last *": "Requests"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Last *",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "align": "auto",
+            "filterable": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      }
+    },
+    {
+      "type": "piechart",
+      "title": "Status codes",
+      "id": 16,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 24
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (response_code) count() c | sort by (c desc) | limit 10",
+          "queryType": "stats",
+          "refId": "A",
+          "legendFormat": "{{response_code}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "piechart",
+      "title": "Response flags",
+      "id": 17,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 24
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query response_flags:!'-' | stats by (response_flags) count() c | sort by (c desc) | limit 10",
+          "queryType": "stats",
+          "refId": "A",
+          "legendFormat": "{{response_flags}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "description": "Envoy's reason a request failed. UC/UF upstream connection, UH no healthy upstream, DC downstream disconnect, NR no route."
+    },
+    {
+      "type": "table",
+      "title": "Slowest paths",
+      "id": 18,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 24
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query NOT path:~'[.](ico|svg|css|png|jpg|jpeg|gif|woff2?|js|map|xml|txt)$' | stats by (path) quantile(0.95, duration) p95 | sort by (p95 desc) | limit 10",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "renameByName": {
+              "Last *": "p95"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Last *",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "align": "auto",
+            "filterable": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Requests",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 19
+    },
+    {
+      "type": "logs",
+      "title": "Recent requests",
+      "id": 20,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | sort desc | limit $limit",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "sortOrder": "Descending"
+      }
+    }
+  ],
+  "preload": false,
+  "refresh": "1m",
+  "schemaVersion": 40,
+  "tags": [
+    "gateway",
+    "envoy",
+    "victorialogs"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_VICTORIALOGS",
+        "label": "Logs Datasource",
+        "type": "datasource",
+        "query": "victoriametrics-logs-datasource",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "regex": "",
+        "includeAll": false,
+        "hide": 0
+      },
+      {
+        "name": "host",
+        "label": "Host",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "${DS_VICTORIALOGS}"
+        },
+        "query": {
+          "field": "authority",
+          "limit": 200,
+          "query": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:*",
+          "refId": "VictoriaLogsVariableQueryEditor-VariableQuery",
+          "type": "fieldValue"
+        },
+        "definition": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:*",
+        "current": {},
+        "options": [],
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "sort": 1,
+        "hide": 0
+      },
+      {
+        "name": "limit",
+        "label": "Log lines",
+        "type": "custom",
+        "query": "50,100,250,500,1000",
+        "current": {
+          "text": "100",
+          "value": "100"
+        },
+        "options": [
+          {
+            "text": "50",
+            "value": "50",
+            "selected": false
+          },
+          {
+            "text": "100",
+            "value": "100",
+            "selected": true
+          },
+          {
+            "text": "250",
+            "value": "250",
+            "selected": false
+          },
+          {
+            "text": "500",
+            "value": "500",
+            "selected": false
+          },
+          {
+            "text": "1000",
+            "value": "1000",
+            "selected": false
+          }
+        ],
+        "hide": 0
+      },
+      {
+        "name": "query",
+        "label": "Search",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "options": [],
+        "hide": 0
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Gateway Access Logs",
+  "uid": "gateway-access-logs",
+  "version": 1
+}

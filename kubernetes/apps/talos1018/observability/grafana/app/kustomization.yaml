@@ -13,6 +13,7 @@ configMapGenerator:
   - name: grafana-dashboards-custom
     files:
       - dashboards/victorialogs-explorer.json
+      - dashboards/gateway-access-logs.json
     options:
       disableNameSuffixHash: true
       # Grafana's own $var refs would otherwise be eaten by Flux envsubst.
