@@ -6,3 +6,4 @@ resources:
   - ./l2-announcement-policy.yaml
   - ./internal-pool.yaml
   - ./external-pool.yaml
+  - ./gatewayclassconfig.yaml
