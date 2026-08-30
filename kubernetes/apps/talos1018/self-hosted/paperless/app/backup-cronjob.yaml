@@ -18,6 +18,18 @@ spec:
             app: paperless-backup
         spec:
           restartPolicy: OnFailure
+          # paperless-data is RWO: concurrent mounts are only allowed from pods
+          # on the same node, so the exporter has to land where paperless runs.
+          # Select on controller, not name -- name=paperless also matches the
+          # gotenberg/redis/tika pods, which sit on other nodes.
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/instance: paperless
+                      app.kubernetes.io/controller: paperless
+                  topologyKey: kubernetes.io/hostname
           containers:
             - name: exporter
               image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15
@@ -127,7 +139,7 @@ spec:
           volumes:
             - name: data
               persistentVolumeClaim:
-                claimName: paperless-data
+                claimName: paperless-data-rwo
             - name: export
               emptyDir:
                 sizeLimit: 20Gi # Adjust based on your export size

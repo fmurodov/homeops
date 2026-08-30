@@ -137,8 +137,7 @@ timeout, e.g. `--timeout=1800s`), **plus**:
   kubectl -n self-hosted get pods -l app=paperless-backup   # ensure none running
   ```
 - **Make the backup share the RWO volume** by pinning it to the paperless node.
-  In `backup-cronjob.yaml`, add to the job pod spec (confirm the paperless pod
-  label first with `kubectl -n self-hosted get pod -l app.kubernetes.io/name=paperless --show-labels`):
+  In `backup-cronjob.yaml`, add to the job pod spec:
   ```yaml
   spec:            # jobTemplate.spec.template.spec
     affinity:
@@ -146,8 +145,19 @@ timeout, e.g. `--timeout=1800s`), **plus**:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchLabels:
-                app.kubernetes.io/name: paperless
+                app.kubernetes.io/instance: paperless
+                app.kubernetes.io/controller: paperless
             topologyKey: kubernetes.io/hostname
+  ```
+  Select on `controller`, **not** `name`: app-template stamps
+  `app.kubernetes.io/name: paperless` on all four controllers (paperless,
+  gotenberg, redis, tika), which sit on three different nodes — that selector
+  would let the scheduler place the backup away from the volume, where it hangs
+  on multi-attach and the backup silently stops running. Verify with:
+  ```bash
+  kubectl -n self-hosted get pods \
+    -l app.kubernetes.io/instance=paperless,app.kubernetes.io/controller=paperless \
+    -o custom-columns=POD:.metadata.name,NODE:.spec.nodeName   # exactly one pod
   ```
   Longhorn RWO allows multiple pods on the **same** node, and RWO has no NFS, so
   no reboot hang. (Trade-off: the backup only runs when it can land on the

@@ -15,6 +15,7 @@ spec:
         forceRename: paperless
         annotations:
           reloader.stakater.com/auto: "true"
+        strategy: Recreate
 
         containers:
           app:
@@ -124,6 +125,7 @@ spec:
                 memory: 4Gi
 
       redis:
+        strategy: Recreate
         containers:
           redis:
             image:
@@ -201,7 +203,7 @@ spec:
 
     persistence:
       data:
-        existingClaim: paperless-data
+        existingClaim: paperless-data-rwo
         advancedMounts:
           paperless:
             app:
