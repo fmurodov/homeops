@@ -17,8 +17,10 @@ spec:
       storage: 20Gi
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kubernetes
-# Superseded by paperless-data-rwo. Kept only as the migration rollback source;
-# delete once the RWO volume is verified in production (runbook step 6).
+# Superseded by paperless-data-rwo, which holds the verified copy. Kept only as
+# the migration rollback source: this Kustomization prunes, so deleting it here
+# destroys the RWX volume and its share-manager. Drop it in its own PR once the
+# RWO volume has run clean for a few days.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
