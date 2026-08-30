@@ -607,7 +607,8 @@
           "editorMode": "code",
           "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query NOT path:~'[.](ico|svg|css|png|jpg|jpeg|gif|woff2?|js|map|xml|txt)$' | stats by (path) count() c | sort by (c desc) | limit 20",
           "queryType": "stats",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{path}}"
         }
       ],
       "transformations": [
@@ -624,6 +625,7 @@
           "options": {
             "excludeByName": {},
             "renameByName": {
+              "Field": "Path",
               "Last *": "Requests"
             }
           }
@@ -687,9 +689,10 @@
             "uid": "${DS_VICTORIALOGS}"
           },
           "editorMode": "code",
-          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (client_ip, client_country) count() c | sort by (c desc) | limit 20",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (client_ip) count() c | sort by (c desc) | limit 20",
           "queryType": "stats",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{client_ip}}"
         }
       ],
       "transformations": [
@@ -706,89 +709,7 @@
           "options": {
             "excludeByName": {},
             "renameByName": {
-              "Last *": "Requests",
-              "client_country": "Country"
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "Last *",
-                "desc": true
-              }
-            ]
-          }
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "custom": {
-            "align": "auto",
-            "filterable": false
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm",
-        "footer": {
-          "show": false,
-          "reducer": [
-            "sum"
-          ],
-          "countRows": false,
-          "fields": ""
-        }
-      },
-      "description": "Country is empty for requests that did not come through Cloudflare."
-    },
-    {
-      "type": "table",
-      "title": "Top user agents",
-      "id": 15,
-      "datasource": {
-        "type": "victoriametrics-logs-datasource",
-        "uid": "${DS_VICTORIALOGS}"
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 16,
-        "y": 15
-      },
-      "pluginVersion": "11.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "victoriametrics-logs-datasource",
-            "uid": "${DS_VICTORIALOGS}"
-          },
-          "editorMode": "code",
-          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (user_agent) count() c | sort by (c desc) | limit 20",
-          "queryType": "stats",
-          "refId": "A"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "reduce",
-          "options": {
-            "reducers": [
-              "lastNotNull"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "renameByName": {
+              "Field": "Client",
               "Last *": "Requests"
             }
           }
@@ -830,18 +751,197 @@
       }
     },
     {
-      "type": "piechart",
-      "title": "Status codes",
+      "type": "table",
+      "title": "Top user agents",
+      "id": 15,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 15
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (user_agent) count() c | sort by (c desc) | limit 20",
+          "queryType": "stats",
+          "refId": "A",
+          "legendFormat": "{{user_agent}}"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "renameByName": {
+              "Field": "User agent",
+              "Last *": "Requests"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Last *",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "align": "auto",
+            "filterable": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      }
+    },
+    {
+      "type": "table",
+      "title": "Slowest paths",
       "id": 16,
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "${DS_VICTORIALOGS}"
       },
       "gridPos": {
-        "h": 8,
-        "w": 8,
+        "h": 7,
+        "w": 24,
         "x": 0,
         "y": 24
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query NOT path:~'[.](ico|svg|css|png|jpg|jpeg|gif|woff2?|js|map|xml|txt)$' | stats by (path) quantile(0.95, duration) p95 | sort by (p95 desc) | limit 15",
+          "queryType": "stats",
+          "refId": "A",
+          "legendFormat": "{{path}}"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "renameByName": {
+              "Field": "Path",
+              "Last *": "p95"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Last *",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "align": "auto",
+            "filterable": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Distribution",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 17
+    },
+    {
+      "type": "piechart",
+      "title": "Status codes",
+      "id": 18,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 32
       },
       "pluginVersion": "11.5.1",
       "targets": [
@@ -892,16 +992,16 @@
     {
       "type": "piechart",
       "title": "Response flags",
-      "id": 17,
+      "id": 19,
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "${DS_VICTORIALOGS}"
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 24
+        "w": 6,
+        "x": 6,
+        "y": 32
       },
       "pluginVersion": "11.5.1",
       "targets": [
@@ -951,18 +1051,18 @@
       "description": "Envoy's reason a request failed. UC/UF upstream connection, UH no healthy upstream, DC downstream disconnect, NR no route."
     },
     {
-      "type": "table",
-      "title": "Slowest paths",
-      "id": 18,
+      "type": "piechart",
+      "title": "Client country",
+      "id": 20,
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "${DS_VICTORIALOGS}"
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 24
+        "w": 6,
+        "x": 12,
+        "y": 32
       },
       "pluginVersion": "11.5.1",
       "targets": [
@@ -972,64 +1072,105 @@
             "uid": "${DS_VICTORIALOGS}"
           },
           "editorMode": "code",
-          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query NOT path:~'[.](ico|svg|css|png|jpg|jpeg|gif|woff2?|js|map|xml|txt)$' | stats by (path) quantile(0.95, duration) p95 | sort by (p95 desc) | limit 10",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | format if (!client_country:*) 'Direct' as client_country | stats by (client_country) count() c | sort by (c desc) | limit 10",
           "queryType": "stats",
-          "refId": "A"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "reduce",
-          "options": {
-            "reducers": [
-              "lastNotNull"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "renameByName": {
-              "Last *": "p95"
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "Last *",
-                "desc": true
-              }
-            ]
-          }
+          "refId": "A",
+          "legendFormat": "{{client_country}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "ms",
-          "custom": {
-            "align": "auto",
-            "filterable": false
-          }
+          "unit": "short"
         },
         "overrides": []
       },
       "options": {
-        "showHeader": true,
-        "cellHeight": "sm",
-        "footer": {
-          "show": false,
-          "reducer": [
-            "sum"
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
           ],
-          "countRows": false,
-          "fields": ""
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
         }
-      }
+      },
+      "description": "Cloudflare only sets a country for tunnelled requests, so Direct is everything that reached a listener without passing through it."
+    },
+    {
+      "type": "piechart",
+      "title": "Client IP version",
+      "id": 21,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 32
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | format if (client_ip:~':') 'IPv6' as ipv | format if (!client_ip:~':') 'IPv4' as ipv | stats by (ipv) count() c",
+          "queryType": "stats",
+          "refId": "A",
+          "legendFormat": "{{ipv}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "description": "Version of the calling address, so internal callers count too, not just visitors through the tunnel."
     },
     {
       "type": "row",
@@ -1040,14 +1181,14 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 40
       },
-      "id": 19
+      "id": 22
     },
     {
       "type": "logs",
       "title": "Recent requests",
-      "id": 20,
+      "id": 23,
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "${DS_VICTORIALOGS}"
@@ -1056,7 +1197,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 41
       },
       "pluginVersion": "11.5.1",
       "targets": [
