@@ -585,15 +585,15 @@
     },
     {
       "type": "table",
-      "title": "Top paths",
+      "title": "Top clients",
       "id": 13,
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "${DS_VICTORIALOGS}"
       },
       "gridPos": {
-        "h": 9,
-        "w": 8,
+        "h": 10,
+        "w": 14,
         "x": 0,
         "y": 15
       },
@@ -605,28 +605,37 @@
             "uid": "${DS_VICTORIALOGS}"
           },
           "editorMode": "code",
-          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query NOT path:~'[.](ico|svg|css|png|jpg|jpeg|gif|woff2?|js|map|xml|txt)$' | stats by (path) count() c | sort by (c desc) | limit 20",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | format if (!client_country:*) 'Direct' as client_country | stats by (client_country, client_ip, user_agent) count() c | sort by (c desc) | limit 25",
           "queryType": "stats",
-          "refId": "A",
-          "legendFormat": "{{path}}"
+          "refId": "A"
         }
       ],
       "transformations": [
         {
-          "id": "reduce",
+          "id": "labelsToFields",
           "options": {
-            "reducers": [
-              "lastNotNull"
-            ]
+            "mode": "columns"
           }
+        },
+        {
+          "id": "merge",
+          "options": {}
         },
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "client_country": 1,
+              "client_ip": 2,
+              "user_agent": 3,
+              "Value": 4
+            },
             "renameByName": {
-              "Field": "Path",
-              "Last *": "Requests"
+              "Value": "Requests"
             }
           }
         },
@@ -636,7 +645,7 @@
             "fields": {},
             "sort": [
               {
-                "field": "Last *",
+                "field": "Requests",
                 "desc": true
               }
             ]
@@ -645,13 +654,136 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "custom": {
             "align": "auto",
-            "filterable": false
+            "filterable": true
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Requests"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      },
+      "description": "One row per client and agent, so a caller using several agents appears more than once. Direct is anything that did not arrive through Cloudflare, which has no country."
+    },
+    {
+      "type": "table",
+      "title": "Top paths",
+      "id": 14,
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VICTORIALOGS}"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 10,
+        "x": 14,
+        "y": 15
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VICTORIALOGS}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query NOT path:~'[.](ico|svg|css|png|jpg|jpeg|gif|woff2?|js|map|xml|txt)$' | stats by (path) count() c | sort by (c desc) | limit 25",
+          "queryType": "stats",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "path": 1,
+              "Value": 2
+            },
+            "renameByName": {
+              "Value": "Requests"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Requests",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Requests"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "showHeader": true,
@@ -669,89 +801,6 @@
     },
     {
       "type": "table",
-      "title": "Top clients",
-      "id": 14,
-      "datasource": {
-        "type": "victoriametrics-logs-datasource",
-        "uid": "${DS_VICTORIALOGS}"
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 8,
-        "y": 15
-      },
-      "pluginVersion": "11.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "victoriametrics-logs-datasource",
-            "uid": "${DS_VICTORIALOGS}"
-          },
-          "editorMode": "code",
-          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (client_ip) count() c | sort by (c desc) | limit 20",
-          "queryType": "stats",
-          "refId": "A",
-          "legendFormat": "{{client_ip}}"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "reduce",
-          "options": {
-            "reducers": [
-              "lastNotNull"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "renameByName": {
-              "Field": "Client",
-              "Last *": "Requests"
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "Last *",
-                "desc": true
-              }
-            ]
-          }
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "custom": {
-            "align": "auto",
-            "filterable": false
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm",
-        "footer": {
-          "show": false,
-          "reducer": [
-            "sum"
-          ],
-          "countRows": false,
-          "fields": ""
-        }
-      }
-    },
-    {
-      "type": "table",
       "title": "Top user agents",
       "id": 15,
       "datasource": {
@@ -759,10 +808,10 @@
         "uid": "${DS_VICTORIALOGS}"
       },
       "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 16,
-        "y": 15
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 25
       },
       "pluginVersion": "11.5.1",
       "targets": [
@@ -774,26 +823,33 @@
           "editorMode": "code",
           "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query | stats by (user_agent) count() c | sort by (c desc) | limit 20",
           "queryType": "stats",
-          "refId": "A",
-          "legendFormat": "{{user_agent}}"
+          "refId": "A"
         }
       ],
       "transformations": [
         {
-          "id": "reduce",
+          "id": "labelsToFields",
           "options": {
-            "reducers": [
-              "lastNotNull"
-            ]
+            "mode": "columns"
           }
+        },
+        {
+          "id": "merge",
+          "options": {}
         },
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "user_agent": 1,
+              "Value": 2
+            },
             "renameByName": {
-              "Field": "User agent",
-              "Last *": "Requests"
+              "Value": "Requests"
             }
           }
         },
@@ -803,7 +859,7 @@
             "fields": {},
             "sort": [
               {
-                "field": "Last *",
+                "field": "Requests",
                 "desc": true
               }
             ]
@@ -812,13 +868,29 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "custom": {
             "align": "auto",
-            "filterable": false
+            "filterable": true
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Requests"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "showHeader": true,
@@ -842,10 +914,10 @@
         "uid": "${DS_VICTORIALOGS}"
       },
       "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 24
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 25
       },
       "pluginVersion": "11.5.1",
       "targets": [
@@ -855,28 +927,35 @@
             "uid": "${DS_VICTORIALOGS}"
           },
           "editorMode": "code",
-          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query NOT path:~'[.](ico|svg|css|png|jpg|jpeg|gif|woff2?|js|map|xml|txt)$' | stats by (path) quantile(0.95, duration) p95 | sort by (p95 desc) | limit 15",
+          "expr": "_stream: {kubernetes_container_name=\"cilium-envoy\"} response_code:* authority:~\"^$host$\" $query NOT path:~'[.](ico|svg|css|png|jpg|jpeg|gif|woff2?|js|map|xml|txt)$' | stats by (path) quantile(0.95, duration) p95 | sort by (p95 desc) | limit 20",
           "queryType": "stats",
-          "refId": "A",
-          "legendFormat": "{{path}}"
+          "refId": "A"
         }
       ],
       "transformations": [
         {
-          "id": "reduce",
+          "id": "labelsToFields",
           "options": {
-            "reducers": [
-              "lastNotNull"
-            ]
+            "mode": "columns"
           }
+        },
+        {
+          "id": "merge",
+          "options": {}
         },
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "path": 1,
+              "Value": 2
+            },
             "renameByName": {
-              "Field": "Path",
-              "Last *": "p95"
+              "Value": "p95"
             }
           }
         },
@@ -886,7 +965,7 @@
             "fields": {},
             "sort": [
               {
-                "field": "Last *",
+                "field": "p95",
                 "desc": true
               }
             ]
@@ -895,13 +974,29 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "ms",
           "custom": {
             "align": "auto",
-            "filterable": false
+            "filterable": true
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "showHeader": true,
@@ -925,7 +1020,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 33
       },
       "id": 17
     },
@@ -941,7 +1036,7 @@
         "h": 8,
         "w": 6,
         "x": 0,
-        "y": 32
+        "y": 34
       },
       "pluginVersion": "11.5.1",
       "targets": [
@@ -1001,7 +1096,7 @@
         "h": 8,
         "w": 6,
         "x": 6,
-        "y": 32
+        "y": 34
       },
       "pluginVersion": "11.5.1",
       "targets": [
@@ -1062,7 +1157,7 @@
         "h": 8,
         "w": 6,
         "x": 12,
-        "y": 32
+        "y": 34
       },
       "pluginVersion": "11.5.1",
       "targets": [
@@ -1123,7 +1218,7 @@
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 32
+        "y": 34
       },
       "pluginVersion": "11.5.1",
       "targets": [
@@ -1181,7 +1276,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 42
       },
       "id": 22
     },
@@ -1197,7 +1292,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 43
       },
       "pluginVersion": "11.5.1",
       "targets": [
