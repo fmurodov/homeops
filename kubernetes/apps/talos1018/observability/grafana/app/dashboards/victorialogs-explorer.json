@@ -74,7 +74,7 @@
       "title": "View In Explore",
       "tooltip": "",
       "type": "link",
-      "url": "/explore?orgId=1&left={\"datasource\":\"$DS_VICTORIALOGS\",\"queries\":[{\"expr\":\"_stream: {kubernetes_container_name=~\\\"$container\\\"} kubernetes.labels.app.kubernetes.io/name:=\\\"$app\\\" $query\"}]}"
+      "url": "/explore?orgId=1&left={\"datasource\":\"$DS_VICTORIALOGS\",\"queries\":[{\"expr\":\"_stream: {kubernetes_container_name=~\\\"^$container$\\\"} kubernetes.labels.app.kubernetes.io/name:~\\\"^$app$\\\" $query\"}]}"
     },
     {
       "asDropdown": false,
@@ -181,7 +181,7 @@
             "uid": "${DS_VICTORIALOGS}"
           },
           "editorMode": "code",
-          "expr": "_stream: {kubernetes_container_name=~\"$container\", kubernetes_namespace_name=\"$namespace\"} kubernetes.labels.app.kubernetes.io/name:=\"$app\" $query | stats count()",
+          "expr": "_stream: {kubernetes_container_name=~\"^$container$\", kubernetes_namespace_name=~\"^$namespace$\"} kubernetes.labels.app.kubernetes.io/name:~\"^$app$\" $query | stats count()",
           "legendFormat": "${namespace} ${container}",
           "queryType": "statsRange",
           "refId": "A"
@@ -247,7 +247,7 @@
             "uid": "${DS_VICTORIALOGS}"
           },
           "editorMode": "code",
-          "expr": "_stream: {kubernetes_container_name=~\"$container\", kubernetes_namespace_name=\"$namespace\"} kubernetes.labels.app.kubernetes.io/name:=\"$app\" $query | stats by (\"$count_by\") count() c | sort by (c desc) | limit 50",
+          "expr": "_stream: {kubernetes_container_name=~\"^$container$\", kubernetes_namespace_name=~\"^$namespace$\"} kubernetes.labels.app.kubernetes.io/name:~\"^$app$\" $query | stats by (\"$count_by\") count() c | sort by (c desc) | limit 50",
           "legendFormat": "{{$count_by}}",
           "queryType": "stats",
           "refId": "A"
@@ -287,7 +287,7 @@
             "uid": "${DS_VICTORIALOGS}"
           },
           "editorMode": "code",
-          "expr": "_stream: {kubernetes_container_name=~\"$container\", kubernetes_namespace_name=\"$namespace\"} kubernetes.labels.app.kubernetes.io/name:=\"$app\" $query | sort desc | limit $limit",
+          "expr": "_stream: {kubernetes_container_name=~\"^$container$\", kubernetes_namespace_name=~\"^$namespace$\"} kubernetes.labels.app.kubernetes.io/name:~\"^$app$\" $query | sort desc | limit $limit",
           "queryType": "range",
           "refId": "A"
         }
@@ -320,7 +320,7 @@
           "uid": "${DS_VICTORIALOGS}"
         },
         "definition": "",
-        "includeAll": false,
+        "includeAll": true,
         "name": "namespace",
         "options": [],
         "query": {
@@ -333,7 +333,8 @@
         "refresh": 2,
         "regex": "",
         "sort": 1,
-        "type": "query"
+        "type": "query",
+        "allValue": ".*"
       },
       {
         "current": {},
@@ -341,21 +342,22 @@
           "type": "victoriametrics-logs-datasource",
           "uid": "${DS_VICTORIALOGS}"
         },
-        "definition": "{kubernetes_namespace_name=\"$namespace\"}",
-        "includeAll": false,
+        "definition": "{kubernetes_namespace_name=~\"^$namespace$\"}",
+        "includeAll": true,
         "name": "app",
         "options": [],
         "query": {
           "field": "kubernetes.labels.app.kubernetes.io/name",
           "limit": 0,
-          "query": "{kubernetes_namespace_name=\"$namespace\"}",
+          "query": "{kubernetes_namespace_name=~\"^$namespace$\"}",
           "refId": "VictoriaLogsVariableQueryEditor-VariableQuery",
           "type": "fieldValue"
         },
         "refresh": 2,
         "regex": "",
         "sort": 1,
-        "type": "query"
+        "type": "query",
+        "allValue": ".*"
       },
       {
         "current": {},
@@ -363,21 +365,22 @@
           "type": "victoriametrics-logs-datasource",
           "uid": "${DS_VICTORIALOGS}"
         },
-        "definition": "{kubernetes_namespace_name=\"$namespace\"} kubernetes.labels.app.kubernetes.io/name:=\"$app\"",
-        "includeAll": false,
+        "definition": "{kubernetes_namespace_name=~\"^$namespace$\"} kubernetes.labels.app.kubernetes.io/name:~\"^$app$\"",
+        "includeAll": true,
         "name": "container",
         "options": [],
         "query": {
           "field": "kubernetes_container_name",
           "limit": 0,
-          "query": "{kubernetes_namespace_name=\"$namespace\"} kubernetes.labels.app.kubernetes.io/name:=\"$app\"",
+          "query": "{kubernetes_namespace_name=~\"^$namespace$\"} kubernetes.labels.app.kubernetes.io/name:~\"^$app$\"",
           "refId": "VictoriaLogsVariableQueryEditor-VariableQuery",
           "type": "fieldValue"
         },
         "refresh": 2,
         "regex": "",
         "sort": 1,
-        "type": "query"
+        "type": "query",
+        "allValue": ".*"
       },
       {
         "current": {},
@@ -385,14 +388,14 @@
           "type": "victoriametrics-logs-datasource",
           "uid": "${DS_VICTORIALOGS}"
         },
-        "definition": "{kubernetes_namespace_name=\"$namespace\"} kubernetes.labels.app.kubernetes.io/name:=\"$app\"",
+        "definition": "{kubernetes_namespace_name=~\"^$namespace$\"} kubernetes.labels.app.kubernetes.io/name:~\"^$app$\"",
         "includeAll": false,
         "name": "count_by",
         "options": [],
         "query": {
           "field": "kubernetes_container_name",
           "limit": 25,
-          "query": "{kubernetes_namespace_name=\"$namespace\"} kubernetes.labels.app.kubernetes.io/name:=\"$app\"",
+          "query": "{kubernetes_namespace_name=~\"^$namespace$\"} kubernetes.labels.app.kubernetes.io/name:~\"^$app$\"",
           "refId": "VictoriaLogsVariableQueryEditor-VariableQuery",
           "type": "fieldName"
         },
