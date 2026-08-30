@@ -113,6 +113,18 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/default
+          # dashboardsConfigMaps collides with dashboards on the volume name.
+          - name: "custom"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/custom
+    # grafana.com 22759, with only the kubernetes.* field names changed.
+    dashboardsConfigMaps:
+      custom: grafana-dashboards-custom
     dashboards:
       default:
         node-exporter-full:
@@ -205,10 +217,6 @@ spec:
           datasource:
             - name: DS_PROMETHEUS
               value: VictoriaMetrics
-        victorialogs-explorer:
-          gnetId: 22759
-          revision: 9
-          datasource: VictoriaLogs
         # Pulled from upstream rather than grafana.com: the only Flux2 entry
         # there (16714) is still at revision 1 and predates gotk_resource_info.
         # Pinned to a commit so a pod restart cannot change the dashboard.
