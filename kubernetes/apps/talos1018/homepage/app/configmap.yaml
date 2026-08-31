@@ -17,6 +17,39 @@ data:
         - icon: sh-gitlab.svg
           description: OpenTofu pipeline
           href: https://gitlab.com/fmurodov/fmurodov-tf
+      - Renovate:
+        - icon: renovate.svg
+          description: Dependency dashboard
+          href: https://github.com/fmurodov/homeops/issues/1
+    - Cloud:
+      - Cloudflare:
+        - icon: sh-cloudflare.svg
+          description: DNS and zone settings
+          href: https://dash.cloudflare.com
+      - Zero Trust:
+        - icon: sh-cloudflare-zero-trust.svg
+          description: Tunnel and access policies
+          href: https://one.dash.cloudflare.com
+      - TransIP:
+        - icon: mdi-web
+          description: Domain registrar
+          href: https://www.transip.nl/cp/
+      - Tailscale:
+        - icon: sh-tailscale.svg
+          description: Tailnet devices and ACLs
+          href: https://login.tailscale.com/admin
+      - UptimeRobot:
+        - icon: sh-uptimerobot.svg
+          description: External uptime monitors
+          href: https://dashboard.uptimerobot.com
+      - Backblaze:
+        - icon: sh-backblaze.svg
+          description: Longhorn backup bucket
+          href: https://secure.backblaze.com
+      - Talos Factory:
+        - icon: talos.svg
+          description: Image schematics
+          href: https://factory.talos.dev
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
@@ -48,7 +81,7 @@ data:
       - Unifi Controller:
           description: Unifi Console
           href: https://unifi.ui.com
-          icon: https://upload.wikimedia.org/wikipedia/commons/4/4d/Ubiquiti_Logo_2023.svg
+          icon: ubiquiti.svg
           siteMonitor: http://1018LC-GW-U-1.home.:8080/status
     - Smart Home:
       - Energy meter:
