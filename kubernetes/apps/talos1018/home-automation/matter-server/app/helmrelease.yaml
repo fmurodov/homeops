@@ -54,6 +54,41 @@ spec:
                   - ALL
               seccompProfile:
                 type: RuntimeDefault
+            probes:
+              # TCP, not HTTP: /ws hangs plain GETs and / answers 200 even when the
+              # WebSocket server is stuck, so neither proves the API is alive.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 5580
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 5580
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              # Loading ~35 Matter nodes from disk takes a while; hold liveness off
+              # until the listener is up rather than restarting mid-boot.
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 5580
+                  periodSeconds: 5
+                  failureThreshold: 30
+            resources:
+              requests:
+                cpu: 25m
+                memory: 384Mi
     defaultPodOptions:
       annotations:
         k8s.v1.cni.cncf.io/networks: network/multus-macvlan2
