@@ -9,9 +9,9 @@ spec:
     version: v1.13.9
   policy:
     debug: false
-    # Longhorn RWX volumes have wedged reboots before by leaving an orphaned NFS
-    # mount; drain and wait for detach instead of racing the reboot
-    waitForVolumeDetach: true
+    # No waitForVolumeDetach/nodrain: either makes tuppr own the drain, and its
+    # single unordered pass livelocks on Longhorn's instance-manager PDB. Talos
+    # ignores the 429 and leaves that pod up until reboot.
   healthChecks:
     - apiVersion: v1
       kind: Node
