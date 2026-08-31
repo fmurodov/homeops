@@ -67,7 +67,11 @@ spec:
                   initialDelaySeconds: 120
                   periodSeconds: 60
                   timeoutSeconds: 15
-                  failureThreshold: 5
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
 
       otbr-2:
         type: deployment

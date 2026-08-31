@@ -599,6 +599,24 @@ spec:
                     severity: warning
                   annotations:
                     summary: "OTBR {{ $labels.pod }} restarted more than twice in the last hour"
+                    # 6 = otbr-agent exited on its own (RCP crash); 137 = SIGKILL from
+                    # the radio-TX liveness probe. Tells us which failure mode is winning.
+                    # Gauge, not a counter — this is the most recent termination only.
+                    description: >-
+                      Last exit code
+                      {{ query (printf "kube_pod_container_status_last_terminated_exitcode{namespace='home-automation',pod='%s'}" $labels.pod) | first | value | printf "%.0f" }}
+                      (6 = RCP crash, 137 = liveness kill).
+
+                # matter-server now has a liveness probe, so a hung server restarts
+                # itself — this keeps that from happening silently in a loop.
+                - alert: MatterServerRestartStorm
+                  # Anchored to the StatefulSet pod — "matter-server-.*" would also
+                  # catch matter-server-oauth2-proxy.
+                  expr: 'increase(kube_pod_container_status_restarts_total{namespace="home-automation", pod=~"matter-server-[0-9]+"}[1h]) > 2'
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "matter-server restarted more than twice in the last hour"
 
                 # Each Matter node exposes exactly one update.*_firmware entity, so this
                 # counts devices, not entities. Baseline offline (dead batteries,
