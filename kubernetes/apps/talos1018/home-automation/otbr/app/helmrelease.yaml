@@ -34,7 +34,7 @@ spec:
           app: &container
             image:
               repository: openthread/border-router
-              tag: v2026.07.0
+              tag: v2026.09.0
             env: &env
               # Sonoff Dongle-PMG24 does not have RTS/CTS wired — no hardware flow control
               OT_RCP_DEVICE: "spinel+hdlc+uart:///dev/thread0?uart-baudrate=460800"
