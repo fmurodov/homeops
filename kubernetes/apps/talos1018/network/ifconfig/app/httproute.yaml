@@ -14,6 +14,10 @@ metadata:
     gethomepage.dev/href: https://ip.${DOMAIN}
 spec:
   parentRefs:
+    # Outranks the gateway's catch-all http->https redirect.
+    - name: main-gateway
+      namespace: network
+      sectionName: http
     - name: main-gateway
       namespace: network
       sectionName: https-external
