@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.30.0/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ifconfig
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Network
+    gethomepage.dev/icon: mdi-ip-network
+    gethomepage.dev/name: What is my IP
+    gethomepage.dev/app: ifconfig
+    gethomepage.dev/description: Echoes the requesting IP
+    gethomepage.dev/href: https://ip.${DOMAIN}
+spec:
+  parentRefs:
+    - name: main-gateway
+      namespace: network
+      sectionName: https-external
+    - name: main-gateway
+      namespace: network
+      sectionName: https-internal
+  hostnames:
+    - "ip.${DOMAIN}"
+    - "ip.${CLUSTER_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Strict-Transport-Security
+                value: max-age=31536000
+      backendRefs:
+        - name: ifconfig
+          port: 80
