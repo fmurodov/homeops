@@ -22,7 +22,10 @@ spec:
 ---
 # Per-container limits don't bound the total, and `concurrent` is enforced by the
 # runner's own config — worthless once a second runner shares the namespace.
-# Sized for ~2 concurrent jobs plus headroom for another runner.
+#
+# Sized for `concurrent` + 1, not `concurrent`: a terminating pod still counts
+# against quota until it is gone, so back-to-back jobs briefly need room for one
+# extra. These are ceilings; the matching requests total under 1Gi.
 apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -32,6 +35,6 @@ spec:
   hard:
     requests.cpu: "4"
     requests.memory: 8Gi
-    limits.cpu: "8"
-    limits.memory: 12Gi
+    limits.cpu: "10"
+    limits.memory: 16Gi
     pods: "12"
