@@ -1,0 +1,67 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab-runner
+  labels:
+    app.kubernetes.io/name: gitlab-runner
+---
+# Job pods run as this: no RBAC bound to it, and no token projected.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab-runner-jobs
+  labels:
+    app.kubernetes.io/name: gitlab-runner-jobs
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gitlab-runner
+  labels:
+    app.kubernetes.io/name: gitlab-runner
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["get", "create", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/attach"]
+    verbs: ["get", "create", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "delete"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create", "update", "delete"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "create"]
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get"]
+  # print_pod_warning_events surfaces scheduling failures in the job log.
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gitlab-runner
+  labels:
+    app.kubernetes.io/name: gitlab-runner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gitlab-runner
+subjects:
+  - kind: ServiceAccount
+    name: gitlab-runner

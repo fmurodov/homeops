@@ -1,0 +1,12 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-isolated
+  labels:
+    # Counterpart to `dev`, which is privileged and runs code we wrote. This
+    # runs code from anywhere. A runner needing cluster access goes in `dev`.
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/warn: baseline
