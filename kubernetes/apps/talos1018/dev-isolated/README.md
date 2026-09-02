@@ -16,6 +16,10 @@ which is `privileged` and therefore not a boundary at all. This namespace is.
 runner, not a job pod that drops a label. A runner needing the API server adds a
 narrow policy in its own directory, matched to its own label.
 
+A ResourceQuota caps the namespace as a whole — per-container limits don't bound
+the total, and a runner's own `concurrent` setting stops meaning anything once a
+second runner shares the namespace.
+
 # gitlab-runner
 
 Kubernetes executor, one pod per job. No DinD — that is what keeps the namespace
