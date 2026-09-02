@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+# Defaults for anything that omits them, so the quota below can't be dodged by
+# simply not declaring limits.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: dev-isolated
+  namespace: dev-isolated
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 50m
+        memory: 128Mi
+      default:
+        cpu: "1"
+        memory: 1Gi
+      max:
+        cpu: "2"
+        memory: 4Gi
+---
+# Per-container limits don't bound the total, and `concurrent` is enforced by the
+# runner's own config — worthless once a second runner shares the namespace.
+# Sized for ~2 concurrent jobs plus headroom for another runner.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dev-isolated
+  namespace: dev-isolated
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 12Gi
+    pods: "12"
