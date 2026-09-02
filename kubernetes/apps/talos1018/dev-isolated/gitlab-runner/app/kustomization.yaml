@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dev-isolated
+resources:
+  - network-policy.yaml
+  - rbac.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - gitlab-runner-secret.sops.yaml

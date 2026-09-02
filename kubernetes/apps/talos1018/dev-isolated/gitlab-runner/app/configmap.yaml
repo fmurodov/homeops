@@ -1,0 +1,112 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-runner-config
+  labels:
+    app.kubernetes.io/name: gitlab-runner
+  annotations:
+    # render.sh uses pod-side shell variables and Flux's envsubst expands bare
+    # $VAR too, which would blank them out. Nothing here needs substitution.
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+data:
+  # config.toml is an array of [[runners]], so one pod serves any number of
+  # tokens. Adding one is a single new key in gitlab-runner-secret.
+  render.sh: |
+    #!/bin/sh
+    set -eu
+
+    out=/etc/gitlab-runner/config.toml
+    cp /template/config.head.toml "$out"
+
+    found=0
+    for f in /secrets/*; do
+      [ -f "$f" ] || continue  # skip kubelet's ..data symlinks
+      name=$(basename "$f")
+      token=$(cat "$f")
+
+      case "$token" in
+        glrt-*) ;;
+        *) echo "ERROR: token for '$name' is not a glrt- runner authentication token" >&2
+           exit 1 ;;
+      esac
+
+      printf '\n' >> "$out"
+      sed -e "s|__NAME__|$name|g" -e "s|__TOKEN__|$token|g" \
+        /template/config.runner.toml >> "$out"
+      found=$((found + 1))
+      echo "  + $name"
+    done
+
+    if [ "$found" -eq 0 ]; then
+      echo "ERROR: gitlab-runner-secret holds no tokens. Add one key per project:" >&2
+      echo "       key = runner name, value = the project's glrt- token" >&2
+      exit 1
+    fi
+    echo "rendered $found runner block(s)"
+
+  # `concurrent` is the ceiling across all runners, not per runner: at the
+  # limits below, 2 jobs can already claim 4 CPU and 8Gi.
+  config.head.toml: |
+    concurrent = 2
+    check_interval = 10
+    log_level = "info"
+    shutdown_timeout = 30
+    listen_address = "[::]:9252"
+
+  # Emitted once per token. A runner's tags live in GitLab's UI, not here.
+  config.runner.toml: |
+    [[runners]]
+      name = "__NAME__"
+      url = "https://gitlab.com/"
+      token = "__TOKEN__"
+      executor = "kubernetes"
+      # The default of 1 delays pickup while a job is already running.
+      request_concurrency = 2
+
+      [runners.kubernetes]
+        namespace = "dev-isolated"
+        # renovate: datasource=docker depName=alpine
+        image = "alpine:3.22"
+
+        # No DinD; build images with rootless buildah instead (see README).
+        privileged = false
+        allow_privilege_escalation = false
+
+        service_account = "gitlab-runner-jobs"
+
+        # Empty = no .gitlab-ci.yml may override. Picking its own namespace or
+        # service account would put a job outside the sandbox.
+        namespace_overwrite_allowed = ""
+        service_account_overwrite_allowed = ""
+        pod_labels_overwrite_allowed = ""
+
+        poll_timeout = 600
+        print_pod_warning_events = true
+
+        # Scratch space lands on the node's /var, shared with containerd and
+        # Longhorn, so it is capped rather than left to fill the disk.
+        cpu_request = "100m"
+        cpu_limit = "2"
+        memory_request = "256Mi"
+        memory_limit = "4Gi"
+        ephemeral_storage_request = "1Gi"
+        ephemeral_storage_limit = "8Gi"
+
+        helper_cpu_request = "50m"
+        helper_cpu_limit = "500m"
+        helper_memory_request = "64Mi"
+        helper_memory_limit = "512Mi"
+        helper_ephemeral_storage_request = "512Mi"
+        helper_ephemeral_storage_limit = "2Gi"
+
+        service_cpu_request = "50m"
+        service_cpu_limit = "1"
+        service_memory_request = "64Mi"
+        service_memory_limit = "1Gi"
+        service_ephemeral_storage_request = "512Mi"
+        service_ephemeral_storage_limit = "2Gi"
+
+        [runners.kubernetes.pod_labels]
+          "app.kubernetes.io/name" = "gitlab-runner-job"

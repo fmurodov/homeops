@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+---
+# The manager creates and execs into job pods. Scoped to its own label so job
+# pods, which match only the namespace-wide policy, never inherit this.
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: gitlab-runner-manager-apiserver
+  namespace: dev-isolated
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: gitlab-runner
+  egress:
+    - toEntities:
+        - kube-apiserver

@@ -28,6 +28,9 @@ resources:
   # Developer Tools
   - ./dev
 
+  # Untrusted CI: same dev tooling, no LAN or cluster access
+  - ./dev-isolated
+
   # AI / LLM
   - ./ai
 
