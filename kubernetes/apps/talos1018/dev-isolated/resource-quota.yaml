@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kubernetes
-# Defaults for anything that omits them, so the quota below can't be dodged by
-# simply not declaring limits.
+# Defaults, so the quota below can't be dodged by omitting limits.
 apiVersion: v1
 kind: LimitRange
 metadata:
@@ -11,21 +10,18 @@ spec:
   limits:
     - type: Container
       defaultRequest:
-        cpu: 50m
-        memory: 128Mi
+        cpu: 25m
+        memory: 64Mi
       default:
-        cpu: "1"
-        memory: 1Gi
+        cpu: 500m
+        memory: 512Mi
       max:
-        cpu: "2"
-        memory: 4Gi
+        cpu: "1"
+        memory: 2Gi
 ---
-# Per-container limits don't bound the total, and `concurrent` is enforced by the
-# runner's own config — worthless once a second runner shares the namespace.
-#
-# Sized for `concurrent` + 1, not `concurrent`: a terminating pod still counts
-# against quota until it is gone, so back-to-back jobs briefly need room for one
-# extra. These are ceilings; the matching requests total under 1Gi.
+# Per-container limits don't bound the total, and `concurrent` is the runner's
+# own setting — meaningless once a second runner shares the namespace. Worst case
+# is two pods per slot (4 + manager = 3500m/5632Mi); `pods` binds first.
 apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -33,8 +29,8 @@ metadata:
   namespace: dev-isolated
 spec:
   hard:
-    requests.cpu: "4"
-    requests.memory: 8Gi
-    limits.cpu: "10"
-    limits.memory: 16Gi
-    pods: "12"
+    requests.cpu: "2"
+    requests.memory: 4Gi
+    limits.cpu: "6"
+    limits.memory: 10Gi
+    pods: "10"
