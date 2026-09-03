@@ -85,28 +85,34 @@ data:
         poll_timeout = 600
         print_pod_warning_events = true
 
+        # A finished pod holds quota until gone, and its slot's replacement
+        # starts first. Nothing left to shut down gracefully by then.
+        pod_termination_grace_period_seconds = 5
+        cleanup_grace_period_seconds = 5
+
         # Scratch space lands on the node's /var, shared with containerd and
         # Longhorn, so it is capped rather than left to fill the disk.
-        cpu_request = "100m"
-        cpu_limit = "2"
-        memory_request = "256Mi"
-        memory_limit = "4Gi"
-        ephemeral_storage_request = "1Gi"
-        ephemeral_storage_limit = "8Gi"
+        # tofu and Renovate are network-bound; two pods per slot must fit.
+        cpu_request = "25m"
+        cpu_limit = "500m"
+        memory_request = "64Mi"
+        memory_limit = "1Gi"
+        ephemeral_storage_request = "256Mi"
+        ephemeral_storage_limit = "2Gi"
 
-        helper_cpu_request = "50m"
-        helper_cpu_limit = "500m"
-        helper_memory_request = "64Mi"
-        helper_memory_limit = "512Mi"
-        helper_ephemeral_storage_request = "512Mi"
-        helper_ephemeral_storage_limit = "2Gi"
+        helper_cpu_request = "25m"
+        helper_cpu_limit = "250m"
+        helper_memory_request = "32Mi"
+        helper_memory_limit = "256Mi"
+        helper_ephemeral_storage_request = "256Mi"
+        helper_ephemeral_storage_limit = "1Gi"
 
-        service_cpu_request = "50m"
-        service_cpu_limit = "1"
-        service_memory_request = "64Mi"
-        service_memory_limit = "1Gi"
-        service_ephemeral_storage_request = "512Mi"
-        service_ephemeral_storage_limit = "2Gi"
+        service_cpu_request = "25m"
+        service_cpu_limit = "500m"
+        service_memory_request = "32Mi"
+        service_memory_limit = "512Mi"
+        service_ephemeral_storage_request = "256Mi"
+        service_ephemeral_storage_limit = "1Gi"
 
         [runners.kubernetes.pod_labels]
           "app.kubernetes.io/name" = "gitlab-runner-job"
