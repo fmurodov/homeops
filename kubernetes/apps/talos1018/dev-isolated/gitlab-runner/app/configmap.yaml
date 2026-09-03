@@ -70,6 +70,12 @@ data:
         # renovate: datasource=docker depName=alpine
         image = "alpine:3.22"
 
+        # Unset means an empty allowlist, which rejects any pull_policy a
+        # pipeline asks for. `never` withheld: it would let a job run whatever
+        # image is already cached on the node.
+        pull_policy = ["always"]
+        allowed_pull_policies = ["always", "if-not-present"]
+
         # No DinD; build images with rootless buildah instead (see README).
         privileged = false
         allow_privilege_escalation = false
