@@ -5,4 +5,5 @@ kind: Kustomization
 namespace: network
 resources:
   - ./macvlan2.yaml
+  - ./macvlan2-router.yaml
   - ./macvlan3.yaml
