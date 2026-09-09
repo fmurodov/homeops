@@ -151,8 +151,10 @@ spec:
             # ----------------------------------------------------------------
             - name: kubernetes-workloads
               rules:
+                # 1h window: once backoff reaches its 5m ceiling a permanently
+                # broken pod restarts too slowly for a 15m threshold.
                 - alert: KubePodCrashLooping
-                  expr: 'increase(kube_pod_container_status_restarts_total[15m]) > 3'
+                  expr: 'increase(kube_pod_container_status_restarts_total[1h]) > 5'
                   for: 15m
                   labels:
                     severity: warning
@@ -180,9 +182,12 @@ spec:
                   annotations:
                     summary: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} was OOMKilled"
 
+                # Averaged over the window rather than using `for`, which a
+                # crashlooping container resets each time it briefly runs.
                 - alert: KubeContainerWaiting
-                  expr: 'sum by (namespace, pod, container) (kube_pod_container_status_waiting_reason{reason!~"ContainerCreating|PodInitializing"}) > 0'
-                  for: 15m
+                  expr: >-
+                    avg_over_time(sum by (namespace, pod, container)
+                    (kube_pod_container_status_waiting_reason{reason!~"ContainerCreating|PodInitializing"})[15m:1m]) > 0.5
                   labels:
                     severity: warning
                   annotations:
@@ -198,9 +203,12 @@ spec:
                     summary: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has fewer available replicas than desired"
 
                 # Zero available replicas → app is fully down → page
+                # Averaged for the same reason: a crashlooping pod is briefly
+                # Ready each cycle, which resets a plain `for`.
                 - alert: KubeDeploymentDown
-                  expr: 'kube_deployment_spec_replicas > 0 and kube_deployment_status_replicas_available == 0'
-                  for: 15m
+                  expr: >-
+                    avg_over_time(kube_deployment_status_replicas_available[15m:1m]) < 0.5
+                    and kube_deployment_spec_replicas > 0
                   labels:
                     severity: critical
                   annotations:
