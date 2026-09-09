@@ -62,9 +62,10 @@ spec:
                   name: adsb-config
                   key: FEEDER_UUID
           resources:
+            # Steady state is ~49Mi against the old 50Mi cap, and the old 0.02
+            # CPU cap throttled 98% of periods.
             limits:
-              cpu: "0.02"
-              memory: "50Mi"
+              memory: "128Mi"
             requests:
-              cpu: "0.005"
-              memory: "15Mi"
+              cpu: "0.05"
+              memory: "64Mi"
