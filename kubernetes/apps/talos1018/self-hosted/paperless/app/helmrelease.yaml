@@ -41,12 +41,15 @@ spec:
               PAPERLESS_LOGGING_DIR: /tmp/log
               PAPERLESS_MEDIA_ROOT: /data/local/media
               # Configure folder importer
-              PAPERLESS_CONSUMER_POLLING: "60"
               PAPERLESS_CONSUMER_RECURSIVE: "true"
               PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
               PAPERLESS_CONSUMER_DELETE_DUPLICATES: "true"
               # Configure OCR
               PAPERLESS_OCR_MODE: "redo"
+              # v3 splits archive generation out of OCR_MODE, and its new `auto`
+              # default skips the archive copy for born-digital PDFs. `always`
+              # keeps a PDF/A rendition for every document, as on v2.
+              PAPERLESS_ARCHIVE_FILE_GENERATION: "always"
               PAPERLESS_OCR_LANGUAGES: eng nld rus tgk
               PAPERLESS_OCR_LANGUAGE: eng+nld+rus+tgk
               # Configure redis integration
@@ -115,7 +118,11 @@ spec:
                 spec:
                   initialDelaySeconds: 10
                   periodSeconds: 5
-                  failureThreshold: 120
+                  # The v3 upgrade runs the whole 2.x -> 3.x Django migration set
+                  # against a ~330 MB SQLite file on first boot. Being killed
+                  # part-way through would leave the schema half-applied, so the
+                  # budget is 15m for that boot; 10m is ample once it is done.
+                  failureThreshold: 180
             resources:
               requests:
                 cpu: "0.8"
