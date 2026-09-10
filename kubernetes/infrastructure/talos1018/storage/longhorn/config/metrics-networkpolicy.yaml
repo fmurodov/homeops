@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: longhorn-manager-allow-metrics
+  namespace: longhorn-system
+spec:
+  # Longhorn 1.12.1 ships a `longhorn-manager` ingress policy whose allow-list is
+  # in-namespace components only (manager, ui, csi-plugin, recurring-job and
+  # driver-deployer pods). It is gated on networkPolicies.restrictInternalTraffic,
+  # which defaults true independently of networkPolicies.enabled, so it applies
+  # here even though policies are otherwise off. That leaves VictoriaMetrics'
+  # cross-namespace scrape of longhorn-backend:9500 denied. Policies selecting the
+  # same pods union their rules, so this re-opens the scrape without giving up the
+  # rest of the restriction.
+  podSelector:
+    matchLabels:
+      app: longhorn-manager
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: victoria-metrics-single
+      ports:
+        - protocol: TCP
+          port: 9500
