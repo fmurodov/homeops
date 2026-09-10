@@ -40,5 +40,17 @@
         commitMessageTopic: "{{{groupName}}} group",
       },
     },
+    {
+      description: "app-template Group",
+      groupName: "app-template",
+      // The same chart reaches this repo two ways: `helm` for the HelmReleases
+      // backed by the bjw-s HelmRepository, and `docker` for the OCIRepository
+      // tags. Ungrouped they arrive as two PRs for one upstream release.
+      matchDatasources: ["docker", "helm"],
+      matchPackageNames: ["/app-template$/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
   ],
 }
