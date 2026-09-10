@@ -118,11 +118,7 @@ spec:
                 spec:
                   initialDelaySeconds: 10
                   periodSeconds: 5
-                  # The v3 upgrade runs the whole 2.x -> 3.x Django migration set
-                  # against a ~330 MB SQLite file on first boot. Being killed
-                  # part-way through would leave the schema half-applied, so the
-                  # budget is 15m for that boot; 10m is ample once it is done.
-                  failureThreshold: 180
+                  failureThreshold: 120
             resources:
               requests:
                 cpu: "0.8"
