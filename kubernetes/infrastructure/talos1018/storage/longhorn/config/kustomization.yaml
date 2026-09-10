@@ -12,3 +12,4 @@ resources:
   - ./oauth2-proxy-secret.sops.yaml
   - ./oauth2-proxy.yaml
   - ./httproute.yaml
+  - ./metrics-networkpolicy.yaml
