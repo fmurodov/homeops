@@ -38,3 +38,6 @@ kubeconfig
 
 # Logs
 *.log
+
+# Disaster Recovery
+dr/volumes/
