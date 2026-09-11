@@ -91,26 +91,8 @@ data:
         cache-refresh: 24h
         cache-persist-file: /run/akvorado/metadata.cache
         providers:
-          # The bridges and ppp0 are virtual, so the gateway reports ifSpeed 0
-          # for every interface flows actually traverse. Only static can decline
-          # a query, so it goes first; unlisted ifIndexes fall through to SNMP.
-          # ifIndexes are not stable across gateway reboots — re-check after one.
-          - type: static
-            exporters:
-              10.18.6.1/32:
-                name: 1018LC-GW-U-1
-                skip-missing-interfaces: true
-                ifindexes:
-                  24: {name: br0, description: core, speed: 1000}
-                  25: {name: br2, description: lan, speed: 1000}
-                  26: {name: br3, description: iot, speed: 1000}
-                  27: {name: br4, description: guest, speed: 1000}
-                  28: {name: br5, description: security, speed: 1000}
-                  29: {name: br6, description: srv, speed: 1000}
-                  30: {name: br7, description: lan6, speed: 1000}
-                  # 2.5G port, but the ISP hands over 1G — that is the ceiling
-                  # utilisation should be measured against.
-                  31: {name: ppp0, description: wan, speed: 1000}
+          # SNMP only: static can be keyed by nothing but ifIndex, and the
+          # gateway renumbers those. Costs ifSpeed, reported as 0 regardless.
           - type: snmp
             credentials: !include "snmp-credentials.yaml"
       networks:
@@ -138,15 +120,24 @@ data:
         # numbers and there is no routing provider, so only networks can answer.
         asn-providers:
           - networks
+        # Keyed on name, not ifIndex. SNMP leaves the description empty.
         interface-classifiers:
           - |
-            (Interface.Name == "ppp0" || Interface.Description == "ppp0") &&
+            Interface.Name == "ppp0" &&
+            SetDescription("wan") &&
             ClassifyConnectivity("internet") &&
             ClassifyExternal()
           - |
-            (Interface.Name startsWith "wg" || Interface.Description contains "WG") &&
+            Interface.Name startsWith "wg" &&
             ClassifyConnectivity("vpn") &&
             ClassifyExternal()
+          - Interface.Name == "br0" && SetDescription("core") && ClassifyInternal()
+          - Interface.Name == "br2" && SetDescription("lan") && ClassifyInternal()
+          - Interface.Name == "br3" && SetDescription("iot") && ClassifyInternal()
+          - Interface.Name == "br4" && SetDescription("guest") && ClassifyInternal()
+          - Interface.Name == "br5" && SetDescription("security") && ClassifyInternal()
+          - Interface.Name == "br6" && SetDescription("srv") && ClassifyInternal()
+          - Interface.Name == "br7" && SetDescription("lan6") && ClassifyInternal()
           - ClassifyInternal()
 
     console:
