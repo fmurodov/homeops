@@ -6,9 +6,9 @@ metadata:
   name: mosquitto-mqtt
   labels:
     app.kubernetes.io/name: mosquitto
-    service.kubernetes.io/topology: external
+    service.kubernetes.io/topology: internal
   annotations:
-    io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:5:2000:0:6:11,10.18.6.11"
+    io.cilium/lb-ipam-ips: "fd00:1018:0:5:3000::42,10.18.6.42"
 spec:
   type: LoadBalancer
   ports:
@@ -16,5 +16,9 @@ spec:
       targetPort: 1883
       protocol: TCP
       name: mqtt
+    - port: 8883
+      targetPort: 8883
+      protocol: TCP
+      name: mqtts
   selector:
     app.kubernetes.io/name: mosquitto
