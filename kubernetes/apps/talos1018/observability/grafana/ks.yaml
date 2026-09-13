@@ -32,8 +32,3 @@ spec:
     substituteFrom:
       - kind: Secret
         name: cluster-secrets
-  healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      name: grafana
-      namespace: observability
