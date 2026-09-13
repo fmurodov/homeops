@@ -39,6 +39,12 @@ handshake.
 
 ## Credentials
 
+Three users: `homeassistant`, `ithohru` (the ventilation add-on) and `esphome`.
+The ESPHome dashboard connects to the broker whenever any device config carries
+an `mqtt:` block — it reads `username`/`password` straight from that block, so
+the credentials belong in the device YAML on the ESPHome PVC, referenced from
+its own `secrets.yaml`.
+
 Hashed passwords live in `app/mosquitto-secret.sops.yaml`. The secret carries
 `kustomize.toolkit.fluxcd.io/substitute: disabled` because the `$7$` PBKDF2
 markers in the hashes would otherwise be consumed by Flux's envsubst.
