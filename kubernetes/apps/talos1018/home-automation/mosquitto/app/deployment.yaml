@@ -36,14 +36,21 @@ spec:
               type: RuntimeDefault
           ports:
             - containerPort: 1883
+            - containerPort: 8883
           volumeMounts:
             - mountPath: /mosquitto/config/
               name: config
+            - mountPath: /mosquitto/secrets/
+              name: auth
+              readOnly: true
+            - mountPath: /mosquitto/certs/
+              name: certs
+              readOnly: true
             - mountPath: /mosquitto/data/
               name: data
           resources:
             limits:
-              cpu: "0.01"
+              cpu: "0.1"
               memory: "50Mi"
             requests:
               cpu: "0.001"
@@ -52,6 +59,14 @@ spec:
         - name: config
           configMap:
             name: mosquitto-config
+        - name: auth
+          secret:
+            secretName: mosquitto-auth
+            defaultMode: 0440
+        - name: certs
+          secret:
+            secretName: mosquitto-tls
+            defaultMode: 0440
         - name: data
           persistentVolumeClaim:
             claimName: mosquitto-data
