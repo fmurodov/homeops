@@ -29,5 +29,5 @@ spec:
               - name: Strict-Transport-Security
                 value: max-age=31536000
       backendRefs:
-        - name: netbootxyz
-          port: 3000
+        - name: netbootxyz-oauth2-proxy
+          port: 4180

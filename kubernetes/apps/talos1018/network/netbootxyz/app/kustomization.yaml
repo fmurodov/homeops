@@ -6,5 +6,7 @@ namespace: network
 resources:
   - deployment.yaml
   - service.yaml
+  - oauth2-proxy.yaml
+  - netbootxyz-oauth2-proxy-secret.sops.yaml
   - httproute.yaml
   - udproute.yaml
