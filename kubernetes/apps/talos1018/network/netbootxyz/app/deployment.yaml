@@ -28,6 +28,9 @@ spec:
             - name: MENU_VERSION
               # renovate: datasource=github-releases depName=netbootxyz/netboot.xyz
               value: 3.0.3
+            # Keeps transfers on port 69 so the gateway can proxy them.
+            - name: TFTPD_OPTS
+              value: --tftp-single-port
           ports:
             - name: http
               containerPort: 3000

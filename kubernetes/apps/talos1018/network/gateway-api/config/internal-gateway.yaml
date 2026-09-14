@@ -37,3 +37,9 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: tftp
+      protocol: UDP
+      port: 69
+      allowedRoutes:
+        namespaces:
+          from: All
