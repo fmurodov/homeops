@@ -9,6 +9,9 @@ spec:
     - name: main-gateway
       namespace: network
       sectionName: http
+    - name: internal-gateway
+      namespace: network
+      sectionName: http
   rules:
     - filters:
         - type: RequestRedirect

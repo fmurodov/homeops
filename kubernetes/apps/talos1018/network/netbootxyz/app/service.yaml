@@ -26,9 +26,9 @@ metadata:
   name: netbootxyz-udp
   labels:
     app.kubernetes.io/name: netbootxyz
-    service.kubernetes.io/topology: external
+    service.kubernetes.io/topology: internal
   annotations:
-    io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:5:2000:0:6:14,10.18.6.14"
+    io.cilium/lb-ipam-ips: "fd00:1018:0:5:3000::43,10.18.6.43"
 spec:
   externalTrafficPolicy: Local
   sessionAffinity: None
