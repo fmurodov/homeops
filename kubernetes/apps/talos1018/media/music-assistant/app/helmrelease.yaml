@@ -55,9 +55,9 @@ spec:
         controller: music-assistant
         type: LoadBalancer
         annotations:
-          io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:5:2000:0:6:15"
+          io.cilium/lb-ipam-ips: "fd00:1018:0:5:3000::44"
         labels:
-          service.kubernetes.io/topology: external
+          service.kubernetes.io/topology: internal
         ipFamilyPolicy: SingleStack
         ipFamilies:
           - IPv6
