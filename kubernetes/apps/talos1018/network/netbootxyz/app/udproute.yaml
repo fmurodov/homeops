@@ -1,0 +1,14 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: UDPRoute
+metadata:
+  name: netbootxyz-tftp
+spec:
+  parentRefs:
+    - name: internal-gateway
+      namespace: network
+      sectionName: tftp
+  rules:
+    - backendRefs:
+        - name: netbootxyz
+          port: 69
