@@ -76,7 +76,7 @@ spec:
           gethomepage.dev/name: Music Assistant
           gethomepage.dev/app: music-assistant
         parentRefs:
-          - name: main-gateway
+          - name: internal-gateway
             namespace: network
             sectionName: https-internal
         hostnames:
