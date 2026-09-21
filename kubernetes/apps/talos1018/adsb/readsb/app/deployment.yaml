@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: readsb
-          image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest-build-961
+          image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest-build-965
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
