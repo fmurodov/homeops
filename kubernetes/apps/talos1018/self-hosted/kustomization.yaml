@@ -9,5 +9,6 @@ resources:
   - ./mealie/ks.yaml
   - ./paperless/ks.yaml
   - ./n8n/ks.yaml
+  - ./netbox/ks.yaml
   - ./sure/ks.yaml
   - ./wishlist/ks.yaml

@@ -1,0 +1,299 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app netbox
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  # First install runs every migration and overruns Helm's 5m default.
+  timeout: 15m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      netbox:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          # Runs migrations once, before app and worker start, so they never race.
+          migrate:
+            image: &netboxImage
+              repository: ghcr.io/netbox-community/netbox
+              # renovate: datasource=docker depName=ghcr.io/netbox-community/netbox
+              tag: v4.7.1
+            args: [/opt/netbox/docker-entrypoint.sh, "true"]
+            env: &netboxEnv
+              ALLOWED_HOSTS: &host netbox.${CLUSTER_DOMAIN}
+              CSRF_TRUSTED_ORIGINS: https://netbox.${CLUSTER_DOMAIN}
+              TIME_ZONE: ${TIMEZONE}
+              DB_HOST: netbox-postgres
+              DB_NAME: &pgDb netbox
+              DB_USER: &pgUser netbox
+              MAX_DB_WAIT_TIME: "120"
+              REDIS_HOST: netbox-redis
+              SKIP_SUPERUSER: "true"
+              GRANIAN_WORKERS: "2"
+              REMOTE_AUTH_BACKEND: social_core.backends.open_id_connect.OpenIdConnectAuth
+              SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: https://pid.${DOMAIN}
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: netbox-secret
+                    key: POSTGRES_PASSWORD
+              SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: netbox-secret
+                    key: SECRET_KEY
+              API_TOKEN_PEPPER_1:
+                valueFrom:
+                  secretKeyRef:
+                    name: netbox-secret
+                    key: API_TOKEN_PEPPER_1
+              SOCIAL_AUTH_OIDC_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: netbox-secret
+                    key: OIDC_CLIENT_ID
+              SOCIAL_AUTH_OIDC_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: netbox-secret
+                    key: OIDC_CLIENT_SECRET
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+        containers:
+          app:
+            image: *netboxImage
+            env: *netboxEnv
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: &httpGet
+                    path: /login/
+                    port: 8080
+                    httpHeaders:
+                      - name: Host
+                        value: localhost
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: *httpGet
+                  periodSeconds: 5
+                  failureThreshold: 60
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                memory: 1536Mi
+          worker:
+            image: *netboxImage
+            command:
+              - /opt/netbox/venv/bin/python
+              - /opt/netbox/netbox/manage.py
+              - rqworker
+            env: *netboxEnv
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 25m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+        pod:
+          securityContext:
+            runAsUser: 999
+            runAsGroup: 0
+            fsGroup: 999
+            fsGroupChangePolicy: OnRootMismatch
+
+      postgres:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          postgres:
+            image:
+              repository: postgres
+              # renovate: datasource=docker depName=postgres
+              tag: "18"
+            env:
+              POSTGRES_USER: *pgUser
+              POSTGRES_DB: *pgDb
+              PGDATA: /var/lib/postgresql/data/pgdata
+              POSTGRES_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: netbox-secret
+                    key: POSTGRES_PASSWORD
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: &pgReady
+                    command: [pg_isready, -U, netbox, -d, netbox]
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: *pgReady
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec: *pgReady
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+                  failureThreshold: 30
+            resources:
+              requests:
+                cpu: 25m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+        pod:
+          securityContext:
+            fsGroup: 999
+            fsGroupChangePolicy: OnRootMismatch
+
+      redis:
+        strategy: Recreate
+        containers:
+          redis:
+            image:
+              repository: ghcr.io/valkey-io/valkey
+              # renovate: datasource=docker depName=ghcr.io/valkey-io/valkey
+              tag: 9.1.0
+            command:
+              - valkey-server
+              - --appendonly
+              - "yes"
+              - --dir
+              - /data
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: &valkeyPing
+                    command: [valkey-cli, ping]
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: *valkeyPing
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+
+    service:
+      app:
+        forceRename: *app
+        primary: true
+        controller: netbox
+        ports:
+          http:
+            port: 8080
+      postgres:
+        controller: postgres
+        ports:
+          postgres:
+            port: 5432
+      redis:
+        controller: redis
+        ports:
+          redis:
+            port: 6379
+
+    route:
+      app:
+        enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Network
+          gethomepage.dev/icon: sh-netbox
+          gethomepage.dev/name: NetBox
+          gethomepage.dev/app: netbox
+          gethomepage.dev/description: IPAM and DCIM
+        parentRefs:
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-internal
+        hostnames:
+          - *host
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            filters:
+              - type: ResponseHeaderModifier
+                responseHeaderModifier:
+                  set:
+                    - name: Strict-Transport-Security
+                      value: max-age=31536000
+            backendRefs:
+              - identifier: app
+                port: 8080
+
+    persistence:
+      data:
+        existingClaim: netbox-data
+        advancedMounts:
+          netbox:
+            app: &dataMounts
+              - path: /opt/netbox/netbox/media
+                subPath: media
+              - path: /opt/netbox/netbox/scripts
+                subPath: scripts
+            worker: *dataMounts
+      postgres-data:
+        existingClaim: netbox-postgres-data
+        advancedMounts:
+          postgres:
+            postgres:
+              - path: /var/lib/postgresql/data
+      redis-data:
+        existingClaim: netbox-redis-data
+        advancedMounts:
+          redis:
+            redis:
+              - path: /data
