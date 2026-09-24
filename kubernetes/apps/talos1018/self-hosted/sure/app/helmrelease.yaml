@@ -126,7 +126,7 @@ spec:
             image:
               repository: postgres
               # renovate: datasource=docker depName=postgres
-              tag: "16"
+              tag: "18"
             env:
               POSTGRES_USER: *pgUser
               POSTGRES_DB: *pgDb
