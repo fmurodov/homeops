@@ -148,6 +148,9 @@ spec:
       thread-dongle:
         type: hostPath
         hostPath: /dev/thread0
+        # Untyped, kubelet creates a directory here whenever the udev symlink is
+        # briefly absent, which then blocks udev from ever recreating it.
+        hostPathType: CharDevice
         globalMounts:
           - path: /dev/thread0
       tun:
