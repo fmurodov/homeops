@@ -19,6 +19,26 @@ because reopening the serial port does not reset the MG24.
 
 ### Solution
 
+Scale the border router to `0` first:
+
+```bash
+kubectl scale deploy -n home-automation otbr-otbr-3 --replicas=0
+```
+
+The dongle disappears from the bus for a few seconds, and with it the udev symlink. A
+crashlooping pod restarting into that gap will have kubelet create a *directory* at
+`/dev/thread0`, which then blocks udev from ever recreating the symlink — turning a
+transient blip into a permanent failure. `hostPathType: CharDevice` on the mount prevents
+it, but scaling down first costs nothing.
+
+If it has already happened, `/dev/thread0` shows as `drwxr-xr-x` instead of a symlink and
+the agent reports `Radio file not supported`. Remove the directory through a pod that has
+host `/dev` mounted read-write, then re-trigger udev with the port toggle below:
+
+```bash
+kubectl exec -n longhorn-system <longhorn-csi-plugin-pod> -c longhorn-csi-plugin -- rmdir /dev/thread0
+```
+
 Disabling the USB port drops VBUS, which is equivalent to unplugging the dongle. Any
 privileged pod on the node with host `/sys` mounted read-write can do it — on this cluster
 the Longhorn CSI plugin qualifies, so no new pod is needed:
@@ -47,7 +67,14 @@ talosctl -n <node> read /sys/bus/usb/devices/1-1/product
 
 ## Reflashing the Firmware
 
-Needed when the MG24 stops responding entirely and a power cycle does not recover it.
+Needed when the MG24 stops responding entirely and a power cycle does not recover it —
+`Init() at spinel_driver.cpp:87` with the device node intact. The Gecko bootloader stays
+reachable in this state, so the chip is not bricked and no physical access is needed.
+
+A dongle that reaches this state repeatedly is failing: reflashing revives it for days, not
+weeks. Two hard failures on one dongle across two different firmware versions, while the
+other dongle on the same firmware stayed up, means replace the hardware rather than reflash
+again.
 
 ### Free the device
 
@@ -62,9 +89,34 @@ kubectl scale deploy -n home-automation otbr-otbr-3 --replicas=0
 
 ### Option A — universal-silabs-flasher (CLI)
 
-NabuCasa's flasher, the same tool Home Assistant uses for its own radios. Run a throwaway
-`python:3.13` pod, privileged, pinned to the node with `nodeName`, with `/dev/thread0`
-mounted from the host at the same path. Inside it:
+NabuCasa's flasher, the same tool Home Assistant uses for its own radios.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dongle-flasher
+  namespace: home-automation
+spec:
+  restartPolicy: Never
+  nodeName: talos-1018-3
+  containers:
+    - name: flasher
+      image: python:3.13
+      command: ["sleep", "1800"]
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - name: dongle
+          mountPath: /dev/thread0
+  volumes:
+    - name: dongle
+      hostPath:
+        path: /dev/thread0
+        type: CharDevice
+```
+
+Then, inside it:
 
 ```bash
 pip install universal-silabs-flasher
@@ -86,11 +138,47 @@ Sonoff ship their flasher as a container as well as a Home Assistant add-on, so 
 need the dongle plugged into the machine running the browser — it reaches the host's USB
 directly. It picks the firmware itself, which is the safer choice when the image matters.
 
-Run `ewelink/sonoff-dongle-flasher` as a pod on the node, privileged, with hostPath mounts
-for `/dev` and `/run/udev` (read-only, for automatic dongle detection), then reach the UI:
+Host `/dev` is mounted whole because the UI scans it to find the dongle, and `/run/udev`
+gives it the metadata to name what it finds.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sonoff-flasher
+  namespace: home-automation
+spec:
+  restartPolicy: Never
+  nodeName: talos-1018-3
+  containers:
+    - name: flasher
+      image: ewelink/sonoff-dongle-flasher
+      securityContext:
+        privileged: true
+      ports:
+        - containerPort: 8324
+      volumeMounts:
+        - name: dev
+          mountPath: /dev
+        - name: udev
+          mountPath: /run/udev
+          readOnly: true
+        - name: data
+          mountPath: /workspace/data
+  volumes:
+    - name: dev
+      hostPath:
+        path: /dev
+    - name: udev
+      hostPath:
+        path: /run/udev
+    - name: data
+      emptyDir: {}
+```
 
 ```bash
-kubectl port-forward -n home-automation pod/dongle-flasher 8324:8324
+kubectl apply -f sonoff-flasher.yaml
+kubectl port-forward -n home-automation pod/sonoff-flasher 8324:8324
 ```
 
 Open <http://localhost:8324>, pick the dongle and the OpenThread RCP firmware. Without the
