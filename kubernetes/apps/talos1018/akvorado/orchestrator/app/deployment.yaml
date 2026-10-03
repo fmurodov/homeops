@@ -89,7 +89,7 @@ spec:
               cpu: "10m"
               memory: "32Mi"
         - name: orchestrator
-          image: quay.io/akvorado/akvorado:2026.8.0
+          image: quay.io/akvorado/akvorado:2026.10.0
           args:
             - orchestrator
             - /etc/akvorado/akvorado.yaml

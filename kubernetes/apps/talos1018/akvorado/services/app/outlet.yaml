@@ -35,7 +35,7 @@ spec:
       terminationGracePeriodSeconds: 40
       containers:
         - name: outlet
-          image: quay.io/akvorado/akvorado:2026.8.0
+          image: quay.io/akvorado/akvorado:2026.10.0
           args:
             - outlet
             - http://akvorado-orchestrator:8080
