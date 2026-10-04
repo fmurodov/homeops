@@ -30,7 +30,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: inlet
-          image: quay.io/akvorado/akvorado:2026.8.0
+          image: quay.io/akvorado/akvorado:2026.10.0
           args:
             - inlet
             - http://akvorado-orchestrator:8080
