@@ -13,14 +13,16 @@ This document provides essential guidance for AI assistants working with this In
 **Main Branch**: `master`
 **Repository**: https://github.com/fmurodov/homeops
 
-> **Version Info**: Check `talos/talos1018/talconfig.yaml` for Kubernetes/Talos versions, HelmRelease files for application versions.
+> **Version Info**: Check `talos/talos1018/generate.sh` for Kubernetes/Talos versions, HelmRelease files for application versions.
 
 ## Directory Structure
 
 ```
 homeops/
-├── talos/talos1018/           # Talos cluster config
-│   ├── talconfig.yaml         # Source of truth (edit this)
+├── talos/talos1018/           # Talos cluster config (plain talosctl + sops)
+│   ├── generate.sh            # Versions + talosctl gen config; writes clusterconfig/
+│   ├── patches/               # controlplane.yaml + one file per node (edit these)
+│   ├── secrets.sops.yaml      # Talos secrets bundle
 │   └── clusterconfig/         # Generated configs (DO NOT EDIT)
 │
 ├── kubernetes/
@@ -139,13 +141,13 @@ fix(container): update image ghcr.io/esphome/esphome ( 2025.12.4 ➔ 2025.12.5 )
 ### Talos Configuration Changes
 
 ```bash
-# 1. Edit talos/talos1018/talconfig.yaml
-# 2. Regenerate configs
-cd talos/talos1018 && talhelper genconfig
-# 3. Validate
+# 1. Edit talos/talos1018/patches/ (versions live in generate.sh)
+# 2. Validate (renders with a throwaway secrets bundle, no age key needed)
 ./scripts/validate.sh talos
-# 4. Apply to nodes
-talosctl apply-config -n <node-ip> --file clusterconfig/<config>.yaml
+# 3. Regenerate configs (decrypts secrets.sops.yaml)
+talos/talos1018/generate.sh
+# 4. Dry-run, then apply to nodes
+talosctl apply-config -n <node-ip> --file talos/talos1018/clusterconfig/<config>.yaml --dry-run
 ```
 
 ### Adding New Applications
@@ -206,7 +208,7 @@ sops -d path/to/secret.sops.yaml
 ## Key File Locations
 
 - **Cluster-wide secrets**: `kubernetes/components/common/cluster-secrets.sops.yaml`
-- **Talos config**: `talos/talos1018/talconfig.yaml`
+- **Talos config**: `talos/talos1018/patches/`, rendered by `talos/talos1018/generate.sh`
 - **Flux orchestration**: `kubernetes/clusters/talos1018/{cluster-config,infrastructure,apps}.yaml`
 - **SOPS config**: `.sops.yaml` (root, covers both trees), `kubernetes/.sops.yaml`, `talos/talos1018/.sops.yaml`
 - **Validation scripts**: `scripts/validate.sh`, `scripts/validate-flux.sh`

@@ -10,7 +10,7 @@ metadata:
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: CoreDNS
 spec:
-  # These are the .10 of each entry in talconfig clusterSvcNets and must keep
+  # These are the .10 of each entry in the Talos serviceSubnets and must keep
   # matching it — kubelet's clusterDNS is derived from the same source. IPv6
   # stays first here; Talos would render this Service IPv4-primary, and both
   # fields are immutable once the Service exists.
