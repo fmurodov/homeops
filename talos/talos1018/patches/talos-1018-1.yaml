@@ -1,0 +1,21 @@
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: "off"
+hostname: talos-1018-1
+---
+# net0 alias for the physical interface (enp0s31f6)
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: net0
+selector:
+  match: mac(link.permanent_addr) == "6c:4b:90:0a:43:a1"
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+name: net0
+addresses:
+  - address: fd00:1018:0:5:10:18:6:91/64
+  - address: 10.18.6.91/24
+routes:
+  - gateway: fd00:1018:0:5::1
+  - gateway: 10.18.6.1

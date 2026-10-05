@@ -1,0 +1,161 @@
+machine:
+  certSANs: &sans
+    - ::1
+    - fd00:1018:0:5:10:18:6:91
+    - fd00:1018:0:5:10:18:6:92
+    - fd00:1018:0:5:10:18:6:93
+    - 10.18.6.91
+    - 10.18.6.92
+    - 10.18.6.93
+    - 127.0.0.1
+
+  install:
+    disk: /dev/nvme0n1
+    diskSelector:
+      size: ">=500GB"
+    wipe: true
+
+  # NOTE: pod IPv6 internet egress relies on SLAAC. Besides the static ULA/IPv4
+  # addresses in the node patches, each node autoconfigures a GUA address (EUI-64)
+  # from router advertisements on the untagged LAN. Cilium's IPv6 masquerade picks
+  # that GUA as the source for pod -> internet IPv6 traffic, so egress keeps
+  # working (and renumbers automatically) when the ISP prefix changes. Do not
+  # disable RA acceptance on net0 or router advertisements on this segment.
+  network:
+    nameservers:
+      - fd00:1018:0:5::1
+      - 10.18.6.1
+    searchDomains:
+      - cluster.local
+
+  kubelet:
+    extraArgs:
+      rotate-server-certificates: "true"
+    # /var/lib/longhorn shares the EPHEMERAL partition with the containerd
+    # image store, and Longhorn marks a disk unschedulable below its 30%
+    # reserve. Prune well before that, since kubelet defaults to 85%.
+    extraConfig:
+      imageGCHighThresholdPercent: 55
+      imageGCLowThresholdPercent: 45
+      imageMaximumGCAge: 168h
+    extraMounts:
+      - destination: /var/lib/longhorn
+        type: bind
+        source: /var/lib/longhorn
+        options:
+          - bind
+          - rshared
+          - rw
+    nodeIP:
+      validSubnets:
+        - fd00:1018:0:5::/64
+        - 10.18.6.0/24
+
+  nodeLabels:
+    node.kubernetes.io/exclude-from-external-load-balancers: ""
+    node.longhorn.io/create-default-disk: "true"
+
+  time:
+    disabled: false
+    servers:
+      - time.cloudflare.com
+      - 10.18.6.13
+      - ntp1.time.nl
+      - time1.google.com
+    bootTimeout: 2m0s
+
+  features:
+    rbac: true
+    apidCheckExtKeyUsage: true
+    diskQuotaSupport: true
+    kubePrism:
+      enabled: true
+      port: 7445
+    hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: true
+    # Lets tuppr drive node upgrades over the Talos API. Scoped to the
+    # single namespace it runs in — os:admin is full control of the node.
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:admin
+      allowedKubernetesNamespaces:
+        - system-upgrade
+
+  # Stable /dev/thread0 symlink for the USB Thread dongles
+  udev:
+    rules:
+      - SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="thread0", MODE="0666"
+
+  # Keep compressed layers after unpacking so Spegel has blobs to serve to peers
+  files:
+    - path: /etc/cri/conf.d/20-customization.part
+      op: create
+      content: |-
+        [plugins."io.containerd.cri.v1.images"]
+          discard_unpacked_layers = false
+
+cluster:
+  network:
+    cni:
+      name: none
+    podSubnets:
+      - fd00:1018:1000::/56
+      - 10.244.0.0/16
+    serviceSubnets:
+      - fd00:1018:2000::/96
+      - 10.96.0.0/12
+
+  apiServer:
+    certSANs: *sans
+
+  allowSchedulingOnControlPlanes: true
+
+  # Bootstrap add-ons Talos should not manage.
+  #
+  # kube-proxy: replaced by Cilium's kube-proxy replacement.
+  #
+  # coreDNS: Talos always renders the kube-dns Service IPv4-primary
+  # regardless of serviceSubnets order, so on a v6-primary cluster every
+  # `upgrade-k8s` aborts on the immutable clusterIPs/ipFamilies fields and no
+  # bootstrap manifest gets applied. Flux owns CoreDNS instead.
+  coreDNS:
+    disabled: true
+  proxy:
+    disabled: true
+
+  etcd:
+    advertisedSubnets:
+      - fd00:1018:0:5::/64
+      - 10.18.6.0/24
+    extraArgs:
+      listen-metrics-urls: "http://[::]:2381"
+
+  controllerManager:
+    extraArgs:
+      bind-address: "::"
+  scheduler:
+    extraArgs:
+      bind-address: "::"
+
+  extraManifests:
+    - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+    - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+---
+apiVersion: v1alpha1
+kind: Layer2VIPConfig
+name: fd00:1018:0:5:10:18:6:90
+link: net0
+---
+apiVersion: v1alpha1
+kind: VLANConfig
+name: net0.2
+vlanID: 2
+parent: net0
+---
+apiVersion: v1alpha1
+kind: VLANConfig
+name: net0.3
+vlanID: 3
+parent: net0

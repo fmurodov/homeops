@@ -9,9 +9,13 @@ on:
     branches: ["**"]
     tags-ignore: ["*"]
     paths:
-      - "talos/**/*.yaml"
+      - "talos/**"
       - "scripts/validate.sh"
       - ".github/workflows/validate-talos.yaml"
+
+env:
+  # renovate: datasource=github-releases depName=siderolabs/talos
+  TALOSCTL_VERSION: v1.14.0
 
 jobs:
   validate:
@@ -21,15 +25,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Install Talos CLI
+      - name: Install talosctl
         run: |
-          curl -sL https://talos.dev/install | sh
+          base="https://github.com/siderolabs/talos/releases/download/${TALOSCTL_VERSION}"
+          curl -fsSLO "$base/talosctl-linux-amd64"
+          curl -fsSL "$base/sha256sum.txt" | grep ' talosctl-linux-amd64$' | sha256sum -c -
+          sudo install -m 0755 talosctl-linux-amd64 /usr/local/bin/talosctl
           talosctl version --client
-
-      - name: Install talhelper
-        run: |
-          curl -sL https://github.com/budimanjojo/talhelper/releases/latest/download/talhelper_linux_amd64.tar.gz | tar xz -C /usr/local/bin talhelper
-          talhelper --version
 
       - name: Validate Talos configurations
         run: ./scripts/validate.sh talos

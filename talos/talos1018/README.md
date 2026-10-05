@@ -1,14 +1,25 @@
 # Talos Kubernetes Cluster (talos1018)
 
-This directory contains the Talos configuration for the `talos1018` Kubernetes cluster, managed using **talhelper**.
+This directory contains the Talos configuration for the `talos1018` Kubernetes cluster, managed with plain **talosctl**.
 
-Talos machine configs are generated from a single `talconfig.yaml`. Secrets are stored encrypted with SOPS.
+```
+talos1018/
+├── generate.sh                # versions + talosctl gen config; writes clusterconfig/
+├── secrets.sops.yaml          # `talosctl gen secrets` bundle, SOPS-encrypted
+├── patches/
+│   ├── controlplane.yaml      # shared by all nodes
+│   └── talos-1018-N.yaml      # hostname, addresses, NIC alias
+└── clusterconfig/             # generated, gitignored (contains secrets)
+```
+
+Configs are generated with `--talos-version v1.13` although the nodes run 1.14: the patches still set v1alpha1
+fields that the 1.14 documents reject, and the 1.14 new-cluster defaults (`workloadIsolation`, secure EPHEMERAL
+mount) break Longhorn v1. Migrating to the 1.14 document kinds is tracked separately.
 
 ## Prerequisites
 
 - talosctl
 - kubectl
-- talhelper
 - helm
 - sops + age key
 - 3 control-plane nodes (fd00:1018:0:5:10:18:6:91-93)
@@ -17,14 +28,23 @@ Talos machine configs are generated from a single `talconfig.yaml`. Secrets are 
 ## Installation Steps
 
 ### Generate Talos configs
-All machine configs are generated from `talconfig.yaml`.
 
 ```bash
-talhelper genconfig
+./generate.sh
 ```
 
-This generates files in `clusterconfig/`.
+This decrypts `secrets.sops.yaml` and writes `clusterconfig/`.
 These files are **generated** and should not be edited manually.
+
+A new cluster needs a secrets bundle first:
+
+```bash
+talosctl gen secrets -o secrets.sops.yaml
+```
+
+```bash
+sops --encrypt --in-place secrets.sops.yaml
+```
 
 ### Apply Configurations to Nodes
 
@@ -114,14 +134,20 @@ kubectl -n kube-system get pods
 
 ## Updating Talos configuration
 
-1. Edit talconfig.yaml
+1. Edit the files in `patches/`
 2. Regenerate configs:
 
 ```bash
-talhelper genconfig
+./generate.sh
 ```
 
-3. Apply the generated configurations to each control plane node:
+3. Check what changes on a node before applying:
+
+```bash
+talosctl apply-config -n fd00:1018:0:5:10:18:6:91 --file clusterconfig/talos1018-talos-1018-1.yaml --dry-run
+```
+
+4. Apply the generated configurations to each control plane node:
 
 ```bash
 talosctl apply-config -n fd00:1018:0:5:10:18:6:91 --file clusterconfig/talos1018-talos-1018-1.yaml
@@ -130,12 +156,14 @@ talosctl apply-config -n fd00:1018:0:5:10:18:6:93 --file clusterconfig/talos1018
 ```
 
 ## Talos upgrade
-Update versions (`talosVersion`/`kubernetesVersion`) in `talconfig.yaml`:
+tuppr drives upgrades from `kubernetes/apps/talos1018/system-upgrade/tuppr/config/`. Renovate bumps
+`TALOS_VERSION`/`KUBERNETES_VERSION` in `generate.sh` in the same PR, so regenerated configs carry the new
+installer image.
 
-Then regenerate and upgrade:
+Manual upgrade:
 
 ```bash
-talhelper genconfig
+./generate.sh
 
 # renovate: datasource=github-releases depName=siderolabs/talos
 set TALOS_VERSION v1.14.0
@@ -145,6 +173,12 @@ talosctl upgrade -n fd00:1018:0:5:10:18:6:91 --image "$TALOS_IMAGE" --wait
 talosctl upgrade -n fd00:1018:0:5:10:18:6:92 --image "$TALOS_IMAGE" --wait
 talosctl upgrade -n fd00:1018:0:5:10:18:6:93 --image "$TALOS_IMAGE" --wait
 ```
+
+## System extensions
+
+The installer image in `generate.sh` is an Image Factory schematic with intel-ucode, iscsi-tools and
+util-linux-tools. After changing the extensions, create the new schematic at https://factory.talos.dev and
+replace the ID in `generate.sh` and in the upgrade command above.
 
 ## Cilium upgrade
 
@@ -167,7 +201,7 @@ helm upgrade cilium cilium/cilium \
 For cluster maintenance, refer to the [Talos documentation](https://www.talos.dev/latest/introduction/what-is-talos/).
 
 ## Notes
-- Secrets are stored in `talsecret.sops.yaml`
+- Secrets are stored in `secrets.sops.yaml`
 - CNI is set to `none` (installed later via Kubernetes tooling)
 - All control-plane nodes are schedulable
 - IPv4 + IPv6 dual-stack is enabled
