@@ -5,7 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 # renovate: datasource=github-releases depName=siderolabs/talos
-TALOS_VERSION=v1.14.0
+TALOS_VERSION=v1.14.2
 # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
 KUBERNETES_VERSION=v1.36.3
 # Image Factory schematic: intel-ucode, iscsi-tools, util-linux-tools
