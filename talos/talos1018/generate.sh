@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 # renovate: datasource=github-releases depName=siderolabs/talos
 TALOS_VERSION=v1.14.0
 # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-KUBERNETES_VERSION=v1.36.3
+KUBERNETES_VERSION=v1.37.1
 # Image Factory schematic: intel-ucode, iscsi-tools, util-linux-tools
 INSTALL_IMAGE="factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:$TALOS_VERSION"
 
