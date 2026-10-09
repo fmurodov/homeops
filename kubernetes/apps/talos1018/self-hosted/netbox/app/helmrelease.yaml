@@ -32,7 +32,8 @@ spec:
               tag: v4.7.1
             args: [/opt/netbox/docker-entrypoint.sh, "true"]
             env: &netboxEnv
-              ALLOWED_HOSTS: &host netbox.${CLUSTER_DOMAIN}
+              # Service name for in-cluster API clients such as netbox-mcp.
+              ALLOWED_HOSTS: netbox.${CLUSTER_DOMAIN} netbox.self-hosted.svc.cluster.local
               CSRF_TRUSTED_ORIGINS: https://netbox.${CLUSTER_DOMAIN}
               TIME_ZONE: ${TIMEZONE}
               DB_HOST: netbox-postgres
@@ -258,7 +259,7 @@ spec:
             namespace: network
             sectionName: https-internal
         hostnames:
-          - *host
+          - netbox.${CLUSTER_DOMAIN}
         rules:
           - matches:
               - path:
