@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbox-mcp
+  labels:
+    app.kubernetes.io/name: netbox-mcp
+spec:
+  selector:
+    app.kubernetes.io/name: netbox-mcp
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      protocol: TCP
