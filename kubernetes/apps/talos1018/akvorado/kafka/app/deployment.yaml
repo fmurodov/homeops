@@ -62,7 +62,7 @@ spec:
             - name: KAFKA_LOG_DIRS
               value: /var/lib/kafka/data/logs
             - name: KAFKA_HEAP_OPTS
-              value: -Xms512m -Xmx1g
+              value: -Xms256m -Xmx512m
           ports:
             - name: client
               containerPort: 9092
@@ -99,10 +99,10 @@ spec:
                 - ALL
           resources:
             limits:
-              memory: "2Gi"
+              memory: "1Gi"
             requests:
               cpu: "50m"
-              memory: "1Gi"
+              memory: "512Mi"
       volumes:
         - name: data
           persistentVolumeClaim:
