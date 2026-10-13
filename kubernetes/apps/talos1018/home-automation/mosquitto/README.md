@@ -39,7 +39,8 @@ handshake.
 
 ## Credentials
 
-Three users: `homeassistant`, `ithohru` (the ventilation add-on) and `esphome`.
+Four users: `homeassistant`, `ithohru` (the ventilation add-on), `itho-wpu`
+(the heat pump add-on) and `esphome`.
 The ESPHome dashboard connects to the broker whenever any device config carries
 an `mqtt:` block — it reads `username`/`password` straight from that block, so
 the credentials belong in the device YAML on the ESPHome PVC, referenced from
@@ -55,6 +56,11 @@ To add or rotate a user:
 sops -d app/mosquitto-secret.sops.yaml | yq -r '.stringData.password_file' > /tmp/pw
 docker run --rm -v /tmp:/w eclipse-mosquitto:2.0.22 mosquitto_passwd -b /w/pw <user> <password>
 ```
+
+Generate the hash with the broker's own image version, not a locally installed
+`mosquitto_passwd`. Mosquitto 2.1 writes a `$7$` hash with a longer salt and
+more iterations that 2.0.22 cannot verify, so the login is refused as
+"not authorised" even though the user is in the file.
 
 Then paste the result back into `stringData.password_file` and re-encrypt with
 `sops --encrypt --in-place`. Stakater Reloader restarts the broker when either
