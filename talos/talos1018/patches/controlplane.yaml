@@ -15,19 +15,6 @@ machine:
       size: ">=500GB"
     wipe: true
 
-  # NOTE: pod IPv6 internet egress relies on SLAAC. Besides the static ULA/IPv4
-  # addresses in the node patches, each node autoconfigures a GUA address (EUI-64)
-  # from router advertisements on the untagged LAN. Cilium's IPv6 masquerade picks
-  # that GUA as the source for pod -> internet IPv6 traffic, so egress keeps
-  # working (and renumbers automatically) when the ISP prefix changes. Do not
-  # disable RA acceptance on net0 or router advertisements on this segment.
-  network:
-    nameservers:
-      - fd00:1018:0:5::1
-      - 10.18.6.1
-    searchDomains:
-      - cluster.local
-
   kubelet:
     extraArgs:
       rotate-server-certificates: "true"
@@ -55,46 +42,16 @@ machine:
     node.kubernetes.io/exclude-from-external-load-balancers: ""
     node.longhorn.io/create-default-disk: "true"
 
-  time:
-    disabled: false
-    servers:
-      - time.cloudflare.com
-      - 10.18.6.13
-      - ntp1.time.nl
-      - time1.google.com
-    bootTimeout: 2m0s
-
   features:
     rbac: true
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
+    # gen config still emits these at the v1.13 contract; they now live in
+    # KubePrismConfig and ResolverConfig, and both sources together are rejected
     kubePrism:
-      enabled: true
-      port: 7445
+      $patch: delete
     hostDNS:
-      enabled: true
-      forwardKubeDNSToHost: true
-    # Lets tuppr drive node upgrades over the Talos API. Scoped to the
-    # single namespace it runs in — os:admin is full control of the node.
-    kubernetesTalosAPIAccess:
-      enabled: true
-      allowedRoles:
-        - os:admin
-      allowedKubernetesNamespaces:
-        - system-upgrade
-
-  # Stable /dev/thread0 symlink for the USB Thread dongles
-  udev:
-    rules:
-      - SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="thread0", MODE="0666"
-
-  # Keep compressed layers after unpacking so Spegel has blobs to serve to peers
-  files:
-    - path: /etc/cri/conf.d/20-customization.part
-      op: create
-      content: |-
-        [plugins."io.containerd.cri.v1.images"]
-          discard_unpacked_layers = false
+      $patch: delete
 
 cluster:
   network:
@@ -112,18 +69,9 @@ cluster:
 
   allowSchedulingOnControlPlanes: true
 
-  # Bootstrap add-ons Talos should not manage.
-  #
-  # kube-proxy: replaced by Cilium's kube-proxy replacement.
-  #
-  # coreDNS: Talos always renders the kube-dns Service IPv4-primary
-  # regardless of serviceSubnets order, so on a v6-primary cluster every
-  # `upgrade-k8s` aborts on the immutable clusterIPs/ipFamilies fields and no
-  # bootstrap manifest gets applied. Flux owns CoreDNS instead.
-  coreDNS:
-    disabled: true
+  # gen config emits a default kube-proxy image; KubeProxyConfig replaces it
   proxy:
-    disabled: true
+    $patch: delete
 
   etcd:
     advertisedSubnets:
@@ -143,6 +91,85 @@ cluster:
     - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
     - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ---
+apiVersion: v1alpha1
+kind: ResolverConfig
+nameservers:
+  - address: fd00:1018:0:5::1
+  - address: 10.18.6.1
+searchDomains:
+  domains:
+    - cluster.local
+hostDNS:
+  enabled: true
+  forwardKubeDNSToHost: true
+---
+apiVersion: v1alpha1
+kind: KubePrismConfig
+port: 7445
+---
+# Lets tuppr drive node upgrades over the Talos API. Scoped to the
+# single namespace it runs in — os:admin is full control of the node.
+apiVersion: v1alpha1
+kind: KubeTalosAPIAccessConfig
+allowedRoles:
+  - os:admin
+allowedKubernetesNamespaces:
+  - system-upgrade
+---
+# Bootstrap add-ons Talos should not manage.
+#
+# kube-proxy: replaced by Cilium's kube-proxy replacement.
+#
+# CoreDNS: Talos always renders the kube-dns Service IPv4-primary
+# regardless of serviceSubnets order, so on a v6-primary cluster every
+# `upgrade-k8s` aborts on the immutable clusterIPs/ipFamilies fields and no
+# bootstrap manifest gets applied. Flux owns CoreDNS instead.
+apiVersion: v1alpha1
+kind: KubeProxyConfig
+enabled: false
+---
+apiVersion: v1alpha1
+kind: KubeCoreDNSConfig
+enabled: false
+---
+# Stable /dev/thread0 symlink for the USB Thread dongles
+apiVersion: v1alpha1
+kind: UdevRulesConfig
+rules:
+  - SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="thread0", MODE="0666"
+---
+# Keep compressed layers after unpacking so Spegel has blobs to serve to peers
+apiVersion: v1alpha1
+kind: CRICustomizationConfig
+name: spegel
+content: |-
+  [plugins."io.containerd.cri.v1.images"]
+    discard_unpacked_layers = false
+---
+# useNTS applies to every server and rejects IP literals, so only servers
+# that answer NTS-KE on TCP 4460 belong here
+apiVersion: v1alpha1
+kind: TimeSyncConfig
+bootTimeout: 2m0s
+ntp:
+  useNTS: true
+  servers:
+    - time.cloudflare.com
+    - nts.time.nl
+    - nts.netnod.se
+    - ptbtime1.ptb.de
+---
+# Upgraded clusters have no trim schedule; all nodes are NVMe
+apiVersion: v1alpha1
+kind: FilesystemTrimConfig
+interval: 168h0m0s
+---
+# NOTE: pod IPv6 internet egress relies on SLAAC. Besides the static ULA/IPv4
+# addresses in the node patches, each node autoconfigures a GUA address (EUI-64)
+# from router advertisements on the untagged LAN. Cilium's IPv6 masquerade picks
+# that GUA as the source for pod -> internet IPv6 traffic, so egress keeps
+# working (and renumbers automatically) when the ISP prefix changes. Do not
+# disable RA acceptance on net0 or router advertisements on this segment.
 apiVersion: v1alpha1
 kind: Layer2VIPConfig
 name: fd00:1018:0:5:10:18:6:90
