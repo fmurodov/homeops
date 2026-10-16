@@ -15,6 +15,9 @@ machine:
       size: ">=500GB"
     wipe: true
 
+  # Stays in v1alpha1: KubeletConfig has no extraMounts, and Talos will not add
+  # one (siderolabs/talos#14365). Moving it means relocating Longhorn's data
+  # path to a UserVolume first.
   kubelet:
     extraArgs:
       rotate-server-certificates: "true"
@@ -33,14 +36,10 @@ machine:
           - bind
           - rshared
           - rw
-    nodeIP:
-      validSubnets:
-        - fd00:1018:0:5::/64
-        - 10.18.6.0/24
 
+  # gen config emits the default label; KubeNodeConfig owns labels now
   nodeLabels:
-    node.kubernetes.io/exclude-from-external-load-balancers: ""
-    node.longhorn.io/create-default-disk: "true"
+    $patch: delete
 
   features:
     rbac: true
@@ -54,6 +53,8 @@ machine:
       $patch: delete
 
 cluster:
+  # Stays in v1alpha1: KubeNetworkConfig caps IPv6 service subnets at /108, and
+  # the live /96 already has ClusterIPs spread across ~90 different /108s
   network:
     cni:
       name: none
@@ -66,8 +67,6 @@ cluster:
 
   apiServer:
     certSANs: *sans
-
-  allowSchedulingOnControlPlanes: true
 
   # gen config emits a default kube-proxy image; KubeProxyConfig replaces it
   proxy:
@@ -86,10 +85,29 @@ cluster:
   scheduler:
     extraArgs:
       bind-address: "::"
-
-  extraManifests:
-    - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
-    - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+---
+# Labels and taints are taken literally here, unlike v1alpha1 which added the
+# control-plane label itself. No NoSchedule taint: every node is a control plane.
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+nodeIP:
+  validSubnets:
+    - fd00:1018:0:5::/64
+    - 10.18.6.0/24
+labels:
+  node-role.kubernetes.io/control-plane: ""
+  node.kubernetes.io/exclude-from-external-load-balancers: ""
+  node.longhorn.io/create-default-disk: "true"
+---
+apiVersion: v1alpha1
+kind: KubeExternalManifestConfig
+name: kubelet-serving-cert-approver
+url: https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+---
+apiVersion: v1alpha1
+kind: KubeExternalManifestConfig
+name: metrics-server
+url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ---
 apiVersion: v1alpha1
 kind: ResolverConfig
