@@ -19,3 +19,23 @@ addresses:
 routes:
   - gateway: fd00:1018:0:5::1
   - gateway: 10.18.6.1
+---
+# EPHEMERAL used to fill the disk, with Longhorn as a directory on it. Both
+# only apply when the volumes are (re)provisioned, so they take effect after
+# `talosctl reset --system-labels-to-wipe EPHEMERAL`.
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+provisioning:
+  minSize: 100GiB
+  maxSize: 100GiB
+  grow: false
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: longhorn
+provisioning:
+  diskSelector:
+    match: system_disk
+  minSize: 300GiB
+  grow: true
