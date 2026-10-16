@@ -21,12 +21,12 @@ machine:
   kubelet:
     extraArgs:
       rotate-server-certificates: "true"
-    # /var/lib/longhorn shares the EPHEMERAL partition with the containerd
-    # image store, and Longhorn marks a disk unschedulable below its 30%
-    # reserve. Prune well before that, since kubelet defaults to 85%.
+    # EPHEMERAL is a fixed 100 GiB holding little besides the image store.
+    # GC starts below kubelet's imagefs eviction threshold (15% free), which
+    # the default 85% would race.
     extraConfig:
-      imageGCHighThresholdPercent: 55
-      imageGCLowThresholdPercent: 45
+      imageGCHighThresholdPercent: 75
+      imageGCLowThresholdPercent: 65
       imageMaximumGCAge: 168h
     extraMounts:
       - destination: /var/lib/longhorn
@@ -180,6 +180,26 @@ ntp:
     - nts.time.nl
     - nts.netnod.se
     - ptbtime1.ptb.de
+---
+# EPHEMERAL used to fill the disk, with Longhorn as a directory on it. Both
+# only apply when a volume is provisioned; resizing either needs a node
+# rebuild (talos/talos1018/longhorn-disk-migration.md).
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+provisioning:
+  minSize: 100GiB
+  maxSize: 100GiB
+  grow: false
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: longhorn
+provisioning:
+  diskSelector:
+    match: system_disk
+  minSize: 300GiB
+  grow: true
 ---
 # Upgraded clusters have no trim schedule; all nodes are NVMe
 apiVersion: v1alpha1
