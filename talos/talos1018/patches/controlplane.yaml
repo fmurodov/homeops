@@ -15,9 +15,9 @@ machine:
       size: ">=500GB"
     wipe: true
 
-  # Stays in v1alpha1: KubeletConfig has no extraMounts, and Talos will not add
-  # one (siderolabs/talos#14365). Moving it means relocating Longhorn's data
-  # path to a UserVolume first.
+  # Stays in v1alpha1 until generate.sh moves to the v1.14 contract:
+  # KubeletConfig requires an explicit image, which would pin the Kubernetes
+  # version a second time next to generate.sh.
   kubelet:
     extraArgs:
       rotate-server-certificates: "true"
@@ -28,14 +28,6 @@ machine:
       imageGCHighThresholdPercent: 75
       imageGCLowThresholdPercent: 65
       imageMaximumGCAge: 168h
-    extraMounts:
-      - destination: /var/lib/longhorn
-        type: bind
-        source: /var/lib/longhorn
-        options:
-          - bind
-          - rshared
-          - rw
 
   # gen config emits the default label; KubeNodeConfig owns labels now
   nodeLabels:
@@ -183,7 +175,7 @@ ntp:
 ---
 # EPHEMERAL used to fill the disk, with Longhorn as a directory on it. Both
 # only apply when a volume is provisioned; resizing either needs a node
-# rebuild (talos/talos1018/longhorn-disk-migration.md).
+# rebuild (`talosctl reset --system-labels-to-wipe EPHEMERAL`).
 apiVersion: v1alpha1
 kind: VolumeConfig
 name: EPHEMERAL
