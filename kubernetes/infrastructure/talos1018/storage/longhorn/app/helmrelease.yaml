@@ -44,6 +44,10 @@ spec:
       removeSnapshotsDuringFilesystemTrim: "enabled"
       defaultReplicaCount: "3"
       createDefaultDiskLabeledNodes: true
+      # Talos UserVolume partition, not shared with containerd, so the old 30%
+      # reserve is unnecessary. Only affects default disks created from now on.
+      defaultDataPath: /var/mnt/longhorn/
+      storageReservedPercentageForDefaultDisk: "5"
       # systemManagedComponentsNodeSelector: "node.longhorn.io/create-default-disk:true"
     longhornManager:
       nodeSelector:
