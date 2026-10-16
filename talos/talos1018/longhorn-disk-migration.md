@@ -125,38 +125,65 @@ reboots.
 talosctl -n $IP reset --system-labels-to-wipe EPHEMERAL --reboot
 ```
 
-## 7. Check the node came back right
+## 7. Check the node came back right, then uncordon
 
 ```bash
 talosctl -n $IP get volumestatus | grep -E 'EPHEMERAL|u-longhorn'   # both ready; ~100 GiB and ~360 GiB
 talosctl -n $IP get mountstatus | grep -E 'EPHEMERAL|u-longhorn'
 talosctl -n $PEER etcd members                          # three members again
-kubectl get node $NODE                                   # Ready (Talos may have uncordoned it already)
-kubectl -n longhorn-system get pods -o wide --field-selector spec.nodeName=$NODE
+kubectl get node $NODE                                   # Ready,SchedulingDisabled
 ```
 
-## 8. Longhorn: add the new disk
-
-Reserve 5% of the partition (it holds nothing else).
-
-```bash
-kubectl -n longhorn-system patch nodes.longhorn.io $NODE --type merge -p '{"spec":{"disks":{"longhorn":{
-  "path":"/var/mnt/longhorn/","allowScheduling":true,"diskType":"filesystem","storageReserved":0,"tags":[]}}}}'
-# once the disk reports its size, set the 5% reserve
-MAX=$(kubectl -n longhorn-system get nodes.longhorn.io $NODE -o jsonpath='{.status.diskStatus.longhorn.storageMaximum}')
-kubectl -n longhorn-system patch nodes.longhorn.io $NODE --type merge \
-  -p "{\"spec\":{\"allowScheduling\":true,\"disks\":{\"longhorn\":{\"storageReserved\":$((MAX / 20))}}}}"
-kubectl -n longhorn-system get nodes.longhorn.io $NODE -o json | jq '.status.diskStatus.longhorn | {conditions: [.conditions[] | {type,status}], storageMaximum, storageAvailable}'
-```
-
-## 9. Uncordon and wait for the rebuild
-
-Longhorn won't place replicas on a cordoned node. Until step 8 the node has
-no Longhorn disk, so an early uncordon by Talos does no harm.
+Uncordon straight away. Longhorn never creates an instance-manager on a
+cordoned node, and without one it can't read the new disk. Longhorn's own
+`allowScheduling: false` (step 2) still keeps replicas off the node.
 
 ```bash
 kubectl uncordon $NODE
-watch -n 30 "kubectl -n longhorn-system get volumes.longhorn.io -o json | jq -r '[.items[].status.robustness] | group_by(.) | map(\"\(.[0])=\(length)\") | join(\" \")'"
+kubectl -n longhorn-system get pods -o wide --field-selector spec.nodeName=$NODE   # instance-manager Running
+```
+
+## 8. Longhorn: check the new disk
+
+The node keeps its `node.longhorn.io/create-default-disk` label, so Longhorn
+recreates a default disk by itself at the default data path
+(`/var/mnt/longhorn/`) with the default 5% reserve. Wait for it to be ready:
+
+```bash
+kubectl -n longhorn-system get nodes.longhorn.io $NODE -o json | jq -r '.status.diskStatus | to_entries[] |
+  "\(.key) max=\(.value.storageMaximum/1073741824|floor)GiB uuid=\(.value.diskUUID)",
+  (.value.conditions[] | "  \(.type)=\(.status) \(.reason)")'
+talosctl -n $IP read /var/mnt/longhorn/longhorn-disk.cfg            # same diskUUID
+```
+
+Expect ~363 GiB, `Ready=True`, `Schedulable=True`.
+
+If it shows `Ready=False DiskFilesystemChanged` ("record diskUUID doesn't
+match the one on the disk"), the disk was created before the
+instance-manager was up. On node 1 this happened because the node was still
+cordoned. The partition is new and empty, so reset it: remove the disk entry,
+delete the stray config file through the instance-manager, and let Longhorn
+recreate it.
+
+```bash
+talosctl -n $IP usage /var/mnt/longhorn --depth 0 -H                # a few hundred bytes = empty
+DISK=$(kubectl -n longhorn-system get nodes.longhorn.io $NODE -o json | jq -r '.spec.disks | keys[0]')
+kubectl -n longhorn-system patch nodes.longhorn.io $NODE --type json \
+  -p "[{\"op\":\"replace\",\"path\":\"/spec/disks/$DISK/allowScheduling\",\"value\":false}]"
+kubectl -n longhorn-system patch nodes.longhorn.io $NODE --type json \
+  -p "[{\"op\":\"remove\",\"path\":\"/spec/disks/$DISK\"}]"
+IM=$(kubectl -n longhorn-system get pods -l longhorn.io/component=instance-manager \
+  --field-selector spec.nodeName=$NODE -o name)
+kubectl -n longhorn-system exec $IM -- rm -f /host/var/mnt/longhorn/longhorn-disk.cfg
+```
+
+Longhorn re-adds the default disk within a few seconds; check again.
+
+## 9. Enable scheduling and wait for the rebuild
+
+```bash
+kubectl -n longhorn-system patch nodes.longhorn.io $NODE --type merge -p '{"spec":{"allowScheduling":true}}'
+watch -n 30 "kubectl -n longhorn-system get volumes.longhorn.io -o json | jq -r '[.items[].status.robustness] | group_by(.) | map(\"\\(.[0])=\\(length)\") | join(\" \")'"
 ```
 
 Done when every volume except the unused detached one is `healthy`. Then
@@ -169,6 +196,9 @@ talosctl -n $IP usage /var/lib/containerd --depth 0 -H
 ```
 
 Only then move on to the next node.
+
+Node 1 (2026-10-16): drain 1.5 min, reset to node Ready ~10 min, partition
+363.4 GiB.
 
 ## After all three nodes
 
