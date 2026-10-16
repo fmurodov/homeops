@@ -80,15 +80,6 @@ spec:
                 cpu: 10m
                 memory: 64Mi
 
-      otbr-2:
-        type: deployment
-        replicas: 0
-        pod:
-          nodeSelector:
-            kubernetes.io/hostname: talos-1018-2
-        containers:
-          app: *container
-
       otbr-3:
         type: deployment
         replicas: 1
@@ -111,13 +102,6 @@ spec:
             port: 8081
           web:
             port: 8080
-      "2":
-        controller: otbr-2
-        ports:
-          rest:
-            port: 8081
-          web:
-            port: 8080
       "3":
         controller: otbr-3
         ports:
@@ -131,12 +115,6 @@ spec:
         existingClaim: otbr-data-1
         advancedMounts:
           otbr-1:
-            app:
-              - path: /data
-      data-2:
-        existingClaim: otbr-data-2
-        advancedMounts:
-          otbr-2:
             app:
               - path: /data
       data-3:
