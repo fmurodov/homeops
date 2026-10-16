@@ -53,8 +53,9 @@ machine:
       $patch: delete
 
 cluster:
-  # Stays in v1alpha1: KubeNetworkConfig caps IPv6 service subnets at /108, and
-  # the live /96 already has ClusterIPs spread across ~90 different /108s
+  # Was /96. KubeNetworkConfig caps IPv6 service subnets at /108, so the range
+  # shrinks to the first /108 (kubernetes ::1 and kube-dns ::a keep their IPs).
+  # Moves to KubeNetworkConfig once the old default ServiceCIDR is gone.
   network:
     cni:
       name: none
@@ -62,7 +63,7 @@ cluster:
       - fd00:1018:1000::/56
       - 10.244.0.0/16
     serviceSubnets:
-      - fd00:1018:2000::/96
+      - fd00:1018:2000::/108
       - 10.96.0.0/12
 
   apiServer:
