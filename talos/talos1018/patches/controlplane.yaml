@@ -1,5 +1,5 @@
 machine:
-  certSANs: &sans
+  certSANs:
     - ::1
     - fd00:1018:0:5:10:18:6:91
     - fd00:1018:0:5:10:18:6:92
@@ -9,66 +9,77 @@ machine:
     - 10.18.6.93
     - 127.0.0.1
 
-  install:
-    disk: /dev/nvme0n1
-    diskSelector:
-      size: ">=500GB"
-    wipe: true
-
-  # Stays in v1alpha1 until generate.sh moves to the v1.14 contract:
-  # KubeletConfig requires an explicit image, which would pin the Kubernetes
-  # version a second time next to generate.sh.
-  kubelet:
-    extraArgs:
-      rotate-server-certificates: "true"
-    # EPHEMERAL is a fixed 100 GiB holding little besides the image store.
-    # GC starts below kubelet's imagefs eviction threshold (15% free), which
-    # the default 85% would race.
-    extraConfig:
-      imageGCHighThresholdPercent: 75
-      imageGCLowThresholdPercent: 65
-      imageMaximumGCAge: 168h
-
-  # gen config emits the default label; KubeNodeConfig owns labels now
-  nodeLabels:
-    $patch: delete
-
   features:
     rbac: true
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
-    # gen config still emits these at the v1.13 contract; they now live in
-    # KubePrismConfig and ResolverConfig, and both sources together are rejected
-    kubePrism:
-      $patch: delete
-    hostDNS:
-      $patch: delete
 
 cluster:
-  # KubeNetworkConfig replaces this; with no KubeFlannelCNIConfig the CNI stays none
-  network:
-    $patch: delete
-
-  apiServer:
-    certSANs: *sans
-
-  # gen config emits a default kube-proxy image; KubeProxyConfig replaces it
-  proxy:
-    $patch: delete
-
   etcd:
     advertisedSubnets:
       - fd00:1018:0:5::/64
       - 10.18.6.0/24
     extraArgs:
       listen-metrics-urls: "http://[::]:2381"
-
-  controllerManager:
-    extraArgs:
-      bind-address: "::"
-  scheduler:
-    extraArgs:
-      bind-address: "::"
+---
+# gen config defaults to /dev/sda, which on these nodes is a Longhorn volume
+apiVersion: v1alpha1
+kind: UnattendedInstallConfig
+provisioning:
+  diskSelector:
+    match: disk.dev_path == "/dev/nvme0n1"
+  wipe: true
+---
+# Off until the sandboxd evaluation: with it on, kubelet can't reach the host
+# iscsid that Longhorn v1 uses
+apiVersion: v1alpha1
+kind: SecurityProfileConfig
+workloadIsolation: false
+---
+apiVersion: v1alpha1
+kind: KubeletConfig
+extraArgs:
+  rotate-server-certificates: "true"
+# EPHEMERAL is a fixed 100 GiB holding little besides the image store.
+# GC starts below kubelet's imagefs eviction threshold (15% free), which
+# the default 85% would race.
+config:
+  imageGCHighThresholdPercent: 75
+  imageGCLowThresholdPercent: 65
+  imageMaximumGCAge: 168h
+---
+apiVersion: v1alpha1
+kind: KubeAPIServerConfig
+certExtraSANs:
+  - ::1
+  - fd00:1018:0:5:10:18:6:91
+  - fd00:1018:0:5:10:18:6:92
+  - fd00:1018:0:5:10:18:6:93
+  - 10.18.6.91
+  - 10.18.6.92
+  - 10.18.6.93
+  - 127.0.0.1
+---
+apiVersion: v1alpha1
+kind: KubeControllerManagerConfig
+extraArgs:
+  bind-address: "::"
+---
+apiVersion: v1alpha1
+kind: KubeSchedulerConfig
+extraArgs:
+  bind-address: "::"
+---
+# Anonymous auth stays as before; narrowing it to the health endpoints is a
+# separate change
+apiVersion: v1alpha1
+kind: KubeAuthenticationConfig
+$patch: delete
+---
+# CNI is Cilium (deployed by Flux), not Flannel
+apiVersion: v1alpha1
+kind: KubeFlannelCNIConfig
+$patch: delete
 ---
 # Labels and taints are taken literally here, unlike v1alpha1 which added the
 # control-plane label itself. No NoSchedule taint: every node is a control plane.
@@ -82,6 +93,8 @@ labels:
   node-role.kubernetes.io/control-plane: ""
   node.kubernetes.io/exclude-from-external-load-balancers: ""
   node.longhorn.io/create-default-disk: "true"
+taints:
+  $patch: delete
 ---
 # The IPv6 service subnet was /96 until Oct 2026; KubeNetworkConfig rejects
 # anything wider than /108, so it was shrunk to the /108 holding ::1 and ::a

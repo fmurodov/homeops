@@ -12,9 +12,11 @@ talos1018/
 └── clusterconfig/             # generated, gitignored (contains secrets)
 ```
 
-Configs are generated with `--talos-version v1.13` although the nodes run 1.14: the patches still set v1alpha1
-fields that the 1.14 documents reject, and the 1.14 new-cluster defaults (`workloadIsolation`, secure EPHEMERAL
-mount) break Longhorn v1. Migrating to the 1.14 document kinds is tracked separately.
+Configs are generated at the `--talos-version v1.14` contract, so most settings are 1.14 documents rather than
+v1alpha1 fields. `patches/controlplane.yaml` overrides the new-cluster defaults that don't fit this cluster:
+workload isolation stays off (Longhorn v1 needs the host `iscsid`), control-plane nodes carry no `NoSchedule`
+taint (all nodes are control planes), anonymous API auth is left as before, there is no Flannel, and the installer
+targets `/dev/nvme0n1`.
 
 ## Prerequisites
 
