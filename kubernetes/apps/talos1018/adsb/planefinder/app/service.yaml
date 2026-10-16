@@ -5,10 +5,11 @@ kind: Service
 metadata:
   name: planefinder
 spec:
-  # pfclient binds IPv4-only (0.0.0.0); dual-stack so the Gateway can
-  # actually reach it, same as readsb.
-  ipFamilyPolicy: PreferDualStack
-  ipFamilies: [IPv6, IPv4]
+  # pfclient binds IPv4-only (0.0.0.0) and has no IPv6 support at all.
+  # IPv4-only rather than dual-stack: with both families the Gateway's Envoy
+  # balances onto the dead IPv6 pod address and ~half the requests 503.
+  ipFamilyPolicy: SingleStack
+  ipFamilies: [IPv4]
   selector:
     app.kubernetes.io/name: planefinder
   ports:
