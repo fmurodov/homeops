@@ -20,10 +20,9 @@ if [[ -z "${SECRETS:-}" ]]; then
     sops --decrypt secrets.sops.yaml > "$SECRETS"
 fi
 
-# v1.13 contract: the 1.14 one rejects the v1alpha1 fields these patches still use
 talosctl gen config talos1018 "https://[fd00:1018:0:5:10:18:6:90]:6443" \
     --with-secrets "$SECRETS" \
-    --talos-version v1.13 \
+    --talos-version v1.14 \
     --kubernetes-version "$KUBERNETES_VERSION" \
     --install-image "$INSTALL_IMAGE" \
     --config-patch-control-plane @patches/controlplane.yaml \
