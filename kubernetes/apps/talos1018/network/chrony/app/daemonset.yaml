@@ -19,14 +19,16 @@ spec:
     spec:
       containers:
         - name: chrony
-          image: dockurr/chrony:4.6.1
+          image: dockurr/chrony:4.9
           env:
             - name: TZ
               value: "Etc/UTC"
+            # NTS applies to every hostname source, so each one must support NTS-KE
+            - name: ENABLE_NTS
+              value: "true"
             - name: NTP_SERVERS
               value: >-
-                time1.google.com,time2.google.com,ntp1.time.nl,ntp2.time.nl,
-                ntp0.nl.uu.net,ntp1.nl.uu.net
+                time.cloudflare.com,nts.time.nl,nts.netnod.se,ptbtime1.ptb.de
           resources:
             limits:
               cpu: "0.2"
