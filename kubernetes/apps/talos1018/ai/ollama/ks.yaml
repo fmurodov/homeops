@@ -12,7 +12,9 @@ spec:
       namespace: flux-system
   interval: 1h
   retryInterval: 1m
-  timeout: 5m
+  # wait: true covers the Deployment: an image bump pulls ~5GB before the
+  # model loads (~7 min observed), well past the 5m default.
+  timeout: 15m
   sourceRef:
     kind: GitRepository
     name: flux-system
