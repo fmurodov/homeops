@@ -33,11 +33,13 @@ homeops/
 │   ├── infrastructure/talos1018/
 │   │   ├── core/              # Cilium, cert-manager
 │   │   └── storage/           # Longhorn
-│   ├── apps/talos1018/        # 20+ applications
+│   ├── apps/talos1018/        # Apps by category; each app is ks.yaml + app/
+│   │   └── network/gateway-api/   # Gateway API CRDs + main-gateway, internal-gateway
 │   └── components/common/     # Shared components (cluster-secrets)
 │
 ├── scripts/
 │   ├── validate.sh            # Master validation script
+│   ├── validate-flux.sh       # Kubernetes manifest validation (called by validate.sh)
 │   └── pre-commit             # Git pre-commit hook
 │
 └── .github/workflows/         # CI/CD validation
@@ -50,11 +52,17 @@ homeops/
 cluster-config (secrets/vars)
     ↓
 infra-core (Cilium with L2 + Gateway API, cert-manager)
-    ↓
-infra-storage (Longhorn)
-    ↓
-applications (20+ apps, deploy in parallel)
+    ↓                          ↓
+infra-storage (Longhorn)     apps (depends on cluster-config + infra-core only)
+    ↓                          ↓
+infra-longhorn-config  ←──  per-app Kustomizations with a Longhorn PVC
 ```
+
+The `apps` Kustomization does not wait for storage. Every app Kustomization
+that uses a Longhorn PVC (pvc.yaml or a chart volumeClaimTemplate) must list
+`infra-longhorn-config` in its own `dependsOn` (Longhorn installed, both
+StorageClasses and the backup recurring jobs in place). Other app ordering is
+also per-app `dependsOn`.
 
 **Component Structure** (infrastructure components):
 ```
@@ -70,7 +78,8 @@ All secrets use **SOPS + age** encryption.
 
 **Encryption rules** (`.sops.yaml`, `kubernetes/.sops.yaml`, `talos/talos1018/.sops.yaml`):
 - Files must end with `.sops.yaml`
-- Only `data` and `stringData` fields are encrypted
+- Under `kubernetes/`, only `data` and `stringData` are encrypted; write plain values in `stringData` (no base64)
+- Under `talos/`, the whole file is encrypted
 - Age public key is defined in `.sops.yaml` files (see those files for the key)
 - sops looks for `.sops.yaml` by walking up from your **current directory**, not from the file being encrypted; the root config makes the command work from anywhere in the repo
 
@@ -155,22 +164,26 @@ talosctl apply-config -n <node-ip> --file talos/talos1018/clusterconfig/<config>
 ```bash
 # 1. Create directory structure
 kubernetes/apps/talos1018/<category>/<app-name>/
-├── helmrelease.yaml (or custom manifests)
-├── httproute.yaml   # HTTPRoute to main-gateway (or use chart's native route: support)
-├── secret.sops.yaml (if needed)
-└── kustomization.yaml
+├── ks.yaml                      # Flux Kustomization (path: ./.../<app-name>/app)
+└── app/
+    ├── kustomization.yaml       # sets `namespace: <ns>`
+    ├── deployment.yaml, service.yaml (preferred) or helmrelease.yaml
+    ├── httproute.yaml           # or the chart's native route: support
+    ├── pvc.yaml                 # if needed; add infra-longhorn-config to ks.yaml dependsOn
+    └── <app>-secret.sops.yaml   # if needed; stringData only
 
 # 2. Encrypt secrets (rules and age key come from .sops.yaml)
-sops --encrypt --in-place kubernetes/apps/talos1018/<category>/<app>/app/secret.sops.yaml
+sops --encrypt --in-place kubernetes/apps/talos1018/<category>/<app-name>/app/<app>-secret.sops.yaml
 
-# 3. Add to kubernetes/apps/talos1018/kustomization.yaml
+# 3. Add ./<app-name>/ks.yaml to the category's kustomization.yaml
+#    (top-level apps go in kubernetes/apps/talos1018/kustomization.yaml)
 # 4. Validate before commit
 ./scripts/validate.sh flux
 ```
 
-**Routing**: All apps use Cilium Gateway API. Point HTTPRoutes at `main-gateway` in the `network` namespace.
-- Internal apps: hostname `<name>.${CLUSTER_DOMAIN}`, listener `https-internal`
-- External apps: hostname `<name>.${DOMAIN}`, listener `https-external`
+**Routing**: All apps use Cilium Gateway API. Gateways live in the `network` namespace.
+- New internal apps: `internal-gateway`, hostname `<name>.${CLUSTER_DOMAIN}`, listener `https-internal`. It has no wildcard DNS record, so each host needs an explicit DNS record (managed outside this repo). Older internal apps still use `main-gateway` `https-internal`.
+- External apps: `main-gateway`, hostname `<name>.${DOMAIN}`, listener `https-external`
 - Add `gethomepage.dev/*` annotations for Homepage discovery
 - If the Helm chart supports `route:` natively, use that instead of a standalone `httproute.yaml`
 

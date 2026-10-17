@@ -13,6 +13,8 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: infra-longhorn-config
+      namespace: flux-system
     - name: gitea
   decryption:
     provider: sops
