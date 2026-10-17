@@ -5,4 +5,6 @@ kind: Kustomization
 namespace: self-hosted
 resources:
   - ./pvc.yaml
-  - ./helmrelease.yaml
+  - ./deployment.yaml
+  - ./service.yaml
+  - ./httproute.yaml
