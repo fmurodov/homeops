@@ -8,6 +8,9 @@ metadata:
     app.kubernetes.io/name: redis
 spec:
   replicas: 1
+  # RWO volume: surge pod can't attach while the old pod holds it.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: redis

@@ -51,6 +51,8 @@ spec:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: DoNotSchedule
+          # count only this revision's pods, or a rollout spreads around leaving ones
+          matchLabelKeys: [pod-template-hash]
           labelSelector:
             matchLabels:
               app.kubernetes.io/instance: cert-manager
