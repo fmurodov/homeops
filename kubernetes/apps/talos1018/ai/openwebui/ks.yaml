@@ -18,7 +18,8 @@ spec:
       name: sops-age
   interval: 1h
   retryInterval: 1m
-  timeout: 5m
+  # wait: true now waits on the Deployment, whose startupProbe allows 20 min.
+  timeout: 20m
   sourceRef:
     kind: GitRepository
     name: flux-system

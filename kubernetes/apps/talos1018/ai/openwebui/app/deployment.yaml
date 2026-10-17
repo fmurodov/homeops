@@ -1,0 +1,123 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openwebui
+  labels:
+    app.kubernetes.io/name: openwebui
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  # RWO volume: a surge pod could never attach it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openwebui
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openwebui
+    spec:
+      automountServiceAccountToken: false
+      # Otherwise the "openwebui" Service injects OPENWEBUI_* variables.
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: openwebui
+          image: ghcr.io/open-webui/open-webui:v0.12.0
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: HOST
+              value: "::"
+            - name: PORT
+              value: "8080"
+            - name: OLLAMA_BASE_URL
+              value: http://ollama:11434
+            - name: WEBUI_URL
+              value: "https://openwebui.${CLUSTER_DOMAIN}"
+            # No local signups or login form: Pocket ID is the only way in.
+            - name: WEBUI_AUTH
+              value: "true"
+            - name: ENABLE_SIGNUP
+              value: "false"
+            - name: ENABLE_LOGIN_FORM
+              value: "false"
+            - name: ENABLE_OAUTH_SIGNUP
+              value: "true"
+            - name: OAUTH_MERGE_ACCOUNTS_BY_EMAIL
+              value: "true"
+            - name: OAUTH_PROVIDER_NAME
+              value: Pocket ID
+            - name: OAUTH_SCOPES
+              value: openid email profile
+            - name: OAUTH_USERNAME_CLAIM
+              value: preferred_username
+            - name: OAUTH_EMAIL_CLAIM
+              value: email
+            - name: OPENID_PROVIDER_URL
+              value: "https://pid.${DOMAIN}/.well-known/openid-configuration"
+            - name: OPENID_REDIRECT_URI
+              value: "https://openwebui.${CLUSTER_DOMAIN}/oauth/oidc/callback"
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: WEBUI_SECRET_KEY
+            - name: OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: OAUTH_CLIENT_ID
+            - name: OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: OAUTH_CLIENT_SECRET
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            # First run downloads ~1 GB of sentence-transformers weights into the
+            # PVC; restarts still need ~2 min to load embeddings. 20 min cap.
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 120
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 1200Mi
+            limits:
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /app/backend/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openwebui-data
