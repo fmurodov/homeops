@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: wishlist
+  labels:
+    app.kubernetes.io/name: wishlist
+spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: wishlist
+  ports:
+    - name: http
+      port: 3280
+      targetPort: http
+      protocol: TCP
