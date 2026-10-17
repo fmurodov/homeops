@@ -86,7 +86,7 @@ spec:
               memory: "2Gi"
             requests:
               cpu: "50m"
-              memory: "512Mi"
+              memory: "768Mi"
         # A plain sidecar, not an init container: bad credentials must degrade
         # to no geo data, never stop the outlet from consuming flows.
         - name: geoipupdate

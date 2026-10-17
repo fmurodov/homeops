@@ -43,7 +43,7 @@ spec:
               memory: "256Mi"
             requests:
               cpu: "0.01"
-              memory: "32Mi"
+              memory: "80Mi"
       volumes:
         - name: redis-data
           persistentVolumeClaim:

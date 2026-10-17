@@ -35,10 +35,10 @@ spec:
                   periodSeconds: 5
             resources:
               limits:
-                memory: 2Gi
+                memory: 3Gi
               requests:
-                cpu: 100m
-                memory: 512Mi
+                cpu: 200m
+                memory: 1536Mi
 
     defaultPodOptions:
       annotations:

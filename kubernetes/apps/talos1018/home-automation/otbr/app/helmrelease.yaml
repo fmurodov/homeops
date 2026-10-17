@@ -75,6 +75,16 @@ spec:
                   periodSeconds: 60
                   timeoutSeconds: 25
                   failureThreshold: 10
+              # REST only: the radio check above is too slow to run every 30s
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 8081
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
             resources:
               requests:
                 cpu: 10m

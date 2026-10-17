@@ -126,7 +126,7 @@ spec:
               memory: "420Mi"
             requests:
               cpu: "0.02"
-              memory: "100Mi"
+              memory: "192Mi"
       volumes:
         - name: globe-history
           persistentVolumeClaim:

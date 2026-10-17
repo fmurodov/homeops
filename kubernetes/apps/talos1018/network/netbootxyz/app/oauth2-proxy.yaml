@@ -67,6 +67,10 @@ spec:
             httpGet:
               path: /ready
               port: http
+          resources:
+            requests:
+              cpu: 5m
+              memory: 48Mi
 ---
 apiVersion: v1
 kind: Service
