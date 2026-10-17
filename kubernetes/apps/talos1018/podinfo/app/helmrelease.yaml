@@ -15,6 +15,15 @@ spec:
   interval: 1h0m0s
   values:
     replicaCount: 3
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: podinfo
+    podDisruptionBudget:
+      maxUnavailable: 1
 
     service:
       ipFamilyPolicy: PreferDualStack

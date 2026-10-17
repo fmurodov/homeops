@@ -145,6 +145,16 @@ spec:
                 memory: 128Mi
 
       gotenberg:
+        replicas: 2
+        pod:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: paperless
+                  app.kubernetes.io/controller: gotenberg
         containers:
           redis:
             image:
@@ -163,6 +173,16 @@ spec:
                 memory: 1Gi
 
       tika:
+        replicas: 2
+        pod:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: paperless
+                  app.kubernetes.io/controller: tika
         containers:
           redis:
             image:

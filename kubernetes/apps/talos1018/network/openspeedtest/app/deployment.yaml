@@ -16,6 +16,13 @@ spec:
       labels:
         app.kubernetes.io/name: openspeedtest
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: openspeedtest
       containers:
         - name: openspeedtest
           image: "openspeedtest/latest:v2.0.6"
@@ -39,3 +46,13 @@ spec:
             requests:
               cpu: "0.001"
               memory: "20Mi"
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: openspeedtest
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openspeedtest

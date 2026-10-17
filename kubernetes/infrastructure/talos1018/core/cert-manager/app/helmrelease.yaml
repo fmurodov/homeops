@@ -27,3 +27,31 @@ spec:
     config:
       gatewayAPI:
         enabled: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 112Mi
+    cainjector:
+      resources:
+        requests:
+          cpu: 15m
+          memory: 80Mi
+    # failurePolicy is Fail: with the webhook down, every Certificate/Issuer
+    # write in the cluster is rejected.
+    webhook:
+      replicaCount: 2
+      resources:
+        requests:
+          cpu: 5m
+          memory: 80Mi
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: 1
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: cert-manager
+              app.kubernetes.io/component: webhook
