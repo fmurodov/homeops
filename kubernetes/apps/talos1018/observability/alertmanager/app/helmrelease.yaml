@@ -13,6 +13,12 @@ spec:
         name: prometheus
   interval: 1h0m0s
   values:
+    # Two peers gossip notification state, so either one can send without
+    # duplicates; the chart wires the peers once replicaCount > 1.
+    replicaCount: 2
+    podAntiAffinity: hard
+    podDisruptionBudget:
+      maxUnavailable: 1
     podAnnotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "9093"
