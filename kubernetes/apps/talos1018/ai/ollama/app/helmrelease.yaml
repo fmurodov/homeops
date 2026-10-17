@@ -67,6 +67,10 @@ spec:
                   initialDelaySeconds: 5
                   periodSeconds: 5
                   failureThreshold: 60
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: [ALL]
             resources:
               # llama3.1:8b is ~8.7Gi resident at 4096 context on CPU.
               requests:
@@ -81,6 +85,9 @@ spec:
             runAsGroup: 1000
             fsGroup: 1000
             fsGroupChangePolicy: OnRootMismatch
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
           # Pin to nodes with more CPU headroom; talos-1018-1 is excluded.
           affinity:
             nodeAffinity:
