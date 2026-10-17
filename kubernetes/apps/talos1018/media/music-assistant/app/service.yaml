@@ -1,0 +1,43 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: music-assistant-app
+  labels:
+    app.kubernetes.io/name: music-assistant
+spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: music-assistant
+  ports:
+    - name: http
+      port: 8095
+      targetPort: http
+      protocol: TCP
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: music-assistant-streamserver
+  labels:
+    app.kubernetes.io/name: music-assistant
+    # Selects internal-pool; changing it moves the LB IP to another pool.
+    service.kubernetes.io/topology: internal
+  annotations:
+    io.cilium/lb-ipam-ips: "fd00:1018:0:5:3000::44"
+spec:
+  type: LoadBalancer
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: music-assistant
+  ports:
+    - name: streamserver
+      port: 8097
+      targetPort: streamserver
+      protocol: TCP

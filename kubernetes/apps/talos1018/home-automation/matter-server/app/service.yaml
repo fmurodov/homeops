@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: matter-server
+  labels:
+    app.kubernetes.io/name: matter-server
+spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: matter-server
+  ports:
+    - name: websocket
+      port: 5580
+      targetPort: websocket
+      protocol: TCP
