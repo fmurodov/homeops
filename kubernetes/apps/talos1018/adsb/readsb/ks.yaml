@@ -8,6 +8,9 @@ metadata:
   name: readsb-app
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infra-longhorn-config
+      namespace: flux-system
   interval: 1h
   retryInterval: 1m
   timeout: 5m

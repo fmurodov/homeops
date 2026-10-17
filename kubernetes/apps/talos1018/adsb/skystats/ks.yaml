@@ -12,6 +12,8 @@ spec:
     secretRef:
       name: sops-age
   dependsOn:
+    - name: infra-longhorn-config
+      namespace: flux-system
     - name: readsb-app
   interval: 1h
   retryInterval: 1m

@@ -17,6 +17,8 @@ spec:
     secretRef:
       name: sops-age
   dependsOn:
+    - name: infra-longhorn-config
+      namespace: flux-system
     - name: victoria-metrics
     - name: victoria-logs
   interval: 1h

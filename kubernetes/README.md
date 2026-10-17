@@ -61,30 +61,23 @@ This directory uses Mozilla SOPS with age encryption for managing secrets.
 3. All encrypted files should have a `.sops.yaml` extension and be encrypted using the age key
 
 ### Working with Secrets:
-1. Encode your secret data in base64:
+1. Create the Secret as `app/<app>-secret.sops.yaml` with plain values under
+   `stringData:` (no base64 needed), and list it in `app/kustomization.yaml`.
+   The app's `ks.yaml` needs `decryption.secretRef.name: sops-age`.
+
+2. Encrypt it in place. The age key and the rule to encrypt only
+   `data`/`stringData` come from the `.sops.yaml` creation rules, so no flags
+   are needed (works from anywhere in the repo):
    ```bash
-   echo -n "your-secret-data" | base64 | pbcopy
-   ```
-   or
-   ```bash
-   pbpaste | base64 | pbcopy
+   sops --encrypt --in-place path/to/your/<app>-secret.sops.yaml
    ```
 
-2. Create your secret file with the encoded data
-3. Encrypt the secret file:
-   ```bash
-   sops --age=age1kesma5f5dadlzdl5lzgrtxl6e8z8frf7njsfnlnprzan0lmzgdmstnd39u \
-        --encrypt \
-        --encrypted-regex '^(data|stringData)$' \
-        --in-place path/to/your/secret.sops.yaml
-   ```
-
-4. Verify the encryption:
+3. Verify the encryption:
    ```bash
    sops -d path/to/your/secret.sops.yaml
    ```
 
-5. Edit encrypted file:
+4. Edit encrypted file:
    ```bash
    export SOPS_AGE_KEY=AGE-SECRET-KEY-xxxxxx
    sops path/to/your/secret.sops.yaml
