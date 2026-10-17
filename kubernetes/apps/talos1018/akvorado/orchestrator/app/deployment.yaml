@@ -39,6 +39,8 @@ spec:
           env:
             - name: PYTHONDONTWRITEBYTECODE
               value: "1"
+            - name: UNIFI_URL
+              value: "https://[${GATEWAY_IPV6}]"
           envFrom:
             - secretRef:
                 name: akvorado-unifi-secret
@@ -67,6 +69,8 @@ spec:
           env:
             - name: PYTHONDONTWRITEBYTECODE
               value: "1"
+            - name: UNIFI_URL
+              value: "https://[${GATEWAY_IPV6}]"
           envFrom:
             - secretRef:
                 name: akvorado-unifi-secret
