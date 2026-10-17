@@ -38,9 +38,11 @@ securityContext:
       - SYS_ADMIN
       - SYS_RESOURCE
 
+# Talos already mounts cgroup2 at /sys/fs/cgroup; the auto-mount init
+# container would nsenter PID 1's namespaces to do it again
 cgroup:
   autoMount:
-    enabled: true
+    enabled: false
   hostRoot: /sys/fs/cgroup
 
 cni:
