@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+# Shared by the migrate, netbox and worker containers. Credentials stay in netbox-secret.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netbox-env
+  labels:
+    app.kubernetes.io/name: netbox
+data:
+  # Service name for in-cluster API clients such as netbox-mcp.
+  ALLOWED_HOSTS: "netbox.${CLUSTER_DOMAIN} netbox.self-hosted.svc.cluster.local"
+  CSRF_TRUSTED_ORIGINS: "https://netbox.${CLUSTER_DOMAIN}"
+  TIME_ZONE: "${TIMEZONE}"
+  DB_HOST: netbox-postgres
+  DB_NAME: netbox
+  DB_USER: netbox
+  MAX_DB_WAIT_TIME: "120"
+  REDIS_HOST: netbox-redis
+  SKIP_SUPERUSER: "true"
+  GRANIAN_WORKERS: "2"
+  REMOTE_AUTH_BACKEND: social_core.backends.open_id_connect.OpenIdConnectAuth
+  SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: "https://pid.${DOMAIN}"
