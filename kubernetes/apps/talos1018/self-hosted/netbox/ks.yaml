@@ -16,7 +16,9 @@ spec:
       name: sops-age
   interval: 1h
   retryInterval: 1m
-  timeout: 5m
+  # wait: true covers the Deployment, and a first start (or a NetBox upgrade)
+  # runs every migration in the init container, well past 5m.
+  timeout: 15m
   sourceRef:
     kind: GitRepository
     name: flux-system

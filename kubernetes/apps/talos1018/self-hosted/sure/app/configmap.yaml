@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+# Shared by the sure and worker containers. Credentials stay in sure-secret.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sure-env
+  labels:
+    app.kubernetes.io/name: sure
+data:
+  SELF_HOSTED: "true"
+  ONBOARDING_STATE: "closed"
+  RAILS_FORCE_SSL: "false"
+  RAILS_ASSUME_SSL: "true"
+  PORT: "3000"
+  BINDING: "::"
+  APP_DOMAIN: "sure.${CLUSTER_DOMAIN}"
+  DB_HOST: sure-postgres
+  DB_PORT: "5432"
+  POSTGRES_USER: sure
+  POSTGRES_DB: sure_production
+  REDIS_URL: redis://sure-redis:6379/1
+  EXCHANGE_RATE_PROVIDER: yahoo_finance
+  SECURITIES_PROVIDER: yahoo_finance
+  WEBAUTHN_RP_ID: "sure.${CLUSTER_DOMAIN}"
+  WEBAUTHN_ALLOWED_ORIGINS: "https://sure.${CLUSTER_DOMAIN}"
+  AUTH_LOCAL_LOGIN_ENABLED: "false"
+  AUTH_LOCAL_ADMIN_OVERRIDE_ENABLED: "true"
+  OIDC_ISSUER: "https://pid.${DOMAIN}"
+  OIDC_REDIRECT_URI: "https://sure.${CLUSTER_DOMAIN}/auth/openid_connect/callback"
+  OPENAI_URI_BASE: http://ollama.ai.svc.cluster.local:11434/v1
+  OPENAI_MODEL: "llama3.1:8b"
+  AI_DEBUG_MODE: "true"

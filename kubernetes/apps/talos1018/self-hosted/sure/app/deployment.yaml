@@ -1,0 +1,118 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sure
+  labels:
+    app.kubernetes.io/name: sure
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  # RWO volume: a surge pod could never attach it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sure
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sure
+    spec:
+      automountServiceAccountToken: false
+      # Otherwise the "sure" Service injects SURE_* variables.
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: sure
+          # renovate: datasource=docker depName=ghcr.io/we-promise/sure
+          image: ghcr.io/we-promise/sure:0.7.1
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          envFrom: &envFrom
+            - configMapRef:
+                name: sure-env
+          env: &env
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: sure-secret
+                  key: SECRET_KEY_BASE
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sure-secret
+                  key: POSTGRES_PASSWORD
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sure-secret
+                  key: OIDC_CLIENT_ID
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sure-secret
+                  key: OIDC_CLIENT_SECRET
+            - name: BRAND_FETCH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sure-secret
+                  key: BRAND_FETCH_CLIENT_ID
+            - name: OPENAI_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sure-secret
+                  key: OPENAI_ACCESS_TOKEN
+          startupProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+          volumeMounts: &volumeMounts
+            - name: data
+              mountPath: /rails/storage
+        - name: worker
+          # renovate: datasource=docker depName=ghcr.io/we-promise/sure
+          image: ghcr.io/we-promise/sure:0.7.1
+          command:
+            - bundle
+            - exec
+            - sidekiq
+          envFrom: *envFrom
+          env: *env
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          volumeMounts: *volumeMounts
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: sure-app-data

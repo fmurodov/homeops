@@ -6,4 +6,9 @@ namespace: self-hosted
 resources:
   - ./pvcs.yaml
   - ./sure-secret.sops.yaml
-  - ./helmrelease.yaml
+  - ./configmap.yaml
+  - ./postgres.yaml
+  - ./redis.yaml
+  - ./deployment.yaml
+  - ./service.yaml
+  - ./httproute.yaml

@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: sure
+  labels:
+    app.kubernetes.io/name: sure
+spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: sure
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP
