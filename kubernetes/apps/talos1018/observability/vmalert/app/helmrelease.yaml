@@ -14,6 +14,21 @@ spec:
   interval: 1h0m0s
   values:
     server:
+      # Both replicas evaluate every rule; Alertmanager dedupes what they send.
+      replicaCount: 2
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          # count only this revision's pods, or a rollout spreads around leaving ones
+          matchLabelKeys: [pod-template-hash]
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: vmalert
+              app.kubernetes.io/name: victoria-metrics-alert
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: 1
       podAnnotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8880"
@@ -27,9 +42,13 @@ spec:
       remote:
         write:
           url: http://victoria-metrics-victoria-metrics-single-server:8428
-      notifier:
-        alertmanager:
-          url: http://alertmanager:9093
+      # Every Alertmanager peer, not the Service: an alert must reach both
+      # for either to send it if the other is down.
+      notifiers:
+        - alertmanager:
+            url: http://alertmanager-0.alertmanager-headless:9093
+        - alertmanager:
+            url: http://alertmanager-1.alertmanager-headless:9093
       resources:
         requests:
           cpu: 50m
