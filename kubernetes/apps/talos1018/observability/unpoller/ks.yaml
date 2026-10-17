@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# unpoller - UniFi Network metrics exporter, scraped by victoria-metrics (job "unpoller")
+# PREREQUISITE: create a UniFi API key (Settings → Control Plane → Integrations),
+#   fill it and the console URL into unpoller-secret.sops.yaml, then encrypt with:
+#   sops --encrypt --in-place kubernetes/apps/talos1018/observability/unpoller/app/unpoller-secret.sops.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: unpoller
+  namespace: flux-system
+spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/talos1018/observability/unpoller/app
+  prune: true
+  wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets

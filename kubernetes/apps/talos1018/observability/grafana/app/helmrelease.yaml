@@ -217,6 +217,36 @@ spec:
           datasource:
             - name: DS_PROMETHEUS
               value: VictoriaMetrics
+        unpoller-network-sites:
+          gnetId: 11311
+          revision: 5
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
+        unpoller-usw-insights:
+          gnetId: 11312
+          revision: 9
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
+        unpoller-usg-insights:
+          gnetId: 11313
+          revision: 9
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
+        unpoller-uap-insights:
+          gnetId: 11314
+          revision: 10
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
+        unpoller-client-insights:
+          gnetId: 11315
+          revision: 9
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
         # Pulled from upstream rather than grafana.com: the only Flux2 entry
         # there (16714) is still at revision 1 and predates gotk_resource_info.
         # Pinned to a commit so a pod restart cannot change the dashboard.

@@ -251,6 +251,23 @@ spec:
                   action: keep
                   regex: readsb;http
 
+            # UniFi via unpoller - job name must be "unpoller" because the
+            # USG Insights dashboard (11313) hardcodes it. unpoller serves a
+            # snapshot refreshed every 60s, so scraping faster gains nothing.
+            - job_name: unpoller
+              scrape_interval: 60s
+              kubernetes_sd_configs:
+                - role: endpoints
+                  namespaces:
+                    names:
+                      - observability
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_name
+                    - __meta_kubernetes_endpoint_port_name
+                  action: keep
+                  regex: unpoller;metrics
+
             # Home Assistant prometheus integration — needs a long-lived
             # access token (ha-token-secret). The response is ~1MB, so scrape
             # at half the global rate.

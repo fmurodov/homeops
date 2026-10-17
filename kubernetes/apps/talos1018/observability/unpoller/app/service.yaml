@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: unpoller
+  labels:
+    app.kubernetes.io/name: unpoller
+spec:
+  ipFamilyPolicy: PreferDualStack
+  ports:
+    - port: 9130
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    app.kubernetes.io/name: unpoller
