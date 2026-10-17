@@ -12,7 +12,7 @@ import sys
 import time
 import urllib.request
 
-BASE = os.environ.get("UNIFI_URL", "https://10.18.6.1")
+BASE = os.environ["UNIFI_URL"]
 OUT = os.environ.get("OUTPUT", "/run/akvorado-dict/devices.csv")
 INTERVAL = int(os.environ.get("INTERVAL", "900"))
 PAGE = 200
