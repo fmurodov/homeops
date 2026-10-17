@@ -70,11 +70,21 @@ kind: KubeSchedulerConfig
 extraArgs:
   bind-address: "::"
 ---
-# Anonymous auth stays as before; narrowing it to the health endpoints is a
-# separate change
+# Talos' default. Anonymous access is limited to the health endpoints, which
+# the kube-apiserver probes added at this contract hit unauthenticated. The
+# document can't be dropped (the API server gets an empty
+# --authentication-config file and refuses to start), and turning anonymous
+# off entirely fails the startup probe.
 apiVersion: v1alpha1
 kind: KubeAuthenticationConfig
-$patch: delete
+configuration:
+  anonymous:
+    enabled: true
+    conditions:
+      - path: /livez
+      - path: /readyz
+      - path: /healthz
+  jwt: []
 ---
 # CNI is Cilium (deployed by Flux), not Flannel
 apiVersion: v1alpha1

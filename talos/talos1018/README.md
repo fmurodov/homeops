@@ -15,7 +15,7 @@ talos1018/
 Configs are generated at the `--talos-version v1.14` contract, so most settings are 1.14 documents rather than
 v1alpha1 fields. `patches/controlplane.yaml` overrides the new-cluster defaults that don't fit this cluster:
 workload isolation stays off (Longhorn v1 needs the host `iscsid`), control-plane nodes carry no `NoSchedule`
-taint (all nodes are control planes), anonymous API auth is left as before, there is no Flannel, and the installer
+taint (all nodes are control planes), anonymous API auth is limited to the health endpoints, there is no Flannel, and the installer
 targets `/dev/nvme0n1`.
 
 ## Prerequisites
