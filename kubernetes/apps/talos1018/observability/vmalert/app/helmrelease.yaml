@@ -375,6 +375,24 @@ spec:
                   annotations:
                     summary: "Longhorn daily backup heartbeat is missing (CronJob or kube-state-metrics gone)"
 
+                # talos-backup exits non-zero unless the encrypted snapshot
+                # reached B2, so last-success time is the etcd backup heartbeat.
+                - alert: EtcdBackupStale
+                  expr: 'time() - max(kube_cronjob_status_last_successful_time{namespace="system-upgrade", cronjob="talos-backup"}) > 26 * 3600'
+                  for: 30m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "etcd snapshot has not reached B2 in over 26h"
+
+                - alert: EtcdBackupAbsent
+                  expr: 'absent(kube_cronjob_status_last_successful_time{namespace="system-upgrade", cronjob="talos-backup"})'
+                  for: 1h
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "etcd backup heartbeat is missing (CronJob or kube-state-metrics gone)"
+
                 # State 4 = Error in Longhorn's backup exporter.
                 - alert: LonghornBackupFailed
                   expr: 'longhorn_backup_state == 4'
