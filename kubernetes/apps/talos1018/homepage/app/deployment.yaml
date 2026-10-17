@@ -10,7 +10,7 @@ metadata:
     reloader.stakater.com/auto: "true"
 spec:
   revisionHistoryLimit: 3
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
   selector:
@@ -21,6 +21,13 @@ spec:
       labels:
         app.kubernetes.io/name: homepage
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: homepage
       serviceAccountName: homepage
       automountServiceAccountToken: true
       dnsPolicy: ClusterFirst
@@ -119,3 +126,13 @@ spec:
             name: homepage
         - name: logs
           emptyDir: {}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: homepage
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homepage

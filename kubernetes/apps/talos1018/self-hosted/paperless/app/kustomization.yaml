@@ -7,4 +7,5 @@ resources:
   - ./pvc.yaml
   - ./paperless-secret.sops.yaml
   - ./helmrelease.yaml
+  - ./pdb.yaml
   - ./backup-cronjob.yaml

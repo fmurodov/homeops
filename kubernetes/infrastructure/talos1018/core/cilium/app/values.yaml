@@ -80,6 +80,12 @@ prometheus:
 operator:
   prometheus:
     enabled: true
+  podDisruptionBudget:
+    enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 160Mi
 
 # Hubble observability
 hubble:

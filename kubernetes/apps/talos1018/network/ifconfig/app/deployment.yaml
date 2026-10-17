@@ -25,7 +25,7 @@ spec:
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
+          whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: ifconfig
@@ -72,3 +72,13 @@ spec:
             requests:
               cpu: "0.005"
               memory: "16Mi"
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ifconfig
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ifconfig

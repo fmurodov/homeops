@@ -113,3 +113,13 @@ spec:
             items:
               - key: Corefile
                 path: Corefile
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: coredns
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      k8s-app: kube-dns
