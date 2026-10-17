@@ -1,0 +1,64 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assistant
+  labels:
+    app.kubernetes.io/name: home-assistant
+spec:
+  replicas: 1
+  # RWO volume: a surge pod could never attach it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: home-assistant
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: home-assistant
+      annotations:
+        k8s.v1.cni.cncf.io/networks: network/multus-macvlan2, network/multus-macvlan3
+    spec:
+      automountServiceAccountToken: false
+      # Otherwise the "home-assistant" Service injects HOME_ASSISTANT_* variables.
+      enableServiceLinks: false
+      containers:
+        - name: home-assistant
+          image: ghcr.io/home-assistant/home-assistant:2026.10.1
+          ports:
+            - name: http
+              containerPort: 8123
+              protocol: TCP
+          env:
+            - name: TZ
+              value: "${TIMEZONE}"
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1536Mi
+            limits:
+              memory: 3Gi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: home-assistant-config
