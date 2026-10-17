@@ -1,0 +1,81 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unpoller
+  labels:
+    app.kubernetes.io/name: unpoller
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: unpoller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: unpoller
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      # distroless image has no USER, so it would otherwise run as root
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: unpoller
+          image: ghcr.io/unpoller/unpoller:v5.5.1
+          ports:
+            - name: metrics
+              containerPort: 9130
+              protocol: TCP
+          env:
+            - name: UP_UNIFI_DEFAULT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: unpoller-secret
+                  key: UP_UNIFI_DEFAULT_URL
+            - name: UP_UNIFI_DEFAULT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: unpoller-secret
+                  key: UP_UNIFI_DEFAULT_API_KEY
+            # The console serves a self-signed certificate.
+            - name: UP_UNIFI_DEFAULT_VERIFY_SSL
+              value: "false"
+            # The baked-in config enables InfluxDB output.
+            - name: UP_INFLUXDB_DISABLE
+              value: "true"
+            - name: UP_PROMETHEUS_HTTP_LISTEN
+              value: "[::]:9130"
+            # Keep series for down/disabled ports so port-down can be alerted on.
+            - name: UP_PROMETHEUS_DEAD_PORTS
+              value: "true"
+            - name: UP_POLLER_QUIET
+              value: "true"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          # No /health endpoint: any unknown path hits a catch-all handler.
+          livenessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 48Mi
+            limits:
+              memory: 128Mi
