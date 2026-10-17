@@ -23,7 +23,6 @@ resources:
   - ./fluent-bit/ks.yaml
 
   # External probes
-  - ./nrtm-check/ks.yaml
 
   # Visualization
   - ./grafana/ks.yaml
