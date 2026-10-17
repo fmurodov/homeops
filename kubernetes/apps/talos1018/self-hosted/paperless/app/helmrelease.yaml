@@ -146,6 +146,8 @@ spec:
 
       gotenberg:
         replicas: 2
+        # app-template defaults to Recreate, which stops both replicas at once
+        strategy: RollingUpdate
         pod:
           topologySpreadConstraints:
             - maxSkew: 1
@@ -176,6 +178,7 @@ spec:
 
       tika:
         replicas: 2
+        strategy: RollingUpdate
         pod:
           topologySpreadConstraints:
             - maxSkew: 1
