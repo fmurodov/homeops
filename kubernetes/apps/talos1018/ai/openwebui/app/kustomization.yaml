@@ -6,4 +6,6 @@ namespace: ai
 resources:
   - ./pvc.yaml
   - ./openwebui-secret.sops.yaml
-  - ./helmrelease.yaml
+  - ./deployment.yaml
+  - ./service.yaml
+  - ./httproute.yaml

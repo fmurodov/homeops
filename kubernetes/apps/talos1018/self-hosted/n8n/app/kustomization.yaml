@@ -6,4 +6,6 @@ namespace: self-hosted
 resources:
   - ./pvc.yaml
   - ./n8n-secret.sops.yaml
-  - ./helmrelease.yaml
+  - ./deployment.yaml
+  - ./service.yaml
+  - ./httproute.yaml

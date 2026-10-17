@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: openwebui
+  labels:
+    app.kubernetes.io/name: openwebui
+spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: openwebui
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
