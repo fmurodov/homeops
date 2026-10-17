@@ -45,9 +45,12 @@ spec:
   hostnames:
     - "n8n-webhook.${DOMAIN}"
   rules:
-    # Only n8n's public trigger endpoints; the editor, login and REST API
-    # stay on the internal route.
+    # Only n8n's public trigger endpoints, plus /healthz for the external
+    # uptime monitor; the editor, login and REST API stay on the internal route.
     - matches:
+        - path:
+            type: Exact
+            value: /healthz
         - path:
             type: PathPrefix
             value: /webhook/
