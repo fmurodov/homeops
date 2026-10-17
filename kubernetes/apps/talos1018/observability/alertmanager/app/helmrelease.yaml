@@ -25,6 +25,11 @@ spec:
         memory: 64Mi
       limits:
         memory: 128Mi
+    configmapReload:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 24Mi
     persistence:
       enabled: true
       storageClass: longhorn

@@ -45,6 +45,18 @@ cgroup:
     enabled: false
   hostRoot: /sys/fs/cgroup
 
+# cilium-agent
+resources:
+  requests:
+    cpu: 100m
+    memory: 768Mi
+
+envoy:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 96Mi
+
 cni:
   exclusive: false
 
@@ -93,9 +105,23 @@ hubble:
 
   relay:
     enabled: true
+    resources:
+      requests:
+        cpu: 5m
+        memory: 48Mi
 
   ui:
     enabled: true
+    backend:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 48Mi
+    frontend:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 16Mi
 
   metrics:
     enabled:

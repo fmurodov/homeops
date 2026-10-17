@@ -52,8 +52,8 @@ spec:
                 type: RuntimeDefault
             resources:
               requests:
-                cpu: 5m
-                memory: 128Mi
+                cpu: 50m
+                memory: 576Mi
               limits:
                 memory: 2Gi
         pod:

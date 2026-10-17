@@ -52,3 +52,12 @@ spec:
     longhornManager:
       nodeSelector:
         node.longhorn.io/create-default-disk: "true"
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+    longhornGlobalManager:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi

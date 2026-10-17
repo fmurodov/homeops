@@ -21,12 +21,13 @@ spec:
       vulnerabilityScannerScanOnlyCurrentRevisions: true
       configAuditScannerScanOnlyCurrentRevisions: true
       infraAssessmentScannerEnabled: false
-      resources:
-        requests:
-          cpu: 10m
-          memory: 128Mi
-        limits:
-          memory: 512Mi
+    # Top level, not under operator: the chart never reads operator.resources.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 576Mi
+      limits:
+        memory: 1Gi
     nodeCollector:
       excludeNodes: "*"
     serviceMonitor:

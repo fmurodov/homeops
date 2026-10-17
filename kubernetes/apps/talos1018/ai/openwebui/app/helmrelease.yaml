@@ -94,7 +94,7 @@ spec:
             resources:
               requests:
                 cpu: 50m
-                memory: 512Mi
+                memory: 1200Mi
               limits:
                 memory: 2Gi
         pod:
