@@ -162,6 +162,24 @@ tuppr drives upgrades from `kubernetes/apps/talos1018/system-upgrade/tuppr/confi
 `TALOS_VERSION`/`KUBERNETES_VERSION` in `generate.sh` in the same PR, so regenerated configs carry the new
 installer image.
 
+**Merging a Talos PR is not a config-only change:** the `TalosUpgrade` is live, so the merge starts a rolling
+drain and reboot of every node. Renovate holds Talos minor/major releases for 14 days and patches for 3. During
+the run tuppr holds an Alertmanager silence for the alerts a reboot is expected to trip (`spec.silences`).
+
+Before merging:
+
+1. Read the release notes at the tag (`gh release view <version> --repo siderolabs/talos`), not the PR body:
+   it can carry pre-release notes.
+2. Check the cluster is healthy: all nodes `Ready`, every Longhorn volume `healthy` (or `unknown` when
+   detached), Flux has nothing failing, and no other `TalosUpgrade`/`KubernetesUpgrade` is in progress.
+3. Take an etcd snapshot (any control-plane node):
+
+   ```bash
+   talosctl -n fd00:1018:0:5:10:18:6:92 etcd snapshot ~/talos-etcd-snapshots/etcd-before-$(date +%Y%m%d%H%M).db
+   ```
+
+For a Kubernetes minor bump, check the Cilium version supports it first.
+
 Manual upgrade:
 
 ```bash

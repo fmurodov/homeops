@@ -23,6 +23,11 @@ spec:
       prometheus.io/port: "8081"
     controller:
       logLevel: info
+    # Lets TalosUpgrade hold Alertmanager silences for the length of a run
+    silences:
+      enabled: true
+      alertmanager:
+        address: http://alertmanager.observability.svc.cluster.local:9093
     resources:
       requests:
         cpu: 10m
