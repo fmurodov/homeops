@@ -22,6 +22,9 @@ spec:
       extraArgs:
         httpListenAddr: "[::]:8428"
         enableTCP6: "true"
+        # The scrape config is read once at startup otherwise, so new jobs
+        # sit inert until the pod happens to restart.
+        promscrape.configCheckInterval: 1m
       retentionPeriod: "30d"
       persistentVolume:
         enabled: true
