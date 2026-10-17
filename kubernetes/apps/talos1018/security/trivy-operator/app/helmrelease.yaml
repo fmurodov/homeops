@@ -21,6 +21,10 @@ spec:
       vulnerabilityScannerScanOnlyCurrentRevisions: true
       configAuditScannerScanOnlyCurrentRevisions: true
       infraAssessmentScannerEnabled: false
+      # SBOM reports are ~100 MB in etcd and rewritten on every rescan, which
+      # bloats etcd and the apiserver's watch cache. Vulnerability reports don't
+      # need them; only ClusterVulnerabilityReports would.
+      sbomGenerationEnabled: false
     # Top level, not under operator: the chart never reads operator.resources.
     resources:
       requests:
