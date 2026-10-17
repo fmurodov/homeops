@@ -194,6 +194,24 @@ talosctl upgrade -n fd00:1018:0:5:10:18:6:92 --image "$TALOS_IMAGE" --wait
 talosctl upgrade -n fd00:1018:0:5:10:18:6:93 --image "$TALOS_IMAGE" --wait
 ```
 
+## etcd backups
+
+`kubernetes/apps/talos1018/system-upgrade/talos-backup/` snapshots etcd daily at 02:30 and uploads it to its
+own B2 bucket (`talos1018-etcd`, key restricted to that bucket), encrypted to the SOPS age key.
+`EtcdBackupStale` fires when no upload has succeeded in 26h. Retention is a B2 lifecycle rule on the bucket,
+not anything in this repo: every snapshot has a unique name, so it needs "days from uploading to hiding" set —
+"keep prior versions" alone never expires anything.
+
+To restore after losing etcd quorum (see Talos' disaster recovery guide first):
+
+```bash
+age -d -i <age-key-file> -o db.snapshot talos1018-<timestamp>.snap.age
+```
+
+```bash
+talosctl -n fd00:1018:0:5:10:18:6:91 bootstrap --recover-from=./db.snapshot
+```
+
 ## System extensions
 
 The installer image in `generate.sh` is an Image Factory schematic with intel-ucode, iscsi-tools and
