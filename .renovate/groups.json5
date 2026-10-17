@@ -32,6 +32,15 @@
       minimumGroupSize: 2,
     },
     {
+      description: "Hold Talos minor/major releases for two weeks",
+      // merging a Talos bump starts a rolling upgrade of every node via tuppr;
+      // .0 releases have needed pre-GA fixes before
+      matchDatasources: ["docker", "github-releases"],
+      matchPackageNames: ["/installer/", "siderolabs/talos"],
+      matchUpdateTypes: ["minor", "major"],
+      minimumReleaseAge: "14 days",
+    },
+    {
       description: "Flux Group",
       groupName: "flux",
       matchDatasources: ["docker", "github-releases"],

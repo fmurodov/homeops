@@ -44,14 +44,18 @@
       minimumReleaseAge: "1 day",
     },
     {
-      description: "Automerge Minecraft Bedrock updates without waiting",
+      description: "Automerge listed apps",
+      // To automerge another app, add its package name here. Renovate merges
+      // only after every check on the PR passes: the branch ruleset requires
+      // none, so GitHub auto-merge (platformAutomerge) would merge at once.
       matchPackageNames: [
         "LomotHo/minecraft-bedrock",
         "itzg/minecraft-bedrock-server",
       ],
-      automerge: false,
+      automerge: true,
       automergeType: "pr",
-      platformAutomerge: true,
+      automergeStrategy: "squash",
+      platformAutomerge: false,
       minimumReleaseAge: null,
     },
   ],

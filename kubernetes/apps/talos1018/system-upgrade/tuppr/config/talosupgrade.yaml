@@ -12,6 +12,14 @@ spec:
     # No waitForVolumeDetach/nodrain: either makes tuppr own the drain, and its
     # single unordered pass livelocks on Longhorn's instance-manager PDB. Talos
     # ignores the 429 and leaves that pod up until reboot.
+  # Alerts every node reboot trips. Held as a lease while the run is active;
+  # faulted volumes, etcd quorum loss, crash loops and OOMs stay live.
+  silences:
+    - matchers:
+        - name: alertname
+          matchType: "=~"
+          value: ^(NodeDown|LonghornNodeDown|LonghornVolumeStatusWarning|KubePodNotReady|KubeContainerWaiting|KubeDeploymentDown|KubeDeploymentReplicasMismatch|KubeStatefulSetDown|KubeStatefulSetReplicasMismatch|KubeDaemonSetNotReady|TargetDown|KubeSchedulerDown|KubeControllerManagerDown|CoreDNSDown|EtcdHighLeaderChanges|MatterDevicesUnavailable)$
+      maxDuration: 2h
   healthChecks:
     - apiVersion: v1
       kind: Node
