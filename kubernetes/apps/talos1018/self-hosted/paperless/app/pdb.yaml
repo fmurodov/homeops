@@ -1,6 +1,5 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kubernetes
-# app-template gives every controller the same name label; select on controller.
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -9,8 +8,7 @@ spec:
   maxUnavailable: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: paperless
-      app.kubernetes.io/controller: gotenberg
+      app.kubernetes.io/name: paperless-gotenberg
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -20,5 +18,4 @@ spec:
   maxUnavailable: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: paperless
-      app.kubernetes.io/controller: tika
+      app.kubernetes.io/name: paperless-tika

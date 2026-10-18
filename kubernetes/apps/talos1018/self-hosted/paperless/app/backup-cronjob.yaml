@@ -23,15 +23,12 @@ spec:
           restartPolicy: OnFailure
           # paperless-data is RWO: concurrent mounts are only allowed from pods
           # on the same node, so the exporter has to land where paperless runs.
-          # Select on controller, not name -- name=paperless also matches the
-          # gotenberg/redis/tika pods, which sit on other nodes.
           affinity:
             podAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
                 - labelSelector:
                     matchLabels:
-                      app.kubernetes.io/instance: paperless
-                      app.kubernetes.io/controller: paperless
+                      app.kubernetes.io/name: paperless
                   topologyKey: kubernetes.io/hostname
           containers:
             - name: exporter
