@@ -20,7 +20,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/infrastructure/talos1018/core/cert-manager/app
+  path: ./kubernetes/apps/talos1018/cert-manager/app
   prune: true
   deletionPolicy: Orphan
   wait: true
@@ -46,7 +46,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/infrastructure/talos1018/core/cert-manager/config
+  path: ./kubernetes/apps/talos1018/cert-manager/config
   prune: true
   deletionPolicy: Orphan
   wait: true
