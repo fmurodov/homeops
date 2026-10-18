@@ -11,6 +11,9 @@ resources:
   # Cloudflare Tunnel (public ingress)
   - ./cloudflared/ks.yaml
 
+  # TLS certificates (Let's Encrypt issuers)
+  - ./cert-manager/ks.yaml
+
   - ./security
 
   # Cluster lifecycle
