@@ -16,6 +16,8 @@ spec:
       labels:
         app.kubernetes.io/name: ifconfig
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534

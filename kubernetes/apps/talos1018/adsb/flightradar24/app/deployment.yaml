@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: flightradar24
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: flightradar24
           image: ghcr.io/sdr-enthusiasts/docker-flightradar24:1.0.48-0

@@ -18,6 +18,7 @@ spec:
       labels:
         app.kubernetes.io/name: netbox-mcp
     spec:
+      enableServiceLinks: false
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true

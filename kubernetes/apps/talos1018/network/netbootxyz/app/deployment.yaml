@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: netbootxyz
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: netbootxyz
           image: ghcr.io/netbootxyz/netbootxyz:0.7.6-nbxyz10
@@ -41,27 +43,21 @@ spec:
             - name: tftp
               containerPort: 69
               protocol: UDP
-          # livenessProbe:
-          #   failureThreshold: 3
-          #   initialDelaySeconds: 0
-          #   periodSeconds: 10
-          #   tcpSocket:
-          #     port: 3000
-          #   timeoutSeconds: 1
-          # readinessProbe:
-          #   failureThreshold: 3
-          #   initialDelaySeconds: 0
-          #   periodSeconds: 10
-          #   tcpSocket:
-          #     port: 3000
-          #   timeoutSeconds: 1
-          # startupProbe:
-          #   failureThreshold: 30
-          #   initialDelaySeconds: 0
-          #   periodSeconds: 5
-          #   tcpSocket:
-          #     port: 3000
-          #   timeoutSeconds: 1
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
           resources:
             limits:
               cpu: "0.2"

@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: radarvirtuel
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: radarvirtuel
           image: ghcr.io/sdr-enthusiasts/docker-radarvirtuel:latest-build-800
