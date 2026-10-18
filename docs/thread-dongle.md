@@ -22,7 +22,7 @@ because reopening the serial port does not reset the MG24.
 Scale the border router to `0` first:
 
 ```bash
-kubectl scale deploy -n home-automation otbr-otbr-3 --replicas=0
+kubectl scale deploy -n home-automation otbr-3 --replicas=0
 ```
 
 The dongle disappears from the bus for a few seconds, and with it the udev symlink. A
@@ -83,8 +83,7 @@ border router straight back up:
 
 ```bash
 flux suspend kustomization otbr-app
-flux suspend helmrelease otbr -n home-automation
-kubectl scale deploy -n home-automation otbr-otbr-3 --replicas=0
+kubectl scale deploy -n home-automation otbr-3 --replicas=0
 ```
 
 ### Option A — universal-silabs-flasher (CLI)
@@ -186,14 +185,12 @@ udev mount the port can still be selected by hand.
 
 ### Restore
 
-Scale back up explicitly. Resuming Flux does **not** do it: helm-controller skips
-releases whose chart and values have not changed, so the HelmRelease goes green
-while the deployment stays at zero replicas.
+Scale back up explicitly rather than waiting for the resumed Kustomization to
+correct the replica drift on its next reconcile.
 
 ```bash
 kubectl delete pod -n home-automation dongle-flasher
-kubectl scale deploy -n home-automation otbr-otbr-3 --replicas=1
-flux resume helmrelease otbr -n home-automation
+kubectl scale deploy -n home-automation otbr-3 --replicas=1
 flux resume kustomization otbr-app
 ```
 
