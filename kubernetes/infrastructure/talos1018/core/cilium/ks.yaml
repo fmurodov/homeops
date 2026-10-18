@@ -6,6 +6,11 @@ kind: Kustomization
 metadata:
   name: infra-cilium-app
   namespace: flux-system
+  annotations:
+    # Moving into the apps parent (docs/infra-into-apps.md): the old parent
+    # must not garbage-collect this object, and if it is ever deleted it
+    # must not take its workloads with it.
+    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   dependsOn:
     - name: gateway-api-app
@@ -17,6 +22,7 @@ spec:
     name: flux-system
   path: ./kubernetes/infrastructure/talos1018/core/cilium/app
   prune: true
+  deletionPolicy: Orphan
   wait: true
 ---
 # Cilium CNI - Config (CRDs - depends on controller)
@@ -25,6 +31,8 @@ kind: Kustomization
 metadata:
   name: infra-cilium-config
   namespace: flux-system
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   dependsOn:
     - name: infra-cilium-app
@@ -36,6 +44,7 @@ spec:
     name: flux-system
   path: ./kubernetes/infrastructure/talos1018/core/cilium/config
   prune: true
+  deletionPolicy: Orphan
   wait: true
   postBuild:
     substituteFrom:
