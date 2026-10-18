@@ -19,6 +19,8 @@ spec:
           labels:
             app: talos-backup
         spec:
+          automountServiceAccountToken: false
+          enableServiceLinks: false
           restartPolicy: Never
           securityContext:
             runAsNonRoot: true
