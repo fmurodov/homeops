@@ -1,0 +1,46 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: otbr-1
+  labels:
+    app.kubernetes.io/name: otbr-1
+spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: otbr-1
+  ports:
+    - name: rest
+      port: 8081
+      targetPort: rest
+      protocol: TCP
+    - name: web
+      port: 8080
+      targetPort: web
+      protocol: TCP
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: otbr-3
+  labels:
+    app.kubernetes.io/name: otbr-3
+spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: otbr-3
+  ports:
+    - name: rest
+      port: 8081
+      targetPort: rest
+      protocol: TCP
+    - name: web
+      port: 8080
+      targetPort: web
+      protocol: TCP
