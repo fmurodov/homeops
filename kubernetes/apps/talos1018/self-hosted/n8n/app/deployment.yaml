@@ -84,6 +84,25 @@ spec:
               drop: [ALL]
             seccompProfile:
               type: RuntimeDefault
+          # DB_SQLITE_VACUUM_ON_STARTUP can hold the port closed for minutes.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
           resources:
             requests:
               cpu: 50m

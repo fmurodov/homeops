@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: akvorado-kafka
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

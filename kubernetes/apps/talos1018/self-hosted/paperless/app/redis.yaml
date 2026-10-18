@@ -31,6 +31,16 @@ spec:
             - name: redis
               containerPort: 6379
               protocol: TCP
+          livenessProbe:
+            exec:
+              command: [valkey-cli, ping]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: [valkey-cli, ping]
+            initialDelaySeconds: 5
+            periodSeconds: 5
           resources:
             requests:
               cpu: 5m

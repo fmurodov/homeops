@@ -20,6 +20,8 @@ spec:
       labels:
         app.kubernetes.io/name: spoolman
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: spoolman
           image: "ghcr.io/donkie/spoolman:0.27.0"

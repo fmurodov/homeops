@@ -19,6 +19,8 @@ spec:
       labels:
         app.kubernetes.io/name: redis
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
@@ -40,6 +42,16 @@ spec:
           ports:
             - containerPort: 6379
               name: redis
+          livenessProbe:
+            exec:
+              command: [valkey-cli, ping]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: [valkey-cli, ping]
+            initialDelaySeconds: 5
+            periodSeconds: 5
           resources:
             limits:
               cpu: "0.1"

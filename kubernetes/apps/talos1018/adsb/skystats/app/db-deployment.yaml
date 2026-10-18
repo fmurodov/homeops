@@ -19,6 +19,8 @@ spec:
       labels:
         app.kubernetes.io/name: skystats-db
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         fsGroup: 999
         fsGroupChangePolicy: OnRootMismatch
@@ -43,6 +45,16 @@ spec:
           ports:
             - containerPort: 5432
               name: postgres
+          livenessProbe:
+            exec:
+              command: [pg_isready, -U, skystats, -d, skystats_db]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: [pg_isready, -U, skystats, -d, skystats_db]
+            initialDelaySeconds: 10
+            periodSeconds: 5
           resources:
             limits:
               cpu: "0.2"

@@ -22,6 +22,8 @@ spec:
         app: bds
         app.kubernetes.io/name: bds
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: main
           image: "itzg/minecraft-bedrock-server:2026.10.1"

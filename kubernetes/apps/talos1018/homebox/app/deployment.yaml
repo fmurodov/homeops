@@ -20,6 +20,8 @@ spec:
       labels:
         app.kubernetes.io/name: homebox
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsUser: 65532
         runAsGroup: 65532
