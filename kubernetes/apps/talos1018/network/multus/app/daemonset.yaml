@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: multus
+  labels:
+    app.kubernetes.io/name: multus
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: multus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: multus
+    spec:
+      serviceAccountName: multus
+      # The thin entrypoint writes this token into the host kubeconfig that
+      # the multus CNI binary uses to read NetworkAttachmentDefinitions.
+      automountServiceAccountToken: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      enableServiceLinks: false
+      initContainers:
+        - name: cni-plugins
+          image: ghcr.io/home-operations/cni-plugins:1.9.1
+          resources:
+            requests:
+              cpu: 10m
+              memory: 15Mi
+          volumeMounts:
+            - name: etc-cni-net-d
+              mountPath: /host/etc/cni/net.d
+            - name: opt-cni-bin
+              mountPath: /host/opt/cni/bin
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: multus
+          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v4.3.0
+          args:
+            # On exit the entrypoint removes 00-multus.conflist, so pods
+            # created while multus is down fall back to Cilium only.
+            - --cleanup-config-on-exit=true
+            - --multus-cni-conf-dir=/tmp
+          resources:
+            requests:
+              cpu: 10m
+              memory: 96Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              add:
+                - NET_ADMIN
+              drop:
+                - ALL
+          volumeMounts:
+            - name: etc-cni-net-d
+              mountPath: /host/etc/cni/net.d
+            - name: opt-cni-bin
+              mountPath: /host/opt/cni/bin
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: etc-cni-net-d
+          hostPath:
+            path: /etc/cni/net.d
+        - name: opt-cni-bin
+          hostPath:
+            path: /opt/cni/bin
+        - name: tmp
+          emptyDir: {}
