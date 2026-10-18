@@ -4,6 +4,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: oauth2-proxy
+  annotations:
+    # the Secret isn't generated, so its changes don't roll the pods by themselves
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 2
   selector:
@@ -14,6 +17,8 @@ spec:
       labels:
         app.kubernetes.io/name: oauth2-proxy
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -41,30 +46,16 @@ spec:
           args:
             - --provider=oidc
             - --oidc-issuer-url=https://pid.${DOMAIN}
-            - --upstream=http://spoolman-http:8000
             - --http-address=[::]:4180
-            - --redirect-url=https://spoolman.${CLUSTER_DOMAIN}/oauth2/callback
             - --email-domain=*
             - --cookie-secure=true
-            - --cookie-name=_oauth2_proxy_spoolman
             - --silence-ping-logging=true
             - --code-challenge-method=S256
-          env:
-            - name: OAUTH2_PROXY_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: oauth2-proxy-secret
-                  key: OAUTH2_PROXY_CLIENT_ID
-            - name: OAUTH2_PROXY_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: oauth2-proxy-secret
-                  key: OAUTH2_PROXY_CLIENT_SECRET
-            - name: OAUTH2_PROXY_COOKIE_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: oauth2-proxy-secret
-                  key: OAUTH2_PROXY_COOKIE_SECRET
+          envFrom:
+            - configMapRef:
+                name: oauth2-proxy
+            - secretRef:
+                name: oauth2-proxy-secret
           ports:
             - name: http
               containerPort: 4180
@@ -80,25 +71,3 @@ spec:
             requests:
               cpu: 5m
               memory: 48Mi
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: oauth2-proxy
-spec:
-  maxUnavailable: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: oauth2-proxy
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: oauth2-proxy
-spec:
-  selector:
-    app.kubernetes.io/name: oauth2-proxy
-  ports:
-    - name: http
-      port: 4180
-      targetPort: http

@@ -7,10 +7,6 @@ metadata:
   name: ripe-atlas
   namespace: flux-system
 spec:
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
   dependsOn:
     - name: infra-longhorn-config
       namespace: flux-system

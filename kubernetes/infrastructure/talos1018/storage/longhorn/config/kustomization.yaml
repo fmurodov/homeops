@@ -10,6 +10,13 @@ resources:
   - ./weekly-trim.yaml
   - ./storageclass-2replicas.yaml
   - ./oauth2-proxy-secret.sops.yaml
-  - ./oauth2-proxy.yaml
   - ./httproute.yaml
   - ./metrics-networkpolicy.yaml
+components:
+  - ../../../../../components/oauth2-proxy
+configMapGenerator:
+  - name: oauth2-proxy
+    literals:
+      - OAUTH2_PROXY_UPSTREAMS=http://longhorn-frontend:80
+      - OAUTH2_PROXY_REDIRECT_URL=https://longhorn.${CLUSTER_DOMAIN}/oauth2/callback
+      - OAUTH2_PROXY_COOKIE_NAME=_oauth2_proxy_longhorn
