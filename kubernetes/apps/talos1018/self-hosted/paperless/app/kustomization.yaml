@@ -6,6 +6,11 @@ namespace: self-hosted
 resources:
   - ./pvc.yaml
   - ./paperless-secret.sops.yaml
-  - ./helmrelease.yaml
+  - ./redis.yaml
+  - ./gotenberg.yaml
+  - ./tika.yaml
+  - ./deployment.yaml
+  - ./service.yaml
+  - ./httproute.yaml
   - ./pdb.yaml
   - ./backup-cronjob.yaml

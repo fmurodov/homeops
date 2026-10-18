@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless-gotenberg
+  labels:
+    app.kubernetes.io/name: paperless-gotenberg
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: paperless-gotenberg
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: paperless-gotenberg
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          # count only this revision's pods, or a rollout spreads around leaving ones
+          matchLabelKeys: [pod-template-hash]
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: paperless-gotenberg
+      containers:
+        - name: paperless-gotenberg
+          image: docker.io/gotenberg/gotenberg:8.37.0
+          command:
+            - gotenberg
+            - --chromium-disable-javascript=true
+            - --api-timeout=600s
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 5m
+              memory: 10Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: paperless-gotenberg
+  labels:
+    app.kubernetes.io/name: paperless-gotenberg
+spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: paperless-gotenberg
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP

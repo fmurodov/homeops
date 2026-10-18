@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless-tika
+  labels:
+    app.kubernetes.io/name: paperless-tika
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: paperless-tika
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: paperless-tika
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          # count only this revision's pods, or a rollout spreads around leaving ones
+          matchLabelKeys: [pod-template-hash]
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: paperless-tika
+      containers:
+        - name: paperless-tika
+          image: docker.io/apache/tika:3.3.1.0
+          command:
+            - /bin/sh
+            - -c
+            - "exec java -cp \"/tika-server-standard-$${TIKA_VERSION}.jar:/tika-extras/*\" org.apache.tika.server.core.TikaServerCli -h [::] $0 $@"
+          ports:
+            - name: http
+              containerPort: 9998
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: paperless-tika
+  labels:
+    app.kubernetes.io/name: paperless-tika
+spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  selector:
+    app.kubernetes.io/name: paperless-tika
+  ports:
+    - name: http
+      port: 9998
+      targetPort: http
+      protocol: TCP

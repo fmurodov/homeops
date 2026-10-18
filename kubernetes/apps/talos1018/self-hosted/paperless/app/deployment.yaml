@@ -1,0 +1,184 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless
+  labels:
+    app.kubernetes.io/name: paperless
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  # RWO volume: a surge pod could never attach it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: paperless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: paperless
+    spec:
+      automountServiceAccountToken: false
+      # Otherwise the paperless* Services inject PAPERLESS_* variables (PAPERLESS_PORT=tcp://...) into paperless's own config namespace.
+      enableServiceLinks: false
+      containers:
+        - name: paperless
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.3.0
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          # Inline, not a ConfigMap: $(VAR) references only expand in env
+          # values, and only from variables listed above them.
+          env:
+            # Configure application
+            - name: PAPERLESS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secret
+                  key: PAPERLESS_SECRET_KEY
+            - name: PAPERLESS_URL
+              value: https://paperless.${CLUSTER_DOMAIN}
+            - name: PAPERLESS_PORT
+              value: "8000"
+            - name: PAPERLESS_TIME_ZONE
+              value: "${TIMEZONE}"
+            - name: PAPERLESS_WEBSERVER_WORKERS
+              value: "2"
+            - name: PAPERLESS_TASK_WORKERS
+              value: "2"
+            # Configure folders
+            - name: PAPERLESS_CONSUMPTION_DIR
+              value: /data/local/consume
+            - name: PAPERLESS_DATA_DIR
+              value: /data/local/data
+            - name: PAPERLESS_EXPORT_DIR
+              value: /data/nas/export
+            - name: PAPERLESS_LOGGING_DIR
+              value: /tmp/log
+            - name: PAPERLESS_MEDIA_ROOT
+              value: /data/local/media
+            # Configure folder importer
+            - name: PAPERLESS_CONSUMER_RECURSIVE
+              value: "true"
+            - name: PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS
+              value: "true"
+            - name: PAPERLESS_CONSUMER_DELETE_DUPLICATES
+              value: "true"
+            # Configure OCR
+            - name: PAPERLESS_OCR_MODE
+              value: "redo"
+            # v3 splits archive generation out of OCR_MODE, and its new `auto`
+            # default skips the archive copy for born-digital PDFs. `always`
+            # keeps a PDF/A rendition for every document, as on v2.
+            - name: PAPERLESS_ARCHIVE_FILE_GENERATION
+              value: "always"
+            - name: PAPERLESS_OCR_LANGUAGES
+              value: eng nld rus tgk
+            - name: PAPERLESS_OCR_LANGUAGE
+              value: eng+nld+rus+tgk
+            # Configure redis integration
+            - name: PAPERLESS_REDIS
+              value: redis://paperless-redis:6379
+            # Configure tika for eml, office docs
+            - name: PAPERLESS_TIKA_ENABLED
+              value: "1"
+            - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
+              value: http://paperless-gotenberg:3000
+            - name: PAPERLESS_TIKA_ENDPOINT
+              value: http://paperless-tika:9998
+            # Configure user permissions
+            - name: USERMAP_GID
+              value: "65542" # gladius:external-services
+            # Configure admin user
+            - name: PAPERLESS_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secret
+                  key: PAPERLESS_ADMIN_USER
+            - name: PAPERLESS_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secret
+                  key: PAPERLESS_ADMIN_PASSWORD
+            # OIDC Configuration
+            - name: PAPERLESS_APPS
+              value: allauth.socialaccount.providers.openid_connect
+            - name: PAPERLESS_ACCOUNT_ALLOW_SIGNUPS
+              value: "false"
+            - name: PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS
+              value: "false"
+            - name: PAPERLESS_DISABLE_REGULAR_LOGIN
+              value: "true"
+            - name: PAPERLESS_REDIRECT_LOGIN_TO_SSO
+              value: "true"
+            # Sync only adds/removes membership; matching-named groups must
+            # already exist in Paperless. Needs the groups scope below so
+            # Pocket ID emits the claim.
+            - name: PAPERLESS_SOCIAL_ACCOUNT_SYNC_GROUPS
+              value: "true"
+            - name: PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secret
+                  key: PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_ID
+            - name: PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secret
+                  key: PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_SECRET
+            - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS
+              value: |
+                {
+                  "openid_connect": {
+                    "APPS": [
+                      {
+                        "provider_id": "pocket-id",
+                        "name": "Pocket ID",
+                        "client_id": "$(PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_ID)",
+                        "secret": "$(PAPERLESS_APPS_ALLAUTH_OIDC_CLIENT_SECRET)",
+                        "settings": {
+                          "server_url": "https://pid.${CLUSTER_DOMAIN}/.well-known/openid-configuration"
+                        }
+                      }
+                    ],
+                    "SCOPE": ["openid", "profile", "email", "groups"]
+                  }
+                }
+          startupProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 120
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 800m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data/local
+            - name: logs
+              mountPath: /tmp/log
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperless-data-rwo
+        - name: logs
+          emptyDir: {}
