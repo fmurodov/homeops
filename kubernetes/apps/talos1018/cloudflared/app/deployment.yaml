@@ -21,6 +21,8 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "2000"
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

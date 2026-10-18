@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: api
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -67,6 +69,16 @@ spec:
           ports:
             - containerPort: 80
               name: http
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
           resources:
             limits:
               cpu: "0.2"

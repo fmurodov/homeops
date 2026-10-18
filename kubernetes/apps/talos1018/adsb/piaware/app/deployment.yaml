@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: piaware
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: piaware
           image: ghcr.io/sdr-enthusiasts/docker-piaware:v9.0.1

@@ -22,6 +22,8 @@ spec:
         prometheus.io/port: "8080"
         prometheus.io/path: /api/v0/metrics
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

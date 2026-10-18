@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: adsbhub
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: adsbhub
           image: ghcr.io/sdr-enthusiasts/docker-adsbhub:latest-build-530

@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: opensky-network
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: opensky-network
           image: ghcr.io/sdr-enthusiasts/docker-opensky-network:latest-build-844

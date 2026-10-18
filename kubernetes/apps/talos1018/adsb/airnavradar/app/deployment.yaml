@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: airnavradar
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: airnavradar
           image: ghcr.io/sdr-enthusiasts/docker-airnavradar:latest-build-883
