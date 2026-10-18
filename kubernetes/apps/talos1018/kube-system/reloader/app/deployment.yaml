@@ -24,6 +24,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090"
     spec:
+      enableServiceLinks: false
       containers:
         - image: "ghcr.io/stakater/reloader:v1.4.22"
           imagePullPolicy: IfNotPresent

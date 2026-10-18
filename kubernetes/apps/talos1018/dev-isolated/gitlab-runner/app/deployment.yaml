@@ -24,6 +24,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9252"
     spec:
+      enableServiceLinks: false
       serviceAccountName: gitlab-runner
       securityContext:
         runAsNonRoot: true

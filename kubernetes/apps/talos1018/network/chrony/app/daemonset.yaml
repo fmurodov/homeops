@@ -17,6 +17,8 @@ spec:
       labels:
         app.kubernetes.io/name: chrony
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: chrony
           image: dockurr/chrony:4.9

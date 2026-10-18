@@ -25,6 +25,7 @@ spec:
       labels:
         k8s-app: kube-dns
     spec:
+      enableServiceLinks: false
       priorityClassName: system-cluster-critical
       serviceAccountName: coredns
       # Resolve via the host's resolv.conf, not the cluster DNS being served here

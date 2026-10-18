@@ -20,6 +20,8 @@ spec:
       labels:
         app.kubernetes.io/name: ntfy
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
