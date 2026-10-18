@@ -7,6 +7,9 @@ metadata:
   name: infra-core
   namespace: flux-system
 spec:
+  # Being emptied into apps/ (docs/infra-into-apps.md): deleting this parent
+  # must leave what its children applied in place.
+  deletionPolicy: Orphan
   dependsOn:
     - name: cluster-config
   interval: 1h
@@ -30,8 +33,10 @@ metadata:
   name: infra-storage
   namespace: flux-system
 spec:
+  deletionPolicy: Orphan
+  # Ordering lives on the children (longhorn dependsOn cilium/cert-manager).
   dependsOn:
-    - name: infra-core
+    - name: cluster-config
   interval: 1h
   retryInterval: 1m
   timeout: 5m

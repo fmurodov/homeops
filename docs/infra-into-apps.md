@@ -191,40 +191,44 @@ kubectl get clusterissuer; kubectl get certificate -A
 Expected: OWNER=`apps`, same UIDs, in the `apps` inventory and gone from
 `infra-core`'s, issuers Ready.
 
-### Step 3: move Cilium
+### Step 3a: make the parents independent and safe to delete (no moves)
 
-Same as step 2 with `core/cilium` → `apps/talos1018/kube-system/cilium`.
-Add `./cilium/ks.yaml` to `kube-system/kustomization.yaml`. Fix the paths in
-the Cilium README. Also verify: `cilium status`, the gateway Services still
-have their LB IPs, and `kubectl get ciliumloadbalancerippool`.
+Learned after step 2: moving the last child out of a parent leaves it with an
+empty kustomization, which fails to build, and `apps` (and `infra-storage`)
+depended on `infra-core` — a failed parent would block every app. So before
+emptying a parent:
 
-### Step 4: move Longhorn
+- `deletionPolicy: Orphan` on `infra-core` and `infra-storage`
+  (`kubernetes/clusters/talos1018/infrastructure.yaml`).
+- Drop `dependsOn: infra-core` from `apps` and `infra-storage` (the latter
+  depends on `cluster-config` instead). Ordering already lives on the
+  children: cilium/cert-manager → gateway-api, longhorn → cilium/cert-manager,
+  PVC apps → longhorn-config.
 
-`storage/longhorn` → `apps/talos1018/longhorn`, removed from
-`storage/kustomization.yaml`. Also verify:
-`kubectl -n longhorn-system get volumes.longhorn.io` (all healthy/attached as
-before) and `kubectl get recurringjob -n longhorn-system`.
+Verify: `flux diff ks flux-system --path ./kubernetes/clusters/talos1018`
+shows only those fields; after merge all Kustomizations stay Ready.
 
-### Step 5: make the empty parents inert
+### Step 3b: move Cilium and remove `infra-core`
 
-Both parent inventories must be empty first:
-```bash
-kubectl -n flux-system get ks infra-core infra-storage -o jsonpath='{range .items[*]}{.metadata.name}: {.status.inventory.entries}{"\n"}{end}'
-```
-- In `infrastructure.yaml` set `deletionPolicy: Orphan` on `infra-core` and `infra-storage`.
-- In `apps.yaml` drop `dependsOn: infra-core`. Otherwise `apps` stalls on a
-  missing dependency once the parent is gone.
+`core/cilium` → `apps/talos1018/kube-system/cilium` (add `./cilium/ks.yaml`
+to `kube-system/kustomization.yaml`; fix doc paths). Cilium is the last child
+of `infra-core`, so in the same PR delete `kubernetes/infrastructure/talos1018/core/`
+and the `infra-core` object from `infrastructure.yaml`. Deleting `infra-core`
+orphans its inventory (step 3a) and the children carry `prune: disabled`
+(step 1), so nothing is removed; `apps` adopts the two Cilium Kustomizations.
 
-### Step 6: remove the infra parents
+Verify as in step 2 plus `cilium status`, gateway Services keep their LB IPs,
+`kubectl get ciliumloadbalancerippool`, and `kubectl get ks infra-core` is gone.
 
-Delete `kubernetes/clusters/talos1018/infrastructure.yaml` and
-`kubernetes/infrastructure/`. `flux-system` prunes `infra-core` and
-`infra-storage`; their finalizers find an empty inventory (and `Orphan`).
-Verify: `flux get ks -A` has no `infra-core`/`infra-storage`, all six
-`infra-*` children are still Ready with unchanged UIDs, and the HelmReleases
-are unchanged.
+### Step 4: move Longhorn and remove `infra-storage`
 
-### Step 7: back to defaults, docs
+`storage/longhorn` → `apps/talos1018/longhorn`; delete
+`kubernetes/infrastructure/` and `kubernetes/clusters/talos1018/infrastructure.yaml`
+(only `infra-storage` is left in it). Verify as in step 2 plus
+`kubectl -n longhorn-system get volumes.longhorn.io` (unchanged) and
+`kubectl -n longhorn-system get recurringjob`.
+
+### Step 5: back to defaults, docs
 
 - Remove the `prune: disabled` annotation and `deletionPolicy: Orphan` from
   the six children, so they use the out-of-the-box behaviour like every other
