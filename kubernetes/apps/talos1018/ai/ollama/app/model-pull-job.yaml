@@ -25,7 +25,7 @@ spec:
             capabilities:
               drop: [ALL]
           # renovate: datasource=docker depName=ollama/ollama
-          image: ollama/ollama:0.40.3
+          image: ollama/ollama:0.40.5
           env:
             - name: OLLAMA_HOST
               value: http://ollama:11434
