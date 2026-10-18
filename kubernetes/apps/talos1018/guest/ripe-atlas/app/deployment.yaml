@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: ripe-atlas
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: ripe-atlas
           image: ghcr.io/jamesits/ripe-atlas:5130

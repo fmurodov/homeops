@@ -40,6 +40,21 @@ spec:
               value: "1"
             - name: PLAYWRIGHT_DRIVER_URL
               value: ws://localhost:3000/chrome?headless=false&stealth=true&blockAds=true
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
           resources:
             requests:
               cpu: 20m
@@ -74,6 +89,12 @@ spec:
               value: "true"
             - name: DEFAULT_HEADLESS
               value: "false"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           resources:
             requests:
               cpu: 30m

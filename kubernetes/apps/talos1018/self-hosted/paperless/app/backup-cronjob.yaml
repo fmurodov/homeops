@@ -20,6 +20,8 @@ spec:
           labels:
             app: paperless-backup
         spec:
+          automountServiceAccountToken: false
+          enableServiceLinks: false
           restartPolicy: OnFailure
           # paperless-data is RWO: concurrent mounts are only allowed from pods
           # on the same node, so the exporter has to land where paperless runs.

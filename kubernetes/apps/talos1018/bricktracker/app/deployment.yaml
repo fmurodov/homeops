@@ -20,6 +20,8 @@ spec:
       labels:
         app.kubernetes.io/name: bricktracker
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

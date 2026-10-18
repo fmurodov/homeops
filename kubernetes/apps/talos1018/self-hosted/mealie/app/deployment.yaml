@@ -20,6 +20,8 @@ spec:
       labels:
         app.kubernetes.io/name: mealie
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: mealie
           image: "ghcr.io/mealie-recipes/mealie:v3.28.0"
@@ -70,6 +72,24 @@ spec:
           volumeMounts:
             - mountPath: /app/data
               name: data
+          startupProbe:
+            httpGet:
+              path: /api/app/about
+              port: http
+            periodSeconds: 10
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /api/app/about
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/app/about
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
           resources:
             limits:
               cpu: "0.1"

@@ -20,6 +20,8 @@ spec:
       labels:
         app.kubernetes.io/name: mosquitto
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsUser: 1883
         runAsGroup: 1883
@@ -50,6 +52,16 @@ spec:
               readOnly: true
             - mountPath: /mosquitto/data/
               name: data
+          livenessProbe:
+            tcpSocket:
+              port: 1883
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 1883
+            periodSeconds: 10
+            timeoutSeconds: 3
           resources:
             limits:
               cpu: "0.1"

@@ -20,6 +20,8 @@ spec:
       annotations:
         k8s.v1.cni.cncf.io/networks: network/multus-macvlan2, network/multus-macvlan3
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: esphome
           image: "ghcr.io/esphome/esphome:2026.9.0"
@@ -60,6 +62,21 @@ spec:
             - name: font
               mountPath: /config/fonts/MatrixLight8X.ttf
               subPath: MatrixLight8X.ttf
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
           resources:
             limits:
               cpu: "2"

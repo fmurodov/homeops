@@ -21,6 +21,8 @@ spec:
       labels:
         app.kubernetes.io/name: readsb
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       containers:
         - name: readsb
           image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest-build-972
@@ -120,6 +122,24 @@ spec:
               name: sbs-out
             - containerPort: 80
               name: http
+          # Liveness follows readsb itself (the feeders' Beast source);
+          # readiness follows nginx, which serves the routed dashboard.
+          startupProbe:
+            tcpSocket:
+              port: beast-out
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket:
+              port: beast-out
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
           resources:
             limits:
               cpu: "0.4"
