@@ -639,8 +639,8 @@ spec:
                 # matter-server now has a liveness probe, so a hung server restarts
                 # itself — this keeps that from happening silently in a loop.
                 - alert: MatterServerRestartStorm
-                  # By container, not pod: pod=~"matter-server-.*" would also
-                  # catch matter-server-oauth2-proxy.
+                  # By container, not pod name: Deployment pod names carry a
+                  # random suffix.
                   expr: 'increase(kube_pod_container_status_restarts_total{namespace="home-automation", container="matter-server"}[1h]) > 2'
                   labels:
                     severity: warning

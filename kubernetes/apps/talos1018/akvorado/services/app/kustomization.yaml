@@ -9,7 +9,16 @@ resources:
   - flow-service.yaml
   - outlet.yaml
   - console.yaml
-  - akvorado-oauth2-proxy-secret.sops.yaml
+  - oauth2-proxy-secret.sops.yaml
   - akvorado-geoip-secret.sops.yaml
-  - oauth2-proxy.yaml
   - httproute.yaml
+components:
+  - ../../../../../components/oauth2-proxy
+configMapGenerator:
+  - name: oauth2-proxy
+    literals:
+      - OAUTH2_PROXY_UPSTREAMS=http://akvorado-console:8080
+      - OAUTH2_PROXY_REDIRECT_URL=https://akvorado.${CLUSTER_DOMAIN}/oauth2/callback
+      - OAUTH2_PROXY_COOKIE_NAME=_oauth2_proxy_akvorado
+      - OAUTH2_PROXY_PASS_BASIC_AUTH=false
+      - OAUTH2_PROXY_PASS_USER_HEADERS=true

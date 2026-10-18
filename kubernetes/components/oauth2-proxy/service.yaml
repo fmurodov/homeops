@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth2-proxy
+spec:
+  selector:
+    app.kubernetes.io/name: oauth2-proxy
+  ports:
+    - name: http
+      port: 4180
+      targetPort: http

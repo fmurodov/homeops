@@ -7,6 +7,13 @@ resources:
   - ./pvc.yaml
   - ./deployment.yaml
   - ./service.yaml
-  - ./oauth2-proxy.yaml
-  - ./matter-server-oauth2-proxy-secret.sops.yaml
+  - ./oauth2-proxy-secret.sops.yaml
   - ./httproute.yaml
+components:
+  - ../../../../../components/oauth2-proxy
+configMapGenerator:
+  - name: oauth2-proxy
+    literals:
+      - OAUTH2_PROXY_UPSTREAMS=http://matter-server:5580
+      - OAUTH2_PROXY_REDIRECT_URL=https://matter-server.${CLUSTER_DOMAIN}/oauth2/callback
+      - OAUTH2_PROXY_COOKIE_NAME=_oauth2_proxy_matter_server

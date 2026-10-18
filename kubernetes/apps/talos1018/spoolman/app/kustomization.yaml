@@ -8,6 +8,13 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
-  - oauth2-proxy.yaml
   - oauth2-proxy-secret.sops.yaml
   - httproute.yaml
+components:
+  - ../../../../components/oauth2-proxy
+configMapGenerator:
+  - name: oauth2-proxy
+    literals:
+      - OAUTH2_PROXY_UPSTREAMS=http://spoolman-http:8000
+      - OAUTH2_PROXY_REDIRECT_URL=https://spoolman.${CLUSTER_DOMAIN}/oauth2/callback
+      - OAUTH2_PROXY_COOKIE_NAME=_oauth2_proxy_spoolman

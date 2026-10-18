@@ -1,0 +1,12 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Shared OIDC proxy in front of apps without their own login. Each app adds the
+# component and a `oauth2-proxy` configMapGenerator with OAUTH2_PROXY_UPSTREAMS,
+# OAUTH2_PROXY_REDIRECT_URL and OAUTH2_PROXY_COOKIE_NAME, plus an
+# `oauth2-proxy-secret` holding the client ID/secret and cookie secret.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./deployment.yaml
+  - ./service.yaml
+  - ./pdb.yaml

@@ -10,10 +10,6 @@ spec:
   dependsOn:
     - name: infra-longhorn-config
       namespace: flux-system
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
   interval: 1h
   retryInterval: 1m
   timeout: 5m
