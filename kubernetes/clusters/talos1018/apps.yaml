@@ -15,7 +15,6 @@ spec:
       name: sops-age
   dependsOn:
     - name: cluster-config
-    - name: infra-core
   interval: 10m0s
   sourceRef:
     kind: GitRepository
