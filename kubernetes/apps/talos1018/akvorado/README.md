@@ -228,7 +228,7 @@ Two things it did **not** explain, contrary to what this file claimed until
   flows at all, across seven VLANs. Sampling that fine would have surfaced them if the
   gateway exported them. It does not export routed VLAN-to-VLAN traffic, so this is
   the hardware-offload explanation originally dismissed. East-west visibility has to
-  come from [Hubble](../../../infrastructure/talos1018/core/cilium), not from here.
+  come from [Hubble](../kube-system/cilium), not from here.
 - **NTP got worse, not better.** The public [chrony](../network/chrony) service is now
   **97.7% of all records**, up from 92% under Hash. Per-packet selection represents
   the dominant flow proportionally, so it crowds out everything else harder. Non-NTP
