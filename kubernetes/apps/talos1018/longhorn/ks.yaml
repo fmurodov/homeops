@@ -4,12 +4,12 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infra-longhorn-app
+  name: longhorn
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infra-cilium-config
-    - name: infra-cert-manager-config
+    - name: cilium-config
+    - name: cert-manager-config
   interval: 1h
   retryInterval: 1m
   timeout: 5m
@@ -26,7 +26,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infra-longhorn-config
+  name: longhorn-config
   namespace: flux-system
 spec:
   decryption:
@@ -34,7 +34,7 @@ spec:
     secretRef:
       name: sops-age
   dependsOn:
-    - name: infra-longhorn-app
+    - name: longhorn
   interval: 1h
   retryInterval: 1m
   timeout: 5m

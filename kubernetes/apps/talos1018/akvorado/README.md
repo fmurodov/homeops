@@ -7,9 +7,9 @@ NetFlow/IPFIX/sFlow collector and analytics console for the home network.
 Four Flux Kustomizations in the `akvorado` namespace, chained by `dependsOn`:
 
 ```
-akvorado-kafka-app ─┐
-                    ├─→ akvorado-orchestrator-app ─→ akvorado-services-app
-akvorado-clickhouse-app ─┘
+akvorado-kafka ─┐
+                    ├─→ akvorado-orchestrator ─→ akvorado-services
+akvorado-clickhouse ─┘
 ```
 
 | Component | What it does |

@@ -13,7 +13,7 @@ spec:
     secretRef:
       name: sops-age
   dependsOn:
-    - name: infra-longhorn-config
+    - name: longhorn-config
       namespace: flux-system
     - name: kube-state-metrics
     - name: ntfy
