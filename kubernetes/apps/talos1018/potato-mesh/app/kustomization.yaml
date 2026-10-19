@@ -14,6 +14,11 @@ resources:
 components:
   - ../../../../components/oauth2-proxy
 configMapGenerator:
+  - name: set-companion-clock
+    files:
+      - set_companion_clock.py
+    options:
+      disableNameSuffixHash: true
   - name: oauth2-proxy
     literals:
       - OAUTH2_PROXY_UPSTREAMS=http://potato-mesh-web:41447

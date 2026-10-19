@@ -128,6 +128,30 @@ spec:
       # The companion radio is USB-powered from this node.
       nodeSelector:
         kubernetes.io/hostname: talos-1018-2
+      # The radio loses its clock with USB power and the ingestor never sets it.
+      # This only runs on pod start, which a node reboot always causes.
+      initContainers:
+        - name: set-clock
+          image: python:3.15-alpine
+          command: ["python3", "-I", "/opt/clock/set_companion_clock.py"]
+          env:
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+          securityContext:
+            privileged: true
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 5m
+              memory: 24Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: clock-script
+              mountPath: /opt/clock
+              readOnly: true
+            - name: radio
+              mountPath: /dev/meshcore
       containers:
         - name: ingestor
           image: ghcr.io/l5yth/potato-mesh-ingestor-linux-amd64:v1.0.0
@@ -164,6 +188,9 @@ spec:
             - name: tmp
               mountPath: /tmp
       volumes:
+        - name: clock-script
+          configMap:
+            name: set-companion-clock
         - name: radio
           hostPath:
             path: /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_80:B5:4E:F1:13:7C-if00

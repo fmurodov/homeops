@@ -4,7 +4,12 @@
 Repeater firmware only speaks its text CLI over USB, not the companion
 protocol that meshcore_py and friends need, so this polls the stats commands
 directly on every scrape.
+
+The repeater has no battery-backed clock and restarts in 2024 after a power
+loss, which stamps its adverts with stale times, so each scrape also puts the
+clock right when it has fallen behind.
 """
+import calendar
 import json
 import os
 import re
@@ -17,6 +22,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 DEVICE = os.environ.get("MESHCORE_DEVICE", "/dev/meshcore")
 LISTEN_PORT = int(os.environ.get("LISTEN_PORT", "9842"))
 TIMEOUT = float(os.environ.get("COMMAND_TIMEOUT", "3"))
+# `clock` only has minute resolution, so an in-sync clock reads up to 60s behind.
+CLOCK_TOLERANCE = float(os.environ.get("CLOCK_TOLERANCE", "120"))
 
 # (json key, metric name, type, help, scale)
 STATS = {
@@ -46,6 +53,8 @@ STATS = {
 
 # "<4-byte pubkey hex>:<seconds since heard>:<snr * 4>", one per line
 NEIGHBOR = re.compile(r"\b([0-9a-fA-F]{8}):(\d+):(-?\d+)\b")
+# "14:58 - 19/10/2026 UTC"
+CLOCK = re.compile(r"(\d+):(\d+) - (\d+)/(\d+)/(\d+) UTC")
 
 
 def open_port():
@@ -77,6 +86,26 @@ def command(fd, cmd):
     return reply.strip()
 
 
+def clock_offset(fd):
+    """Return how far the repeater clock is ahead of ours, or None if unparseable."""
+    m = CLOCK.search(command(fd, "clock"))
+    if not m:
+        return None
+    hour, minute, day, month, year = map(int, m.groups())
+    return calendar.timegm((year, month, day, hour, minute, 0)) - time.time()
+
+
+def sync_clock(fd):
+    offset = clock_offset(fd)
+    # The firmware refuses to move the clock backwards, so a clock that is
+    # ahead stays visible in the gauge instead.
+    if offset is not None and offset < -CLOCK_TOLERANCE:
+        reply = command(fd, f"time {int(time.time())}")
+        print(f"repeater clock was {offset:.0f}s behind: {reply}", flush=True)
+        offset = clock_offset(fd)
+    return offset
+
+
 def collect():
     lines = []
 
@@ -93,6 +122,7 @@ def collect():
             ver = command(fd, "ver")
             stats = {c: json.loads(command(fd, c)) for c in STATS}
             neighbors = NEIGHBOR.findall(command(fd, "neighbors"))
+            offset = sync_clock(fd)
         finally:
             os.close(fd)
     except (OSError, ValueError) as e:
@@ -115,6 +145,9 @@ def collect():
         "meshcore_neighbor_snr_db", "gauge", "SNR of a neighbor's last advert",
         [(f'{{neighbor="{k.lower()}"}}', int(q) / 4) for k, _, q in neighbors],
     )
+    if offset is not None:
+        metric("meshcore_clock_offset_seconds", "gauge",
+               "Repeater clock minus exporter clock, at minute resolution", [("", round(offset))])
     metric("meshcore_scrape_duration_seconds", "gauge", "Time spent talking to the repeater",
            [("", round(time.monotonic() - start, 3))])
     return "\n".join(lines) + "\n"
