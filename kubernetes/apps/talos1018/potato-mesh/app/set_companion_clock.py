@@ -5,6 +5,7 @@ The radio has no battery-backed clock, so after a power loss it stamps adverts
 with stale times until something sets it, and the ingestor never does.
 Best-effort: a radio that does not answer must not keep the ingestor down.
 """
+import fcntl
 import os
 import select
 import struct
@@ -13,7 +14,9 @@ import termios
 import time
 
 DEVICE = os.environ.get("MESHCORE_DEVICE", "/dev/meshcore")
-TIMEOUT = 3
+TIMEOUT = 2
+# The radio can take several seconds to answer right after the port opens.
+STARTUP_TIMEOUT = 30
 MAX_FRAME = 172
 
 CMD_GET_DEVICE_TIME = 5
@@ -25,6 +28,10 @@ RESP_CURR_TIME = 9
 
 def open_port():
     fd = os.open(DEVICE, os.O_RDWR | os.O_NOCTTY)
+    # Same line states as meshcore_py (rts=False, dtr=True): RTS drives the
+    # ESP32 reset and boot-strap pins.
+    fcntl.ioctl(fd, termios.TIOCMBIC, struct.pack("I", termios.TIOCM_RTS))
+    fcntl.ioctl(fd, termios.TIOCMBIS, struct.pack("I", termios.TIOCM_DTR))
     a = termios.tcgetattr(fd)
     a[0] = a[1] = a[3] = 0
     a[2] |= termios.CLOCAL | termios.CREAD
@@ -61,15 +68,22 @@ def request(fd, payload, codes):
     raise TimeoutError(f"no reply to command {payload[0]}")
 
 
-def device_time(fd):
-    frame = request(fd, bytes([CMD_GET_DEVICE_TIME]), {RESP_CURR_TIME})
+def device_time(fd, wait=0):
+    deadline = time.monotonic() + wait
+    while True:
+        try:
+            frame = request(fd, bytes([CMD_GET_DEVICE_TIME]), {RESP_CURR_TIME})
+            break
+        except TimeoutError:
+            if time.monotonic() >= deadline:
+                raise
     return struct.unpack_from("<I", frame, 1)[0]
 
 
 def main():
     fd = open_port()
     try:
-        offset = device_time(fd) - time.time()
+        offset = device_time(fd, STARTUP_TIMEOUT) - time.time()
         print(f"companion clock offset {offset:.0f}s", flush=True)
         # The firmware refuses to move the clock backwards.
         if offset < -60:
