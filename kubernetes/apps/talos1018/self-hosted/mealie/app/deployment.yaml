@@ -24,7 +24,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: mealie
-          image: "ghcr.io/mealie-recipes/mealie:v3.28.0"
+          image: "ghcr.io/mealie-recipes/mealie:v3.29.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
