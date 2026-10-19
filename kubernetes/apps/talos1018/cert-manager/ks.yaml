@@ -17,7 +17,6 @@ spec:
     name: flux-system
   path: ./kubernetes/apps/talos1018/cert-manager/app
   prune: true
-  deletionPolicy: Orphan
   wait: true
 ---
 # cert-manager - Config (ClusterIssuers and secrets)
@@ -41,7 +40,6 @@ spec:
     name: flux-system
   path: ./kubernetes/apps/talos1018/cert-manager/config
   prune: true
-  deletionPolicy: Orphan
   wait: true
   postBuild:
     substituteFrom:

@@ -15,7 +15,6 @@ spec:
     name: flux-system
   path: ./kubernetes/apps/talos1018/podinfo/app
   prune: true
-  deletionPolicy: Orphan
   wait: true
   postBuild:
     substituteFrom:

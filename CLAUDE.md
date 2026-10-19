@@ -52,18 +52,20 @@ applies every component's `ks.yaml`; ordering is per-component `dependsOn`:
 cluster-config (secrets/vars)
     ↓
 apps
-  gateway-api ─► cilium ─► cilium-config ─┐
-                  └► cert-manager ─► cert-manager-config ─┴► longhorn ─► longhorn-config
-                                                                                         ↓
-                                                     every app Kustomization with a Longhorn PVC
+  gateway-api ─┬─► cilium ───────► cilium-config ───────┐
+               └─► cert-manager ─► cert-manager-config ─┴─► longhorn ─► longhorn-config
+                                                                              ↓
+                                                  every app Kustomization with a Longhorn PVC
 ```
 
-The `infra-*` names are historical (the separate infrastructure layer was
-folded into `apps/` in Oct 2026, docs/infra-into-apps.md). Every app
+Kustomization names are the plain app name, with `-config` for a second stage
+that needs the first's CRDs (`cilium` → `cilium-config`). Every app
 Kustomization that uses a Longhorn PVC (pvc.yaml or a chart
 volumeClaimTemplate) must list `longhorn-config` in its own `dependsOn`
 (Longhorn installed, both StorageClasses and the backup recurring jobs in
-place). Other app ordering is also per-app `dependsOn`.
+place). Other app ordering is also per-app `dependsOn`. Cilium and Longhorn
+keep `deletionPolicy: Orphan`, so losing their Kustomization can't delete the
+CNI or every volume.
 
 **Component Structure** (Helm-based platform components: cilium, cert-manager, longhorn):
 ```
