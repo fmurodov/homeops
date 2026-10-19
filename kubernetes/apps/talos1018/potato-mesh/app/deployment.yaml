@@ -63,15 +63,19 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: [ALL]
+          # Kubelet probes the pod's primary (IPv6) address, which the
+          # IPv4-only listener refuses, so probe over loopback instead.
           livenessProbe:
-            tcpSocket:
-              port: http
+            exec:
+              command: ["curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:41447/version"]
             initialDelaySeconds: 10
             periodSeconds: 30
+            timeoutSeconds: 5
           readinessProbe:
-            tcpSocket:
-              port: http
+            exec:
+              command: ["curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:41447/version"]
             periodSeconds: 10
+            timeoutSeconds: 5
           resources:
             requests:
               cpu: 20m
