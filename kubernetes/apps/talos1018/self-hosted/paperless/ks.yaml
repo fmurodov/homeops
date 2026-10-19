@@ -23,6 +23,7 @@ spec:
     namespace: flux-system
   path: ./kubernetes/apps/talos1018/self-hosted/paperless/app
   prune: true
+  deletionPolicy: Orphan
   postBuild:
     substituteFrom:
       - kind: Secret

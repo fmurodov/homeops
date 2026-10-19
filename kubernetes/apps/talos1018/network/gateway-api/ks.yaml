@@ -16,6 +16,7 @@ spec:
     namespace: flux-system
   path: "./kubernetes/apps/talos1018/network/gateway-api/app"
   prune: true
+  deletionPolicy: Orphan
   wait: true
   postBuild:
     substituteFrom:
