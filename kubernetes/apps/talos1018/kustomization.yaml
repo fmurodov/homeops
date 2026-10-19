@@ -52,6 +52,9 @@ resources:
   # 3D Printing
   - ./spoolman/ks.yaml
 
+  # LoRa mesh
+  - ./potato-mesh/ks.yaml
+
   # ADSB / Flight Tracking
   - ./adsb
 

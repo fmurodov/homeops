@@ -9,6 +9,7 @@ resources:
   - ./kube-state-metrics/ks.yaml
   - ./node-exporter/ks.yaml
   - ./unpoller/ks.yaml
+  - ./meshcore-exporter/ks.yaml
 
   # Storage backends (depend on exporters for scraping)
   - ./victoria-metrics/ks.yaml

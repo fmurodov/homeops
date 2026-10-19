@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: potato-mesh-web
+  labels:
+    app.kubernetes.io/name: potato-mesh-web
+spec:
+  # The web app hardcodes `set :bind, "0.0.0.0"`, overriding -o, so it cannot
+  # listen on IPv6.
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv4
+  ports:
+    - port: 41447
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: potato-mesh-web

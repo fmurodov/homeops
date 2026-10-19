@@ -268,6 +268,23 @@ spec:
                   action: keep
                   regex: unpoller;metrics
 
+            # MeshCore repeater on USB serial. Each scrape runs five CLI
+            # round-trips on the radio's MCU, so keep it slow.
+            - job_name: meshcore
+              scrape_interval: 60s
+              scrape_timeout: 30s
+              kubernetes_sd_configs:
+                - role: endpoints
+                  namespaces:
+                    names:
+                      - observability
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_name
+                    - __meta_kubernetes_endpoint_port_name
+                  action: keep
+                  regex: meshcore-exporter;metrics
+
             # Home Assistant prometheus integration — needs a long-lived
             # access token (ha-token-secret). The response is ~1MB, so scrape
             # at half the global rate.
