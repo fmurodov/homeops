@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: observability
+resources:
+  - deployment.yaml
+  - service.yaml
+configMapGenerator:
+  - name: meshcore-exporter
+    files:
+      - meshcore_exporter.py
+    options:
+      disableNameSuffixHash: true
