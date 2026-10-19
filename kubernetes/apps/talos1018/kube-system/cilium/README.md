@@ -25,7 +25,7 @@ helm repo update
 helm install cilium cilium/cilium \
     --version 1.20.0 \
     --namespace kube-system \
-    -f kubernetes/infrastructure/talos1018/core/cilium/app/values.yaml
+    -f kubernetes/apps/talos1018/kube-system/cilium/app/values.yaml
 ```
 
 ## Flux Management
@@ -107,4 +107,4 @@ GatewayClass, making the post-render a no-op.
 ## Related Resources
 
 L2 announcement policies and IP pools are in the same directory:
-- `kubernetes/infrastructure/talos1018/core/cilium/`
+- `kubernetes/apps/talos1018/kube-system/cilium/`

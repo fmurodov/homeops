@@ -1,31 +1,5 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# Core infrastructure components (Cilium, cert-manager, Gateway API)
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: infra-core
-  namespace: flux-system
-spec:
-  # Being emptied into apps/ (docs/infra-into-apps.md): deleting this parent
-  # must leave what its children applied in place.
-  deletionPolicy: Orphan
-  dependsOn:
-    - name: cluster-config
-  interval: 1h
-  retryInterval: 1m
-  timeout: 5m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  path: ./kubernetes/infrastructure/talos1018/core
-  prune: true
-  wait: false
-  postBuild:
-    substituteFrom:
-      - kind: Secret
-        name: cluster-secrets
----
 # Storage infrastructure (Longhorn)
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

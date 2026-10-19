@@ -20,7 +20,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/infrastructure/talos1018/core/cilium/app
+  path: ./kubernetes/apps/talos1018/kube-system/cilium/app
   prune: true
   deletionPolicy: Orphan
   wait: true
@@ -42,7 +42,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/infrastructure/talos1018/core/cilium/config
+  path: ./kubernetes/apps/talos1018/kube-system/cilium/config
   prune: true
   deletionPolicy: Orphan
   wait: true

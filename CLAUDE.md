@@ -231,7 +231,7 @@ sops -d path/to/secret.sops.yaml
 - **Detailed READMEs**: Check component-specific README files for detailed setup
   - `talos/talos1018/README.md` - Talos cluster setup
   - `kubernetes/README.md` - Flux bootstrap and secret management
-  - `kubernetes/infrastructure/talos1018/core/cilium/README.md` - Cilium L2 config
+  - `kubernetes/apps/talos1018/kube-system/cilium/README.md` - Cilium L2 config
 - **Flux Documentation**: https://fluxcd.io/docs/
 - **Talos Documentation**: https://www.talos.dev/latest/
 - **SOPS Documentation**: https://github.com/mozilla/sops

@@ -90,7 +90,7 @@ talosctl kubeconfig --nodes fd00:1018:0:5:10:18:6:90
 > 
 > # Temporarily replace variables in external-pool.yaml
 > sed "s/\${IPV6_PREFIX_GUA}/$IPV6_PREFIX_GUA/g" \
->     ../../kubernetes/infrastructure/talos1018/core/cilium/config/external-pool.yaml > /tmp/external-pool.yaml
+>     ../../kubernetes/apps/talos1018/kube-system/cilium/config/external-pool.yaml > /tmp/external-pool.yaml
 > 
 > # Clean up
 > rm /tmp/cluster-secrets.yaml
@@ -100,7 +100,7 @@ talosctl kubeconfig --nodes fd00:1018:0:5:10:18:6:90
 
 Install Cilium using Helm (required before Flux can operate). Use the same
 version pinned in
-`../../kubernetes/infrastructure/talos1018/core/cilium/app/helmrelease.yaml`
+`../../kubernetes/apps/talos1018/kube-system/cilium/app/helmrelease.yaml`
 so the bootstrap matches what Flux will manage:
 
 ```bash
@@ -109,21 +109,21 @@ helm repo update
 helm install cilium cilium/cilium \
     --version 1.19.6 \
     --namespace kube-system \
-    -f ../../kubernetes/infrastructure/talos1018/core/cilium/app/values.yaml \
+    -f ../../kubernetes/apps/talos1018/kube-system/cilium/app/values.yaml \
     --create-namespace
 ```
 
 Apply the Cilium L2 configuration (using the processed external-pool.yaml):
 
 ```bash
-kubectl create -f ../../kubernetes/infrastructure/talos1018/core/cilium/config/l2-announcement-policy.yaml
-kubectl create -f ../../kubernetes/infrastructure/talos1018/core/cilium/config/internal-pool.yaml
+kubectl create -f ../../kubernetes/apps/talos1018/kube-system/cilium/config/l2-announcement-policy.yaml
+kubectl create -f ../../kubernetes/apps/talos1018/kube-system/cilium/config/internal-pool.yaml
 kubectl create -f /tmp/external-pool.yaml  # Use the processed file with actual values
 ```
 
 > **Note**: After Flux is deployed, it will automatically take over management of Cilium without disruption.
-> The Cilium values and configs are now located at `kubernetes/infrastructure/talos1018/core/cilium/` and
-> are managed by Flux. See `kubernetes/infrastructure/talos1018/core/cilium/README.md` for details.
+> The Cilium values and configs are now located at `kubernetes/apps/talos1018/kube-system/cilium/` and
+> are managed by Flux. See `kubernetes/apps/talos1018/kube-system/cilium/README.md` for details.
 
 ## Verification
 
@@ -221,7 +221,7 @@ replace the ID in `generate.sh` and in the upgrade command above.
 ## Cilium upgrade
 
 Once Flux is managing Cilium, upgrades are done by updating the version in
-`kubernetes/infrastructure/talos1018/core/cilium/helmrelease.yaml` and committing the change.
+`kubernetes/apps/talos1018/kube-system/cilium/helmrelease.yaml` and committing the change.
 
 For manual upgrades (before Flux takeover), match the version pinned in
 `helmrelease.yaml`:
@@ -230,7 +230,7 @@ For manual upgrades (before Flux takeover), match the version pinned in
 helm upgrade cilium cilium/cilium \
     --version 1.19.6 \
     --namespace kube-system \
-    -f ../../kubernetes/infrastructure/talos1018/core/cilium/app/values.yaml \
+    -f ../../kubernetes/apps/talos1018/kube-system/cilium/app/values.yaml \
     --reuse-values
 ```
 
