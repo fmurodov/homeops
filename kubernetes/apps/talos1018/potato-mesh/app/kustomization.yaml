@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: potato-mesh
+resources:
+  - namespace.yaml
+  - pvc.yaml
+  - potato-mesh-secret.sops.yaml
+  - deployment.yaml
+  - service.yaml
+  - oauth2-proxy-secret.sops.yaml
+  - httproute.yaml
+components:
+  - ../../../../components/oauth2-proxy
+configMapGenerator:
+  - name: oauth2-proxy
+    literals:
+      - OAUTH2_PROXY_UPSTREAMS=http://potato-mesh-web:41447
+      - OAUTH2_PROXY_REDIRECT_URL=https://potato-mesh.${CLUSTER_DOMAIN}/oauth2/callback
+      - OAUTH2_PROXY_COOKIE_NAME=_oauth2_proxy_potato_mesh

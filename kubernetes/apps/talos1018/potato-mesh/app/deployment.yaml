@@ -1,0 +1,174 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: potato-mesh-web
+  labels:
+    app.kubernetes.io/name: potato-mesh-web
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: potato-mesh-web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: potato-mesh-web
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: web
+          image: ghcr.io/l5yth/potato-mesh-web-linux-amd64:v1.0.0
+          ports:
+            - name: http
+              containerPort: 41447
+              protocol: TCP
+          env:
+            - name: SITE_NAME
+              value: PotatoMesh
+            - name: INSTANCE_DOMAIN
+              value: "https://potato-mesh.${CLUSTER_DOMAIN}"
+            - name: FEDERATION
+              value: "0"
+            - name: PRIVATE
+              value: "1"
+            # The default links to upstream's Matrix room.
+            - name: CONTACT_LINK
+              value: ""
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: potato-mesh-secret
+                  key: API_TOKEN
+            - name: MAP_CENTER
+              valueFrom:
+                secretKeyRef:
+                  name: potato-mesh-secret
+                  key: MAP_CENTER
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 20m
+              memory: 192Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /app/.local/share/potato-mesh
+              subPath: data
+            # Instance keyfile
+            - name: data
+              mountPath: /app/.config/potato-mesh
+              subPath: config
+            - name: tmp
+              mountPath: /tmp
+            - name: logs
+              mountPath: /app/logs
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: potato-mesh-data
+        - name: tmp
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: potato-mesh-ingestor
+  labels:
+    app.kubernetes.io/name: potato-mesh-ingestor
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  # The serial port takes a single owner: a surge pod would fight the old one for it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: potato-mesh-ingestor
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: potato-mesh-ingestor
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      # The companion radio is USB-powered from this node.
+      nodeSelector:
+        kubernetes.io/hostname: talos-1018-2
+      containers:
+        - name: ingestor
+          image: ghcr.io/l5yth/potato-mesh-ingestor-linux-amd64:v1.0.0
+          env:
+            - name: PROTOCOL
+              value: meshcore
+            - name: CONNECTION
+              value: /dev/meshcore
+            - name: INSTANCE_DOMAIN
+              value: http://potato-mesh-web:41447
+            - name: FEDERATION
+              value: "0"
+            - name: PRIVATE
+              value: "1"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: potato-mesh-secret
+                  key: API_TOKEN
+          # The device cgroup blocks host devices for unprivileged containers,
+          # and ttyACM is root-only 0600 on Talos, so the image's dialout group
+          # does not help.
+          securityContext:
+            privileged: true
+            runAsUser: 0
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 96Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: radio
+              mountPath: /dev/meshcore
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: radio
+          hostPath:
+            path: /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_80:B5:4E:F1:13:7C-if00
+            # Untyped, kubelet creates a directory here whenever the udev symlink is
+            # briefly absent, which then blocks udev from ever recreating it.
+            type: CharDevice
+        - name: tmp
+          emptyDir: {}
