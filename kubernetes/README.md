@@ -14,12 +14,8 @@ This directory contains the GitOps manifests for the home Kubernetes cluster man
 ```
 kubernetes/
 ├── clusters/               # Flux entrypoint per cluster
-│   └── talos1018/          # GitRepository + cluster-config/infrastructure/apps Kustomizations
-├── infrastructure/         # Infrastructure components
-│   └── talos1018/
-│       ├── core/           # Cilium, cert-manager
-│       └── storage/        # Longhorn
-├── apps/                   # Application deployments
+│   └── talos1018/          # GitRepository + cluster-config/apps Kustomizations
+├── apps/                   # Platform components and applications
 │   └── talos1018/          # Grouped by category (home-automation, media, network, ...)
 ├── components/             # Shared Kustomize components (cluster-secrets)
 └── .sops.yaml              # SOPS configuration for secret management

@@ -14,16 +14,11 @@ homeops/
 ├── talos/              # Talos Kubernetes cluster configurations
 │   └── talos1018/      # Cluster-specific config and patches
 ├── kubernetes/         # Flux CD GitOps manifests
-│   ├── apps/           # Application deployments
+│   ├── apps/           # Everything: platform (Cilium, cert-manager, Longhorn) and apps
 │   │   └── talos1018/  # Cluster applications
-│   ├── infrastructure/ # Infrastructure components
-│   │   └── talos1018/
-│   │       ├── core/   # Core components (CNI, cert-manager)
-│   │       └── storage/ # Storage layer (Longhorn)
 │   ├── clusters/       # Flux configurations
 │   │   └── talos1018/
 │   │       ├── flux-system/
-│   │       ├── infrastructure.yaml
 │   │       └── apps.yaml
 │   └── components/     # Shared Kustomize components
 ├── scripts/            # Automation and validation scripts
@@ -41,20 +36,13 @@ A 3-node Kubernetes cluster running on Talos Linux. For detailed setup and confi
 - Network: Cilium CNI (native routing) with L2 announcements and Gateway API
 - Dual-stack, IPv6-primary (ULA `fd00:1018:0:5:10:18:6:90-93`, IPv4 `10.18.6.90-93`)
 
-### Infrastructure Architecture
+### Platform
 
-Layered architecture with minimal dependencies:
+One Flux `apps` Kustomization applies everything; ordering is per-component `dependsOn`:
 
-**Core** (no dependencies):
-- Cilium CNI (native routing) with L2 announcements and Gateway API (HTTPRoutes for all apps)
-- cert-manager with Let's Encrypt
-
-**Storage** (depends on core):
-- Longhorn with S3 backups to Cloudflare R2
-
-**Applications** (depends on core):
-- Deploy in parallel
-- Storage-dependent apps wait automatically via Kubernetes
+- Gateway API CRDs, then Cilium CNI (native routing, L2 announcements, Gateway API for all HTTPRoutes) and cert-manager with Let's Encrypt
+- Longhorn storage with daily backups to Backblaze B2, after Cilium and cert-manager
+- Applications deploy in parallel; those with a Longhorn volume wait for Longhorn via `dependsOn`
 
 ### Kubernetes GitOps
 
