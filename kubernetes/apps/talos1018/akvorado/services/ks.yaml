@@ -4,13 +4,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: akvorado-services-app
+  name: akvorado-services
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infra-longhorn-config
+    - name: longhorn-config
       namespace: flux-system
-    - name: akvorado-orchestrator-app
+    - name: akvorado-orchestrator
   decryption:
     provider: sops
     secretRef:

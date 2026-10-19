@@ -11,7 +11,7 @@ spec:
     secretRef:
       name: sops-age
   dependsOn:
-    - name: infra-longhorn-config
+    - name: longhorn-config
       namespace: flux-system
   interval: 1h
   retryInterval: 1m

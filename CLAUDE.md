@@ -52,8 +52,8 @@ applies every component's `ks.yaml`; ordering is per-component `dependsOn`:
 cluster-config (secrets/vars)
     ↓
 apps
-  gateway-api-app ─► infra-cilium-app ─► infra-cilium-config ─┐
-                  └► infra-cert-manager-app ─► infra-cert-manager-config ─┴► infra-longhorn-app ─► infra-longhorn-config
+  gateway-api ─► cilium ─► cilium-config ─┐
+                  └► cert-manager ─► cert-manager-config ─┴► longhorn ─► longhorn-config
                                                                                          ↓
                                                      every app Kustomization with a Longhorn PVC
 ```
@@ -61,7 +61,7 @@ apps
 The `infra-*` names are historical (the separate infrastructure layer was
 folded into `apps/` in Oct 2026, docs/infra-into-apps.md). Every app
 Kustomization that uses a Longhorn PVC (pvc.yaml or a chart
-volumeClaimTemplate) must list `infra-longhorn-config` in its own `dependsOn`
+volumeClaimTemplate) must list `longhorn-config` in its own `dependsOn`
 (Longhorn installed, both StorageClasses and the backup recurring jobs in
 place). Other app ordering is also per-app `dependsOn`.
 
@@ -170,7 +170,7 @@ kubernetes/apps/talos1018/<category>/<app-name>/
     ├── kustomization.yaml       # sets `namespace: <ns>`
     ├── deployment.yaml, service.yaml (preferred) or helmrelease.yaml
     ├── httproute.yaml           # or the chart's native route: support
-    ├── pvc.yaml                 # if needed; add infra-longhorn-config to ks.yaml dependsOn
+    ├── pvc.yaml                 # if needed; add longhorn-config to ks.yaml dependsOn
     └── <app>-secret.sops.yaml   # if needed; stringData only
 
 # 2. Encrypt secrets (rules and age key come from .sops.yaml)

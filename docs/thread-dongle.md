@@ -82,7 +82,7 @@ The flasher needs exclusive access to the serial port, and Flux would otherwise 
 border router straight back up:
 
 ```bash
-flux suspend kustomization otbr-app
+flux suspend kustomization otbr
 kubectl scale deploy -n home-automation otbr-3 --replicas=0
 ```
 
@@ -191,7 +191,7 @@ correct the replica drift on its next reconcile.
 ```bash
 kubectl delete pod -n home-automation dongle-flasher
 kubectl scale deploy -n home-automation otbr-3 --replicas=1
-flux resume kustomization otbr-app
+flux resume kustomization otbr
 ```
 
 A border router that has just rejoined sits at `state=child` with few neighbours.

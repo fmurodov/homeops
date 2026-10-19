@@ -12,7 +12,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infra-longhorn-config
+    - name: longhorn-config
       namespace: flux-system
   decryption:
     provider: sops

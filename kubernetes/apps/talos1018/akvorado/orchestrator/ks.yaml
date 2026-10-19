@@ -4,12 +4,12 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: akvorado-orchestrator-app
+  name: akvorado-orchestrator
   namespace: flux-system
 spec:
   dependsOn:
-    - name: akvorado-kafka-app
-    - name: akvorado-clickhouse-app
+    - name: akvorado-kafka
+    - name: akvorado-clickhouse
   decryption:
     provider: sops
     secretRef:
