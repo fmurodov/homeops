@@ -17,6 +17,7 @@ spec:
     name: flux-system
   path: ./kubernetes/apps/talos1018/home-automation/matter-server/app
   prune: true
+  deletionPolicy: Orphan
   wait: true
   decryption:
     provider: sops

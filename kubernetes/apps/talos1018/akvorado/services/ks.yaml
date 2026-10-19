@@ -23,6 +23,7 @@ spec:
     name: flux-system
   path: ./kubernetes/apps/talos1018/akvorado/services/app
   prune: true
+  deletionPolicy: Orphan
   wait: true
   postBuild:
     substituteFrom:
