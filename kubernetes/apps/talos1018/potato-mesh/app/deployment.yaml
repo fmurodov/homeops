@@ -43,8 +43,6 @@ spec:
               value: "https://potato-mesh.${CLUSTER_DOMAIN}"
             - name: FEDERATION
               value: "0"
-            - name: PRIVATE
-              value: "1"
             # The default links to upstream's Matrix room.
             - name: CONTACT_LINK
               value: ""
@@ -142,8 +140,6 @@ spec:
               value: http://potato-mesh-web:41447
             - name: FEDERATION
               value: "0"
-            - name: PRIVATE
-              value: "1"
             - name: API_TOKEN
               valueFrom:
                 secretKeyRef:
