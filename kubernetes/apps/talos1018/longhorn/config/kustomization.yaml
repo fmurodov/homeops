@@ -13,7 +13,7 @@ resources:
   - ./httproute.yaml
   - ./metrics-networkpolicy.yaml
 components:
-  - ../../../../../components/oauth2-proxy
+  - ../../../../components/oauth2-proxy
 configMapGenerator:
   - name: oauth2-proxy
     literals:

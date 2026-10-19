@@ -14,6 +14,9 @@ resources:
   # TLS certificates (Let's Encrypt issuers)
   - ./cert-manager/ks.yaml
 
+  # Distributed block storage
+  - ./longhorn/ks.yaml
+
   - ./security
 
   # Cluster lifecycle
