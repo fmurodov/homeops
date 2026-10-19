@@ -1,5 +1,7 @@
 # Fold `infrastructure/` into `apps/` (homeops-project#94)
 
+> **Done 2026-10-19** (fmurodov/homeops-project#94, PRs #1042, #1046–#1049 and step 5). `kubernetes/infrastructure/` and the `infra-core`/`infra-storage` parents are gone; Cilium and Longhorn keep `deletionPolicy: Orphan` as a permanent guard. Kept as the record of how Kustomizations are moved between parents safely.
+
 Decision (refactoring-plan.md §6): drop the separate
 `kubernetes/infrastructure/talos1018` tree and keep everything under
 `kubernetes/apps/talos1018`, ordered with `dependsOn` only where it matters.

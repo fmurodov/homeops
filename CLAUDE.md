@@ -28,12 +28,11 @@ homeops/
 ├── kubernetes/
 │   ├── clusters/talos1018/    # Flux configuration
 │   │   ├── cluster-config.yaml      # Cluster secrets/vars
-│   │   ├── infrastructure.yaml      # Infrastructure layer
 │   │   └── apps.yaml               # Applications layer
-│   ├── infrastructure/talos1018/
-│   │   ├── core/              # Cilium, cert-manager
-│   │   └── storage/           # Longhorn
-│   ├── apps/talos1018/        # Apps by category; each app is ks.yaml + app/
+│   ├── apps/talos1018/        # Everything, by category; each app is ks.yaml + app/
+│   │   ├── kube-system/cilium/    # CNI, L2 announcements, LB pools (+ config/)
+│   │   ├── cert-manager/          # Let's Encrypt issuers (+ config/)
+│   │   ├── longhorn/              # Storage, backups (+ config/)
 │   │   └── network/gateway-api/   # Gateway API CRDs + main-gateway, internal-gateway
 │   └── components/common/     # Shared components (cluster-secrets)
 │
@@ -47,24 +46,26 @@ homeops/
 
 ## GitOps Architecture
 
-**Layered Dependency Model**:
+**Dependency Model** — one `apps` Kustomization (depends on `cluster-config`)
+applies every component's `ks.yaml`; ordering is per-component `dependsOn`:
 ```
 cluster-config (secrets/vars)
     ↓
-infra-core (Cilium with L2 + Gateway API, cert-manager)
-    ↓                          ↓
-infra-storage (Longhorn)     apps (depends on cluster-config + infra-core only)
-    ↓                          ↓
-infra-longhorn-config  ←──  per-app Kustomizations with a Longhorn PVC
+apps
+  gateway-api-app ─► infra-cilium-app ─► infra-cilium-config ─┐
+                  └► infra-cert-manager-app ─► infra-cert-manager-config ─┴► infra-longhorn-app ─► infra-longhorn-config
+                                                                                         ↓
+                                                     every app Kustomization with a Longhorn PVC
 ```
 
-The `apps` Kustomization does not wait for storage. Every app Kustomization
-that uses a Longhorn PVC (pvc.yaml or a chart volumeClaimTemplate) must list
-`infra-longhorn-config` in its own `dependsOn` (Longhorn installed, both
-StorageClasses and the backup recurring jobs in place). Other app ordering is
-also per-app `dependsOn`.
+The `infra-*` names are historical (the separate infrastructure layer was
+folded into `apps/` in Oct 2026, docs/infra-into-apps.md). Every app
+Kustomization that uses a Longhorn PVC (pvc.yaml or a chart
+volumeClaimTemplate) must list `infra-longhorn-config` in its own `dependsOn`
+(Longhorn installed, both StorageClasses and the backup recurring jobs in
+place). Other app ordering is also per-app `dependsOn`.
 
-**Component Structure** (infrastructure components):
+**Component Structure** (Helm-based platform components: cilium, cert-manager, longhorn):
 ```
 component/
 ├── app/                 # HelmRelease + HelmRepository
@@ -132,7 +133,7 @@ fix(container): update image ghcr.io/esphome/esphome ( 2025.12.4 ➔ 2025.12.5 )
 1. **Always validate before committing** - Run `./scripts/validate.sh`
 2. **Follow semantic commits** - Use the convention above
 3. **Encrypt all secrets** - Use SOPS, never commit unencrypted secrets
-4. **Respect layered architecture** - Understand infra-core → infra-storage → apps dependencies
+4. **Respect dependencies** - Ordering is per-Kustomization `dependsOn` (gateway-api → cilium/cert-manager → longhorn → PVC apps)
 5. **Follow existing patterns** - Look at similar components for examples
 6. **Use variable substitution** - Reference `${CLUSTER_DOMAIN}`, etc. from cluster-secrets
 
@@ -222,7 +223,7 @@ sops -d path/to/secret.sops.yaml
 
 - **Cluster-wide secrets**: `kubernetes/components/common/cluster-secrets.sops.yaml`
 - **Talos config**: `talos/talos1018/patches/`, rendered by `talos/talos1018/generate.sh`
-- **Flux orchestration**: `kubernetes/clusters/talos1018/{cluster-config,infrastructure,apps}.yaml`
+- **Flux orchestration**: `kubernetes/clusters/talos1018/{cluster-config,apps}.yaml`
 - **SOPS config**: `.sops.yaml` (root, covers both trees), `kubernetes/.sops.yaml`, `talos/talos1018/.sops.yaml`
 - **Validation scripts**: `scripts/validate.sh`, `scripts/validate-flux.sh`
 
