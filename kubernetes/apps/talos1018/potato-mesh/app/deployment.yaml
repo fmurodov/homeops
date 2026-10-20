@@ -193,7 +193,7 @@ spec:
             name: set-companion-clock
         - name: radio
           hostPath:
-            path: /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_80:B5:4E:F1:13:7C-if00
+            path: /dev/serial/by-id/usb-Raspberry_Pi_Pico_W_E6632C8593276C30-if00
             # Untyped, kubelet creates a directory here whenever the udev symlink is
             # briefly absent, which then blocks udev from ever recreating it.
             type: CharDevice
