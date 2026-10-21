@@ -35,7 +35,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: n8n
-          image: ghcr.io/n8n-io/n8n:2.44.0
+          image: ghcr.io/n8n-io/n8n:2.45.1
           ports:
             - name: http
               containerPort: 8080
