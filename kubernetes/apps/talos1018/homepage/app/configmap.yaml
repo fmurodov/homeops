@@ -34,10 +34,10 @@ data:
         - icon: mdi-web
           description: Domain registrar
           href: https://www.transip.nl/cp/
-      - Tailscale:
-        - icon: sh-tailscale.svg
-          description: Tailnet devices and ACLs
-          href: https://login.tailscale.com/admin
+      - NetBird:
+        - icon: sh-netbird.svg
+          description: Peers and access policies
+          href: https://app.netbird.io
       - UptimeRobot:
         - icon: sh-uptimerobot.svg
           description: External uptime monitors
