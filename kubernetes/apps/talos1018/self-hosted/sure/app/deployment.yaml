@@ -32,7 +32,7 @@ spec:
       containers:
         - name: sure
           # renovate: datasource=docker depName=ghcr.io/we-promise/sure
-          image: ghcr.io/we-promise/sure:0.7.1
+          image: ghcr.io/we-promise/sure:0.7.5
           ports:
             - name: http
               containerPort: 3000
@@ -98,7 +98,7 @@ spec:
               mountPath: /rails/storage
         - name: worker
           # renovate: datasource=docker depName=ghcr.io/we-promise/sure
-          image: ghcr.io/we-promise/sure:0.7.1
+          image: ghcr.io/we-promise/sure:0.7.5
           command:
             - bundle
             - exec
