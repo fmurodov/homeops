@@ -24,7 +24,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: changedetection
-          image: ghcr.io/dgtlmoon/changedetection.io:0.60.8
+          image: ghcr.io/dgtlmoon/changedetection.io:0.60.9
           ports:
             - name: http
               containerPort: 5000
