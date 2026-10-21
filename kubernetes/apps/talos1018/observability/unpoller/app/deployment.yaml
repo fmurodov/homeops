@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: unpoller
-          image: ghcr.io/unpoller/unpoller:v5.6.3
+          image: ghcr.io/unpoller/unpoller:v5.7.0
           ports:
             - name: metrics
               containerPort: 9130
