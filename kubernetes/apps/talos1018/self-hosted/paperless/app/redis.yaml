@@ -23,7 +23,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: paperless-redis
-          image: ghcr.io/valkey-io/valkey:9.1.0
+          image: ghcr.io/valkey-io/valkey:9.1.2
           args:
             - --appendonly
             - "yes"
