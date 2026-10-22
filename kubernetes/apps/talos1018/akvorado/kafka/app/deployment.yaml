@@ -30,7 +30,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: kafka
-          image: apache/kafka:4.3.1
+          image: apache/kafka:4.4.0
           env:
             - name: CLUSTER_ID
               value: WRrU3wkDSNWJ3OkNJ2XZdA
