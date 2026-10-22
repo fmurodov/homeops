@@ -41,7 +41,7 @@ spec:
               mountPath: /tmp
       containers:
         - name: multus
-          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v4.3.0
+          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v4.3.1
           args:
             # On exit the entrypoint removes 00-multus.conflist, so pods
             # created while multus is down fall back to Cilium only.
