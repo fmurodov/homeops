@@ -34,7 +34,7 @@ spec:
                   topologyKey: kubernetes.io/hostname
           containers:
             - name: exporter
-              image: ghcr.io/paperless-ngx/paperless-ngx:3.3.0
+              image: ghcr.io/paperless-ngx/paperless-ngx:3.3.3
               command:
                 - /bin/bash
                 - -c
