@@ -25,7 +25,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: readsb
-          image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest-build-973
+          image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest-build-974
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
