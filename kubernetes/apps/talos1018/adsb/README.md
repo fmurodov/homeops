@@ -12,7 +12,7 @@ which re-broadcasts in-cluster to the other feeders plus a local map/API.
 ```
 
 `readsb` also feeds adsb.fi, planespotters.net, adsb.lol, airplanes.live,
-theairtraffic.com, and avdelphi.com directly via `ULTRAFEEDER_CONFIG` — no
+theairtraffic.com, avdelphi.com, and FlightDeck directly via `ULTRAFEEDER_CONFIG` — no
 separate container needed for those.
 
 ## Apps
