@@ -26,7 +26,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: pocket-id
-          image: ghcr.io/pocket-id/pocket-id:v2.19.0
+          image: ghcr.io/pocket-id/pocket-id:v2.19.1
           ports:
             - name: http
               containerPort: 1411
