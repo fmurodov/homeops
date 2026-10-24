@@ -36,7 +36,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: clickhouse
-          image: clickhouse/clickhouse-server:26.9
+          image: clickhouse/clickhouse-server:26.10
           env:
             - name: CLICKHOUSE_SKIP_USER_SETUP
               value: "1"
