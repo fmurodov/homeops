@@ -33,7 +33,7 @@ spec:
               app.kubernetes.io/name: openspeedtest
       containers:
         - name: openspeedtest
-          image: "openspeedtest/latest:v2.0.6"
+          image: "openspeedtest/latest:v2.0.8"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
