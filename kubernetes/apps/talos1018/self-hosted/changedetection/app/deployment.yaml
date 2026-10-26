@@ -63,7 +63,7 @@ spec:
             - name: data
               mountPath: /datastore
         - name: browser
-          image: ghcr.io/browserless/chrome:v2.57.2
+          image: ghcr.io/browserless/chrome:v2.57.3
           env:
             - name: HOST
               value: "::"
