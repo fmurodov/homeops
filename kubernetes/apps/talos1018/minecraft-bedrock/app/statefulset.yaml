@@ -26,7 +26,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: main
-          image: "itzg/minecraft-bedrock-server:2026.10.1"
+          image: "itzg/minecraft-bedrock-server:2026.10.2"
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
