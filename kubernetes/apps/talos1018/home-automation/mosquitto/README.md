@@ -41,6 +41,7 @@ handshake.
 
 Five users: `homeassistant`, `ithohru` (the ventilation add-on), `itho-wpu`
 (the heat pump add-on), `itho-autotemp` (the Autotemp add-on) and `esphome`.
+The Itho add-ons themselves are described in [docs/itho-wifi.md](../../../../../docs/itho-wifi.md).
 The ESPHome dashboard connects to the broker whenever any device config carries
 an `mqtt:` block — it reads `username`/`password` straight from that block, so
 the credentials belong in the device YAML on the ESPHome PVC, referenced from
