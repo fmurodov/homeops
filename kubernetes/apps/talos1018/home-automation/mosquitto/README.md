@@ -6,7 +6,7 @@ MQTT broker for the home-automation namespace.
 
 | Port | Transport | Used by |
 | ---- | --------- | ------- |
-| 1883 | plaintext | Itho ventilation add-on |
+| 1883 | plaintext | Itho add-ons (ventilation, heat pump, Autotemp) |
 | 8883 | TLS       | Home Assistant, any future TLS-capable client |
 
 Both listeners require authentication — `per_listener_settings` is left at its
@@ -39,8 +39,8 @@ handshake.
 
 ## Credentials
 
-Four users: `homeassistant`, `ithohru` (the ventilation add-on), `itho-wpu`
-(the heat pump add-on) and `esphome`.
+Five users: `homeassistant`, `ithohru` (the ventilation add-on), `itho-wpu`
+(the heat pump add-on), `itho-autotemp` (the Autotemp add-on) and `esphome`.
 The ESPHome dashboard connects to the broker whenever any device config carries
 an `mqtt:` block — it reads `username`/`password` straight from that block, so
 the credentials belong in the device YAML on the ESPHome PVC, referenced from
