@@ -30,7 +30,7 @@ spec:
         kubernetes.io/hostname: talos-1018-1
       containers:
         - name: otbr
-          image: openthread/border-router:v2026.10.0
+          image: openthread/border-router:v2026.11.0
           securityContext:
             privileged: true
             capabilities:
@@ -142,7 +142,7 @@ spec:
         kubernetes.io/hostname: talos-1018-3
       containers:
         - name: otbr
-          image: openthread/border-router:v2026.10.0
+          image: openthread/border-router:v2026.11.0
           securityContext:
             privileged: true
             capabilities:
