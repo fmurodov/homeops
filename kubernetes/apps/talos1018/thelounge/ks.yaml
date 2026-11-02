@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# thelounge - Web IRC client, behind oauth2-proxy (Pocket ID)
+# PREREQUISITES:
+#   - Pocket ID OIDC client with callback https://thelounge.<cluster domain>/oauth2/callback
+#   - explicit DNS record for thelounge on the internal gateway (fmurodov-tf)
+#   - a Lounge user: kubectl -n thelounge exec -it deploy/thelounge -- thelounge add <name>
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: thelounge
+  namespace: flux-system
+spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  dependsOn:
+    - name: longhorn-config
+      namespace: flux-system
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/talos1018/thelounge/app
+  prune: true
+  wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets

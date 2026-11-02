@@ -45,6 +45,9 @@ resources:
   - ./homebox/ks.yaml
   - ./bricktracker/ks.yaml
 
+  # Web IRC client
+  - ./thelounge/ks.yaml
+
   # Media and Entertainment
   - ./media
   - ./minecraft-bedrock/ks.yaml
