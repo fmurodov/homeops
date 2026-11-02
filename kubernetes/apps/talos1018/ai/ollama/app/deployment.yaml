@@ -44,7 +44,7 @@ spec:
       containers:
         - name: ollama
           # renovate: datasource=docker depName=ollama/ollama
-          image: ollama/ollama:0.40.12
+          image: ollama/ollama:0.40.13
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
