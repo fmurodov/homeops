@@ -24,8 +24,8 @@ targets `/dev/nvme0n1`.
 - kubectl
 - helm
 - sops + age key
-- 3 control-plane nodes (fd00:1018:0:5:10:18:6:91-93)
-- Control-plane VIP: fd00:1018:0:5:10:18:6:90
+- 3 control-plane nodes (fd6d:cefe:ddc3:5:10:18:6:91-93)
+- Control-plane VIP: fd6d:cefe:ddc3:5:10:18:6:90
 
 ## Installation Steps
 
@@ -63,13 +63,13 @@ talosctl apply-config --insecure -n 10.18.6.93 --file clusterconfig/talos1018-ta
 Run this **once**, on a single control-plane node:
 
 ```bash
-talosctl bootstrap -n fd00:1018:0:5:10:18:6:91
+talosctl bootstrap -n fd6d:cefe:ddc3:5:10:18:6:91
 ```
 
 ### Get kubeconfig
 
 ```bash
-talosctl kubeconfig --nodes fd00:1018:0:5:10:18:6:90
+talosctl kubeconfig --nodes fd6d:cefe:ddc3:5:10:18:6:90
 ```
 
 ### Network Configuration with Cilium
@@ -146,15 +146,15 @@ kubectl -n kube-system get pods
 3. Check what changes on a node before applying:
 
 ```bash
-talosctl apply-config -n fd00:1018:0:5:10:18:6:91 --file clusterconfig/talos1018-talos-1018-1.yaml --dry-run
+talosctl apply-config -n fd6d:cefe:ddc3:5:10:18:6:91 --file clusterconfig/talos1018-talos-1018-1.yaml --dry-run
 ```
 
 4. Apply the generated configurations to each control plane node:
 
 ```bash
-talosctl apply-config -n fd00:1018:0:5:10:18:6:91 --file clusterconfig/talos1018-talos-1018-1.yaml
-talosctl apply-config -n fd00:1018:0:5:10:18:6:92 --file clusterconfig/talos1018-talos-1018-2.yaml
-talosctl apply-config -n fd00:1018:0:5:10:18:6:93 --file clusterconfig/talos1018-talos-1018-3.yaml
+talosctl apply-config -n fd6d:cefe:ddc3:5:10:18:6:91 --file clusterconfig/talos1018-talos-1018-1.yaml
+talosctl apply-config -n fd6d:cefe:ddc3:5:10:18:6:92 --file clusterconfig/talos1018-talos-1018-2.yaml
+talosctl apply-config -n fd6d:cefe:ddc3:5:10:18:6:93 --file clusterconfig/talos1018-talos-1018-3.yaml
 ```
 
 ## Talos upgrade
@@ -175,7 +175,7 @@ Before merging:
 3. Take an etcd snapshot (any control-plane node):
 
    ```bash
-   talosctl -n fd00:1018:0:5:10:18:6:92 etcd snapshot ~/talos-etcd-snapshots/etcd-before-$(date +%Y%m%d%H%M).db
+   talosctl -n fd6d:cefe:ddc3:5:10:18:6:92 etcd snapshot ~/talos-etcd-snapshots/etcd-before-$(date +%Y%m%d%H%M).db
    ```
 
 For a Kubernetes minor bump, check the Cilium version supports it first.
@@ -189,9 +189,9 @@ Manual upgrade:
 set TALOS_VERSION v1.14.5
 set TALOS_IMAGE "factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:$TALOS_VERSION"
 
-talosctl upgrade -n fd00:1018:0:5:10:18:6:91 --image "$TALOS_IMAGE" --wait
-talosctl upgrade -n fd00:1018:0:5:10:18:6:92 --image "$TALOS_IMAGE" --wait
-talosctl upgrade -n fd00:1018:0:5:10:18:6:93 --image "$TALOS_IMAGE" --wait
+talosctl upgrade -n fd6d:cefe:ddc3:5:10:18:6:91 --image "$TALOS_IMAGE" --wait
+talosctl upgrade -n fd6d:cefe:ddc3:5:10:18:6:92 --image "$TALOS_IMAGE" --wait
+talosctl upgrade -n fd6d:cefe:ddc3:5:10:18:6:93 --image "$TALOS_IMAGE" --wait
 ```
 
 ## etcd backups
@@ -209,7 +209,7 @@ age -d -i <age-key-file> -o db.snapshot talos1018-<timestamp>.snap.age
 ```
 
 ```bash
-talosctl -n fd00:1018:0:5:10:18:6:91 bootstrap --recover-from=./db.snapshot
+talosctl -n fd6d:cefe:ddc3:5:10:18:6:91 bootstrap --recover-from=./db.snapshot
 ```
 
 ## System extensions
