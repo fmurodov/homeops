@@ -11,7 +11,7 @@ KUBERNETES_VERSION=v1.36.3
 # Image Factory schematic: intel-ucode, iscsi-tools, util-linux-tools
 INSTALL_IMAGE="factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:$TALOS_VERSION"
 
-NODE_IPS=(fd00:1018:0:5:10:18:6:91 fd00:1018:0:5:10:18:6:92 fd00:1018:0:5:10:18:6:93)
+NODE_IPS=(fd6d:cefe:ddc3:5:10:18:6:91 fd6d:cefe:ddc3:5:10:18:6:92 fd6d:cefe:ddc3:5:10:18:6:93)
 OUTPUT="${OUTPUT:-clusterconfig}"
 
 if [[ -z "${SECRETS:-}" ]]; then
@@ -20,6 +20,9 @@ if [[ -z "${SECRETS:-}" ]]; then
     sops --decrypt secrets.sops.yaml > "$SECRETS"
 fi
 
+# The endpoint is also the service-account issuer. Changing it invalidates every
+# service-account token in the cluster, so it stays on the old VIP until that
+# is done deliberately (both issuers accepted during the switch).
 talosctl gen config talos1018 "https://[fd00:1018:0:5:10:18:6:90]:6443" \
     --with-secrets "$SECRETS" \
     --talos-version v1.14 \

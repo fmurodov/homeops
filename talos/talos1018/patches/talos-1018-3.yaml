@@ -19,5 +19,5 @@ addresses:
   - address: fd6d:cefe:ddc3:5:10:18:6:93/64
   - address: 10.18.6.93/24
 routes:
-  - gateway: fd00:1018:0:5::1
+  - gateway: fd6d:cefe:ddc3:5::1
   - gateway: 10.18.6.1

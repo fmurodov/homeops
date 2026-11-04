@@ -34,7 +34,7 @@ A 3-node Kubernetes cluster running on Talos Linux. For detailed setup and confi
 
 - Control plane: 3 nodes
 - Network: Cilium CNI (native routing) with L2 announcements and Gateway API
-- Dual-stack, IPv6-primary (ULA `fd00:1018:0:5:10:18:6:90-93`, IPv4 `10.18.6.90-93`)
+- Dual-stack, IPv6-primary (ULA `fd6d:cefe:ddc3:5:10:18:6:90-93`, IPv4 `10.18.6.90-93`)
 
 ### Platform
 
