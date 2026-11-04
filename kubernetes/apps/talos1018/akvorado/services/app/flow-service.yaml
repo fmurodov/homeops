@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: akvorado-inlet
     service.kubernetes.io/topology: internal
   annotations:
-    io.cilium/lb-ipam-ips: "fd00:1018:0:5:3000::41,10.18.6.41"
+    io.cilium/lb-ipam-ips: "fd6d:cefe:ddc3:5:3000::41,10.18.6.41"
     # Akvorado keys exporters by source address; SNAT would erase it.
     service.cilium.io/forwarding-mode: dsr
 spec:
