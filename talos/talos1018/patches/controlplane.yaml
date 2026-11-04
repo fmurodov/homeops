@@ -4,6 +4,10 @@ machine:
     - fd00:1018:0:5:10:18:6:91
     - fd00:1018:0:5:10:18:6:92
     - fd00:1018:0:5:10:18:6:93
+    - fd6d:cefe:ddc3:5:10:18:6:90
+    - fd6d:cefe:ddc3:5:10:18:6:91
+    - fd6d:cefe:ddc3:5:10:18:6:92
+    - fd6d:cefe:ddc3:5:10:18:6:93
     - 10.18.6.91
     - 10.18.6.92
     - 10.18.6.93
@@ -55,6 +59,10 @@ certExtraSANs:
   - fd00:1018:0:5:10:18:6:91
   - fd00:1018:0:5:10:18:6:92
   - fd00:1018:0:5:10:18:6:93
+  - fd6d:cefe:ddc3:5:10:18:6:90
+  - fd6d:cefe:ddc3:5:10:18:6:91
+  - fd6d:cefe:ddc3:5:10:18:6:92
+  - fd6d:cefe:ddc3:5:10:18:6:93
   - 10.18.6.91
   - 10.18.6.92
   - 10.18.6.93
@@ -231,6 +239,12 @@ interval: 168h0m0s
 apiVersion: v1alpha1
 kind: Layer2VIPConfig
 name: fd00:1018:0:5:10:18:6:90
+link: net0
+---
+# The same VIP in the dn42 ULA, so clients can move over before the old one goes
+apiVersion: v1alpha1
+kind: Layer2VIPConfig
+name: fd6d:cefe:ddc3:5:10:18:6:90
 link: net0
 ---
 apiVersion: v1alpha1
