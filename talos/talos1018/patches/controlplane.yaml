@@ -20,9 +20,13 @@ machine:
 
 cluster:
   etcd:
+    # Peer URLs come from these. The IPv4 one keeps peers reachable while the
+    # stored member URLs catch up with the IPv6 change. The VIP moves between
+    # nodes, so it must not become a peer URL.
     advertisedSubnets:
-      - fd00:1018:0:5::/64
+      - fd6d:cefe:ddc3:5::/64
       - 10.18.6.0/24
+      - "!fd6d:cefe:ddc3:5:10:18:6:90/128"
     extraArgs:
       listen-metrics-urls: "http://[::]:2381"
 ---
