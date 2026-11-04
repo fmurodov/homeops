@@ -20,7 +20,10 @@ if [[ -z "${SECRETS:-}" ]]; then
     sops --decrypt secrets.sops.yaml > "$SECRETS"
 fi
 
-talosctl gen config talos1018 "https://[fd6d:cefe:ddc3:5:10:18:6:90]:6443" \
+# The endpoint is also the service-account issuer. Changing it invalidates every
+# service-account token in the cluster, so it stays on the old VIP until that
+# is done deliberately (both issuers accepted during the switch).
+talosctl gen config talos1018 "https://[fd00:1018:0:5:10:18:6:90]:6443" \
     --with-secrets "$SECRETS" \
     --talos-version v1.14 \
     --kubernetes-version "$KUBERNETES_VERSION" \
