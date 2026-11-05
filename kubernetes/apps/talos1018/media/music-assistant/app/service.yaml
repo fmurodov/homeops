@@ -28,7 +28,7 @@ metadata:
     # Selects internal-pool; changing it moves the LB IP to another pool.
     service.kubernetes.io/topology: internal
   annotations:
-    io.cilium/lb-ipam-ips: "fd00:1018:0:5:3000::44"
+    io.cilium/lb-ipam-ips: "fd6d:cefe:ddc3:5:3000::44"
 spec:
   type: LoadBalancer
   ipFamilyPolicy: SingleStack

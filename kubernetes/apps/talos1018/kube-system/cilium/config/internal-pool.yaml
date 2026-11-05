@@ -6,9 +6,11 @@ metadata:
   name: internal-pool
 spec:
   blocks:
-    # Carved from the on-link LAN ranges (fd00:1018:0:5::/64, 10.18.6.0/24) so
+    # Carved from the on-link LAN ranges (fd6d:cefe:ddc3:5::/64, 10.18.6.0/24) so
     # L2/NDP announcements make these reachable without router static routes.
     # Must not overlap clusterSvcNets (fd00:1018:2000::/108, 10.96.0.0/12).
+    - cidr: "fd6d:cefe:ddc3:5:3000::/96"
+    # Old server LAN ULA, kept until the fd00:1018 addresses are removed.
     - cidr: "fd00:1018:0:5:3000::/96"
     - start: "10.18.6.40"
       stop: "10.18.6.69"
