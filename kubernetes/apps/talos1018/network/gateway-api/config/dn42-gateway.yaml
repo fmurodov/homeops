@@ -1,0 +1,22 @@
+---
+# The only thing DN42 peers may reach (rock64 dn42-fw opens it per port).
+# IPv6 only: DN42 here is IPv6 only and dn42-pool has no IPv4 block.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: dn42-gateway
+spec:
+  gatewayClassName: cilium
+  infrastructure:
+    annotations:
+      io.cilium/lb-ipam-ips: "fd6d:cefe:ddc3:5:4000::1"
+    labels:
+      service.kubernetes.io/topology: dn42
+  listeners:
+    # HTTP only until the dn42 ACME issuer exists; it also serves HTTP-01.
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
