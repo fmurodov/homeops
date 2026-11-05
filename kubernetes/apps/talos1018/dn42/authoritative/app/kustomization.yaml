@@ -8,10 +8,12 @@ resources:
   - deployment.yaml
   - service.yaml
 configMapGenerator:
-  - name: dn42-authoritative
+  - name: dn42-authoritative-config
     files:
-      - knot.conf=config/knot.conf
-      - fmurodov.dn42.zone=zones/fmurodov.dn42.zone
-      - 3.c.d.d.e.f.e.c.d.6.d.f.ip6.arpa.zone=zones/3.c.d.d.e.f.e.c.d.6.d.f.ip6.arpa.zone
+      - config/knot.conf
+  - name: dn42-authoritative-zones
+    files:
+      - zones/fmurodov.dn42.zone
+      - zones/3.c.d.d.e.f.e.c.d.6.d.f.ip6.arpa.zone
 generatorOptions:
   disableNameSuffixHash: true

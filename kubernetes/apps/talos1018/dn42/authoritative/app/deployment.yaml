@@ -66,8 +66,7 @@ spec:
                 - ALL
           volumeMounts:
             - name: config
-              mountPath: /config/knot.conf
-              subPath: knot.conf
+              mountPath: /config
               readOnly: true
             - name: zones
               mountPath: /zones
@@ -79,18 +78,10 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: dn42-authoritative
-            items:
-              - key: knot.conf
-                path: knot.conf
+            name: dn42-authoritative-config
         - name: zones
           configMap:
-            name: dn42-authoritative
-            items:
-              - key: fmurodov.dn42.zone
-                path: fmurodov.dn42.zone
-              - key: 3.c.d.d.e.f.e.c.d.6.d.f.ip6.arpa.zone
-                path: 3.c.d.d.e.f.e.c.d.6.d.f.ip6.arpa.zone
+            name: dn42-authoritative-zones
         - name: storage
           persistentVolumeClaim:
             claimName: dn42-authoritative
