@@ -6,4 +6,5 @@ resources:
   - ./l2-announcement-policy.yaml
   - ./internal-pool.yaml
   - ./external-pool.yaml
+  - ./dn42-pool.yaml
   - ./gatewayclassconfig.yaml

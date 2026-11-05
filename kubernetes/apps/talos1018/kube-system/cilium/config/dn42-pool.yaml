@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumloadbalancerippool_v2.json
+---
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: dn42-pool
+spec:
+  blocks:
+    # Services published to DN42 (IPv6 only). On-link in the SRV VLAN like
+    # internal-pool, so L2/NDP makes them reachable and DN42 traffic takes the
+    # same symmetric path through UniFi as the rest of fd6d:cefe:ddc3:5::/64.
+    # Moves to fd6d:cefe:ddc3:200::/64 once Cilium BGP announces it.
+    - cidr: "fd6d:cefe:ddc3:5:4000::/96"
+  serviceSelector:
+    matchLabels:
+      service.kubernetes.io/topology: dn42

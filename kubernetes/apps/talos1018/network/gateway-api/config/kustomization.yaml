@@ -5,4 +5,5 @@ kind: Kustomization
 resources:
   - gateway.yaml
   - internal-gateway.yaml
+  - dn42-gateway.yaml
   - httproute-redirect.yaml
