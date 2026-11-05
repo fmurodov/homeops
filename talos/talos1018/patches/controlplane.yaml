@@ -1,9 +1,6 @@
 machine:
   certSANs:
     - ::1
-    - fd00:1018:0:5:10:18:6:91
-    - fd00:1018:0:5:10:18:6:92
-    - fd00:1018:0:5:10:18:6:93
     - fd6d:cefe:ddc3:5:10:18:6:90
     - fd6d:cefe:ddc3:5:10:18:6:91
     - fd6d:cefe:ddc3:5:10:18:6:92
@@ -60,9 +57,6 @@ apiVersion: v1alpha1
 kind: KubeAPIServerConfig
 certExtraSANs:
   - ::1
-  - fd00:1018:0:5:10:18:6:91
-  - fd00:1018:0:5:10:18:6:92
-  - fd00:1018:0:5:10:18:6:93
   - fd6d:cefe:ddc3:5:10:18:6:90
   - fd6d:cefe:ddc3:5:10:18:6:91
   - fd6d:cefe:ddc3:5:10:18:6:92
@@ -252,12 +246,6 @@ interval: 168h0m0s
 # that GUA as the source for pod -> internet IPv6 traffic, so egress keeps
 # working (and renumbers automatically) when the ISP prefix changes. Do not
 # disable RA acceptance on net0 or router advertisements on this segment.
-apiVersion: v1alpha1
-kind: Layer2VIPConfig
-name: fd00:1018:0:5:10:18:6:90
-link: net0
----
-# The same VIP in the dn42 ULA, so clients can move over before the old one goes
 apiVersion: v1alpha1
 kind: Layer2VIPConfig
 name: fd6d:cefe:ddc3:5:10:18:6:90
