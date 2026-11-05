@@ -55,10 +55,8 @@ a Secret key in the same directory.
 - Console: `https://akvorado.${CLUSTER_DOMAIN}` (behind oauth2-proxy / Pocket ID)
 - Collector: `10.18.6.41`, UDP 2055 (NetFlow v9), 4739 (IPFIX), 6343 (sFlow)
 
-The Service requests `fd6d:cefe:ddc3:5:3000::41` as well, but `internal-pool` hands
-out no IPv6 today, so in practice the collector is v4-only — same as the
-victoria-logs syslog Service. UniFi's collector field takes an IPv4 address
-anyway.
+The Service also has `fd6d:cefe:ddc3:5:3000::41`, but UniFi's collector field
+takes an IPv4 address, so exporters use `10.18.6.41`.
 
 Akvorado identifies exporters by source address, so the Service pairs
 `externalTrafficPolicy: Cluster` with `service.cilium.io/forwarding-mode: dsr`.
