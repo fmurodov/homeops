@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./namespace.yaml
   - ./chrony/ks.yaml
+  - ./dn42-dns/ks.yaml
   - ./gateway-api/ks.yaml
   - ./ifconfig/ks.yaml
   - ./multus/ks.yaml

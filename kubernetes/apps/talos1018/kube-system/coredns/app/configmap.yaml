@@ -34,3 +34,11 @@ data:
         reload
         loadbalance
     }
+    # dn42 names for pods: the network/dn42-dns resolver first, anycast if it is down
+    dn42:53 d.f.ip6.arpa:53 {
+        errors
+        forward . fd6d:cefe:ddc3:5:3000::53 fd42:d42:d42:53::1 {
+            policy sequential
+        }
+        cache 300
+    }

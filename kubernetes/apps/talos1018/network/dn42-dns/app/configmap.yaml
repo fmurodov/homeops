@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dn42-dns
+data:
+  # Only the dn42 zones are served; anything else gets REFUSED, so this is not
+  # an open resolver. Port 1053 because the pods use the host network (see
+  # deployment.yaml); the Service maps 53 to it.
+  Corefile: |
+    dn42:1053 d.f.ip6.arpa:1053 {
+        errors
+        health :8153 {
+            lameduck 5s
+        }
+        ready :8154
+        log . {
+            class error
+        }
+        prometheus :9154
+        forward . fd42:d42:d42:54::1 fd42:d42:d42:53::1 {
+            health_check 10s
+        }
+        cache 300
+        reload
+        loadbalance
+    }
