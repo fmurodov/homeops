@@ -49,7 +49,9 @@ if [ "$VALIDATE_TALOS" = true ]; then
         trap 'rm -rf "$TALOS_WORK"' EXIT
         talosctl gen secrets -o "$TALOS_WORK/secrets.yaml"
 
-        if SECRETS="$TALOS_WORK/secrets.yaml" OUTPUT="$TALOS_WORK" talos/talos1018/generate.sh; then
+        # Documentation prefix in place of the real GUA /48 from cluster-secrets
+        if SECRETS="$TALOS_WORK/secrets.yaml" OUTPUT="$TALOS_WORK" IPV6_PREFIX_GUA=2001:db8:1018 \
+            talos/talos1018/generate.sh; then
             for config_file in "$TALOS_WORK"/talos1018-*.yaml; do
                 if talosctl validate --mode metal --strict --config "$config_file" > /dev/null; then
                     echo "✅ $(basename "$config_file") is valid"

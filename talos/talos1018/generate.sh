@@ -14,11 +14,22 @@ INSTALL_IMAGE="factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d389741083
 NODE_IPS=(fd6d:cefe:ddc3:5:10:18:6:91 fd6d:cefe:ddc3:5:10:18:6:92 fd6d:cefe:ddc3:5:10:18:6:93)
 OUTPUT="${OUTPUT:-clusterconfig}"
 
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+
 if [[ -z "${SECRETS:-}" ]]; then
-    SECRETS="$(mktemp)"
-    trap 'rm -f "$SECRETS"' EXIT
+    SECRETS="$WORK/secrets.yaml"
     sops --decrypt secrets.sops.yaml > "$SECRETS"
 fi
+
+# The pod /56 is carved from the ISP /48, which stays out of git (public repo):
+# patches use ${IPV6_PREFIX_GUA} and it is filled in here from cluster-secrets.
+# validate.sh passes a documentation prefix, so no age key is needed there.
+if [[ -z "${IPV6_PREFIX_GUA:-}" ]]; then
+    IPV6_PREFIX_GUA="$(sops --decrypt --extract '["stringData"]["IPV6_PREFIX_GUA"]' \
+        ../../kubernetes/components/common/cluster-secrets.sops.yaml)"
+fi
+sed "s/\${IPV6_PREFIX_GUA}/$IPV6_PREFIX_GUA/g" patches/controlplane.yaml > "$WORK/controlplane.yaml"
 
 # The endpoint is also the service-account issuer. The old fd00 issuer stays
 # accepted in patches/controlplane.yaml (KubeServiceAccountConfig).
@@ -27,7 +38,7 @@ talosctl gen config talos1018 "https://[fd6d:cefe:ddc3:5:10:18:6:90]:6443" \
     --talos-version v1.14 \
     --kubernetes-version "$KUBERNETES_VERSION" \
     --install-image "$INSTALL_IMAGE" \
-    --config-patch-control-plane @patches/controlplane.yaml \
+    --config-patch-control-plane "@$WORK/controlplane.yaml" \
     --output-types controlplane,talosconfig \
     --with-docs=false \
     --with-examples=false \
