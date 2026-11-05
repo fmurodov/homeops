@@ -75,6 +75,9 @@ spec:
               mountPath: /storage
             - name: rundir
               mountPath: /rundir
+            # knotd builds a temporary config database here from knot.conf
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config
           configMap:
@@ -86,4 +89,6 @@ spec:
           persistentVolumeClaim:
             claimName: dn42-authoritative
         - name: rundir
+          emptyDir: {}
+        - name: tmp
           emptyDir: {}
