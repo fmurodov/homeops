@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dn42
+  labels:
+    # The resolver uses the host network (see resolver/app/deployment.yaml)
+    pod-security.kubernetes.io/enforce: privileged
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled

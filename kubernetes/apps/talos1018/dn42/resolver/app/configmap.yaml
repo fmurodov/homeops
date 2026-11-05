@@ -1,0 +1,70 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dn42-resolver
+data:
+  # Full recursion from the dn42 delegation servers (dn42.dev/services/dns/Configuration),
+  # so we don't depend on someone else's anycast recursor. Only dn42 and
+  # d.f.ip6.arpa are answered; everything else is REFUSED.
+  unbound.conf: |
+    server:
+      chroot: ""
+      username: ""
+      directory: "/etc/unbound"
+      pidfile: ""
+      use-syslog: no
+      logfile: ""
+      verbosity: 1
+      num-threads: 1
+      so-reuseport: yes
+
+      # Host network, so not 53 (Talos host DNS); the Service maps 53 here
+      interface: ::@1053
+      do-ip4: no
+      do-ip6: yes
+      prefer-ip6: yes
+
+      access-control: ::/0 refuse
+      access-control: ::1/128 allow
+      access-control: fc00::/7 allow
+      access-control: ${IPV6_PREFIX_GUA}::/48 allow
+
+      local-zone: "." refuse
+      local-zone: "dn42." transparent
+      local-zone: "d.f.ip6.arpa." transparent
+
+      # No DNSSEC yet: the dn42 trust anchors are in the registry (follow-up)
+      module-config: "iterator"
+
+      hide-identity: yes
+      hide-version: yes
+      prefetch: yes
+      serve-expired: yes
+      serve-expired-ttl: 86400
+
+    remote-control:
+      control-enable: no
+
+    # The dn42 delegation servers (registry dns/delegation-servers.dn42).
+    # stub-prime fetches the current NS set, so this list only needs one live entry.
+    stub-zone:
+      name: "dn42."
+      stub-prime: yes
+      stub-addr: fd42:4242:2601:ac53::1
+      stub-addr: fd00:913e:130::400
+      stub-addr: fd42:4242:2189::1
+      stub-addr: fd42:5d71:219:0:216:3eff:fe1e:22d6
+      stub-addr: fdcf:8538:9ad5:1111::2
+      stub-addr: fd86:bad:11b7:53::1
+
+    stub-zone:
+      name: "d.f.ip6.arpa."
+      stub-prime: yes
+      stub-addr: fd42:4242:2601:ac53::1
+      stub-addr: fd00:913e:130::400
+      stub-addr: fd42:4242:2189::1
+      stub-addr: fd42:5d71:219:0:216:3eff:fe1e:22d6
+      stub-addr: fdcf:8538:9ad5:1111::2
+      stub-addr: fd86:bad:11b7:53::1

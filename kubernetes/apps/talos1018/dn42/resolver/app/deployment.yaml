@@ -1,0 +1,99 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dn42-resolver
+  labels:
+    app.kubernetes.io/name: dn42-resolver
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dn42-resolver
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dn42-resolver
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      # Queries to dn42 must leave from the node's fd6d:cefe:ddc3:5:: address:
+      # rock64 only lets home dn42 prefixes in, and pod IPv6 stops being
+      # masqueraded once pods get GUA addresses (#113).
+      hostNetwork: true
+      dnsPolicy: Default
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: dn42-resolver
+      containers:
+        - name: unbound
+          # Upstream only publishes "main"; Renovate updates the digest
+          image: docker.io/klutchell/unbound:main@sha256:ef24d26eaa095aee2253dca7d7039e2443ca3c05214ecfda73acece6763254a8
+          args:
+            - -d
+            - -c
+            - /etc/unbound/unbound.conf
+          ports:
+            - name: dns
+              containerPort: 1053
+              protocol: UDP
+            - name: dns-tcp
+              containerPort: 1053
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 1053
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 1053
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 101
+            runAsGroup: 102
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: config
+              mountPath: /etc/unbound/unbound.conf
+              subPath: unbound.conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: dn42-resolver
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: dn42-resolver
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dn42-resolver

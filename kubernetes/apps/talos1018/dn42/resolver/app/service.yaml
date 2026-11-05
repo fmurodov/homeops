@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: dn42-resolver
+  labels:
+    app.kubernetes.io/name: dn42-resolver
+    service.kubernetes.io/topology: internal
+  annotations:
+    # IPv6 only; UniFi forwards dn42 and d.f.ip6.arpa here
+    io.cilium/lb-ipam-ips: "fd6d:cefe:ddc3:5:3000::53"
+spec:
+  type: LoadBalancer
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  ports:
+    - name: dns
+      port: 53
+      targetPort: 1053
+      protocol: UDP
+    - name: dns-tcp
+      port: 53
+      targetPort: 1053
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: dn42-resolver
