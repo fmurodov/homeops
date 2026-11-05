@@ -26,7 +26,7 @@ client to its own topic tree if that is ever wanted.
 The broker sits in Cilium's `internal-pool` (`service.kubernetes.io/topology:
 internal`), so it has a ULA and no globally routable address. That pool's IPv4
 block is `10.18.6.40-69`, which is why the broker cannot keep an address from
-the `external-pool` range while using a `fd00:1018:0:5:3000::` address — the
+the `external-pool` range while using a `fd6d:cefe:ddc3:5:3000::` address — the
 label selects the pool, and both families must come from it.
 
 ## DNS

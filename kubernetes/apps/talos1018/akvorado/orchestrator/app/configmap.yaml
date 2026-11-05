@@ -111,7 +111,6 @@ data:
           "${IPV6_PREFIX_GUA}:4::/64": {name: security, role: security}
           "${IPV6_PREFIX_GUA}:5::/64": {name: srv, role: servers}
           "${IPV6_PREFIX_GUA}:6::/64": {name: lan6, role: clients}
-          fd00:1018:0:5::/64: {name: srv, role: servers}
           fd6d:cefe:ddc3:5::/64: {name: srv, role: servers}
       core:
         # The gateway never advertises its rate, so this must mirror the UniFi
