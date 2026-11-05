@@ -98,6 +98,18 @@ configuration:
       - path: /healthz
   jwt: []
 ---
+# Moving the cluster endpoint to the dn42 VIP also moves the service-account
+# issuer. Step 1: accept the new issuer and audience while the old one still
+# signs, so tokens from either stay valid during the rolling apply.
+apiVersion: v1alpha1
+kind: KubeServiceAccountConfig
+accepted:
+  issuers:
+    - https://[fd6d:cefe:ddc3:5:10:18:6:90]:6443
+  audiences:
+    - https://[fd00:1018:0:5:10:18:6:90]:6443
+    - https://[fd6d:cefe:ddc3:5:10:18:6:90]:6443
+---
 # CNI is Cilium (deployed by Flux), not Flannel
 apiVersion: v1alpha1
 kind: KubeFlannelCNIConfig
