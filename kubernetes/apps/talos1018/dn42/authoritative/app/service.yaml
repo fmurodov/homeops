@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: dn42-authoritative
+  labels:
+    app.kubernetes.io/name: dn42-authoritative
+    # dn42-pool: reachable from dn42 (rock64 dn42-fw opens 53 to this address only)
+    service.kubernetes.io/topology: dn42
+  annotations:
+    io.cilium/lb-ipam-ips: "fd6d:cefe:ddc3:5:4000::53"
+spec:
+  type: LoadBalancer
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
+  ports:
+    - name: dns
+      port: 53
+      targetPort: 1053
+      protocol: UDP
+    - name: dns-tcp
+      port: 53
+      targetPort: 1053
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: dn42-authoritative

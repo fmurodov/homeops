@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dn42
+resources:
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+configMapGenerator:
+  - name: dn42-authoritative-config
+    files:
+      - config/knot.conf
+  - name: dn42-authoritative-zones
+    files:
+      - zones/fmurodov.dn42.zone
+      - zones/3.c.d.d.e.f.e.c.d.6.d.f.ip6.arpa.zone
+generatorOptions:
+  disableNameSuffixHash: true

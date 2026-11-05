@@ -1,0 +1,89 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dn42-authoritative
+  labels:
+    app.kubernetes.io/name: dn42-authoritative
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  # The DNSSEC keys live on one RWO volume
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dn42-authoritative
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dn42-authoritative
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 53
+        runAsGroup: 53
+        fsGroup: 53
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: knot
+          image: docker.io/cznic/knot:v3.6.2@sha256:174b0fcb24c6c3bc5065c9d1ce46b588eec607a5f32bc40ff0cda60150f00bd9
+          command:
+            - knotd
+            - -c
+            - /config/knot.conf
+          ports:
+            - name: dns
+              containerPort: 1053
+              protocol: UDP
+            - name: dns-tcp
+              containerPort: 1053
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 1053
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 1053
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: zones
+              mountPath: /zones
+              readOnly: true
+            - name: storage
+              mountPath: /storage
+            - name: rundir
+              mountPath: /rundir
+      volumes:
+        - name: config
+          configMap:
+            name: dn42-authoritative-config
+        - name: zones
+          configMap:
+            name: dn42-authoritative-zones
+        - name: storage
+          persistentVolumeClaim:
+            claimName: dn42-authoritative
+        - name: rundir
+          emptyDir: {}

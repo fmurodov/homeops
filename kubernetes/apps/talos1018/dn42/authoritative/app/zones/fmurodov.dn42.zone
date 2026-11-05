@@ -1,0 +1,6 @@
+$ORIGIN fmurodov.dn42.
+$TTL 3600
+; Serial is managed by Knot (serial-policy: unixtime)
+@       IN SOA  ns1 hostmaster (1 7200 3600 1209600 300)
+@       IN NS   ns1
+ns1     IN AAAA fd6d:cefe:ddc3:5:4000::53
