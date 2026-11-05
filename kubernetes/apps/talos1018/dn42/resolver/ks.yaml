@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: dn42-dns
+  name: dn42-resolver
   namespace: flux-system
 spec:
   interval: 1h
@@ -13,7 +13,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  path: "./kubernetes/apps/talos1018/network/dn42-dns/app"
+  path: "./kubernetes/apps/talos1018/dn42/resolver/app"
   prune: true
   wait: true
   postBuild:

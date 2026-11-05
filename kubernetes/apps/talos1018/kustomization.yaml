@@ -8,6 +8,9 @@ resources:
   # Network and Infrastructure
   - ./network
 
+  # dn42 (resolver, later the dn42 gateway)
+  - ./dn42
+
   # Cloudflare Tunnel (public ingress)
   - ./cloudflared/ks.yaml
 
