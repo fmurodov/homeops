@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: dn42-authoritative
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: longhorn-config
+      namespace: flux-system
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  path: "./kubernetes/apps/talos1018/dn42/authoritative/app"
+  # No postBuild substitution: it would eat $ORIGIN and $TTL in the zone files
+  prune: true
+  wait: true

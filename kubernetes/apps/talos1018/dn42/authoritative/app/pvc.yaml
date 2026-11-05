@@ -1,0 +1,17 @@
+---
+# Journal, timers and the DNSSEC keys. Losing the KSK means a new DS in the registry.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dn42-authoritative
+  labels:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job.longhorn.io/daily-backup: enabled
+    recurring-job.longhorn.io/weekly-trim: enabled
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

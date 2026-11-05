@@ -1,0 +1,7 @@
+$ORIGIN 3.c.d.d.e.f.e.c.d.6.d.f.ip6.arpa.
+$TTL 3600
+; fd6d:cefe:ddc3::/48. Serial is managed by Knot (serial-policy: unixtime)
+@       IN SOA  ns1.fmurodov.dn42. hostmaster.fmurodov.dn42. (1 7200 3600 1209600 300)
+@       IN NS   ns1.fmurodov.dn42.
+; fd6d:cefe:ddc3:5:4000::53
+3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.4.5.0.0.0 IN PTR ns1.fmurodov.dn42.

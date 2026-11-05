@@ -68,3 +68,12 @@ data:
       stub-addr: fd42:5d71:219:0:216:3eff:fe1e:22d6
       stub-addr: fdcf:8538:9ad5:1111::2
       stub-addr: fd86:bad:11b7:53::1
+
+    # Our own zones, from dn42-authoritative (Knot) directly
+    stub-zone:
+      name: "fmurodov.dn42."
+      stub-addr: fd6d:cefe:ddc3:5:4000::53
+
+    stub-zone:
+      name: "3.c.d.d.e.f.e.c.d.6.d.f.ip6.arpa."
+      stub-addr: fd6d:cefe:ddc3:5:4000::53
