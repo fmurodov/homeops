@@ -83,7 +83,7 @@ spec:
                   memory: 2Gi
 
             - name: uploader
-              image: rclone/rclone:1.75.2
+              image: rclone/rclone:1.76.0
               command:
                 - /bin/sh
                 - -c
