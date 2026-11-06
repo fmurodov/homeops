@@ -35,3 +35,14 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-ip
+      hostname: ip.fmurodov.dn42
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: dn42-gateway-ip-tls
+      allowedRoutes:
+        namespaces:
+          from: All

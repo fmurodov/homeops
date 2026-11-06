@@ -24,9 +24,14 @@ spec:
     - name: main-gateway
       namespace: network
       sectionName: https-internal
+    # DN42 (homeops-project#116)
+    - name: dn42-gateway
+      namespace: network
+      sectionName: https-ip
   hostnames:
     - "ip.${DOMAIN}"
     - "ip.${CLUSTER_DOMAIN}"
+    - "ip.fmurodov.dn42"
   rules:
     - matches:
         - path:

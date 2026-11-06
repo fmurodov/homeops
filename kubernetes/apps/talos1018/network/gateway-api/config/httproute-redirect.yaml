@@ -12,6 +12,10 @@ spec:
     - name: internal-gateway
       namespace: network
       sectionName: http
+    # cert-manager's HTTP-01 routes name the host, so they still win here.
+    - name: dn42-gateway
+      namespace: network
+      sectionName: http
   rules:
     - filters:
         - type: RequestRedirect
