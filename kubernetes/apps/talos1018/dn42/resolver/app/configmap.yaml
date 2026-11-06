@@ -35,8 +35,14 @@ data:
       local-zone: "dn42." transparent
       local-zone: "d.f.ip6.arpa." transparent
 
-      # No DNSSEC yet: the dn42 trust anchors are in the registry (follow-up)
-      module-config: "iterator"
+      # DNSSEC: the dn42 KSKs from the registry (ds-rdata on dns/dn42 and
+      # inet6num/fd00::_8). Update these when the registry changes them.
+      module-config: "validator iterator"
+      val-log-level: 1
+      trust-anchor: "dn42. DS 64441 10 2 6dadda00f5986bd26fe4f162669742cf7eba07d212b525acac9840ee06cb2799"
+      trust-anchor: "dn42. DS 3096 10 2 b7c687a99bee60e172ea439bd2d3087b1d970916575db9c1cb591b7ee15d8cb1"
+      trust-anchor: "d.f.ip6.arpa. DS 64441 10 2 9057500a3b6e09bf45a60ed8891f2e649c6812d5d149c45a3c560fa0a6195c49"
+      trust-anchor: "d.f.ip6.arpa. DS 3096 10 2 23fb364c82e6ed1c30b18c635f58dca58bbeb2e069bbd9d90ab9a90f66b948d2"
 
       hide-identity: yes
       hide-version: yes
