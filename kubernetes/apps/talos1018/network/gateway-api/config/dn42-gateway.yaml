@@ -5,6 +5,9 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: dn42-gateway
+  annotations:
+    # dn42 ACME CA, HTTP-01 over this gateway's http listener
+    cert-manager.io/cluster-issuer: dn42
 spec:
   gatewayClassName: cilium
   infrastructure:
@@ -13,10 +16,22 @@ spec:
     labels:
       service.kubernetes.io/topology: dn42
   listeners:
-    # HTTP only until the dn42 ACME issuer exists; it also serves HTTP-01.
+    # Also serves the dn42 ACME HTTP-01 challenges.
     - name: http
       protocol: HTTP
       port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+    # One listener (and certificate) per name: HTTP-01 can't issue wildcards.
+    - name: https-fmurodov
+      hostname: fmurodov.dn42
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: dn42-gateway-fmurodov-tls
       allowedRoutes:
         namespaces:
           from: All

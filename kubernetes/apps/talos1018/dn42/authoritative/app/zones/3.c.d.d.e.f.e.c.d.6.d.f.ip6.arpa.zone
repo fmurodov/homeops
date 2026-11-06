@@ -5,3 +5,5 @@ $TTL 3600
 @       IN NS   ns1.fmurodov.dn42.
 ; fd6d:cefe:ddc3:5:4000::53
 3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.4.5.0.0.0 IN PTR ns1.fmurodov.dn42.
+; fd6d:cefe:ddc3:5:4000::1
+1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.5.0.0.0 IN PTR fmurodov.dn42.

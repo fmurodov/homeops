@@ -6,5 +6,7 @@ resources:
   - ./cloudflare-api-secret.sops.yaml
   - ./clusterissuer-staging.yaml
   - ./clusterissuer.yaml
+  - ./clusterissuer-dn42.yaml
+  - ./clusterissuer-dn42-staging.yaml
 
 namespace: cert-manager
