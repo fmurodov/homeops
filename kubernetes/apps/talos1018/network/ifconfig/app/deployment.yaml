@@ -35,7 +35,7 @@ spec:
               app.kubernetes.io/name: ifconfig
       containers:
         - name: ifconfig
-          image: "georgyo/ifconfig.io:202303260813"
+          image: "ghcr.io/fmurodov/ifconfig.io:0.1.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
