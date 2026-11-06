@@ -6,3 +6,4 @@ $TTL 3600
 ns1     IN AAAA fd6d:cefe:ddc3:5:4000::53
 ; dn42-gateway (network/dn42-gateway, dn42-pool)
 @       IN AAAA fd6d:cefe:ddc3:5:4000::1
+ip      IN AAAA fd6d:cefe:ddc3:5:4000::1
