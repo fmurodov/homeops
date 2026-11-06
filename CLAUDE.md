@@ -33,7 +33,7 @@ homeops/
 │   │   ├── kube-system/cilium/    # CNI, L2 announcements, LB pools (+ config/)
 │   │   ├── cert-manager/          # Let's Encrypt issuers (+ config/)
 │   │   ├── longhorn/              # Storage, backups (+ config/)
-│   │   └── network/gateway-api/   # Gateway API CRDs + main-gateway, internal-gateway
+│   │   └── network/gateway-api/   # Gateway API CRDs + main-gateway, internal-gateway, dn42-gateway
 │   └── components/common/     # Shared components (cluster-secrets)
 │
 ├── scripts/
@@ -187,6 +187,7 @@ sops --encrypt --in-place kubernetes/apps/talos1018/<category>/<app-name>/app/<a
 **Routing**: All apps use Cilium Gateway API. Gateways live in the `network` namespace.
 - New internal apps: `internal-gateway`, hostname `<name>.${CLUSTER_DOMAIN}`, listener `https-internal`. It has no wildcard DNS record, so each host needs an explicit DNS record (managed outside this repo). Older internal apps still use `main-gateway` `https-internal`.
 - External apps: `main-gateway`, hostname `<name>.${DOMAIN}`, listener `https-external`
+- DN42 apps: `dn42-gateway` (`fd6d:cefe:ddc3:5:4000::1`, Cilium pool `dn42-pool`), hostname `<name>.fmurodov.dn42`. Each name gets its own `https-<name>` listener and certificate (ClusterIssuer `dn42`, Burble ACME over HTTP-01, so no wildcards) and an AAAA in the Knot zone under `dn42/authoritative`. Its `http` listener redirects to HTTPS unless the route also attaches to `http`. Ports other than 80/443 also need a `dn42-fw` rule on rock64 (fmurodov/dn42).
 - Add `gethomepage.dev/*` annotations for Homepage discovery
 - If the Helm chart supports `route:` natively, use that instead of a standalone `httproute.yaml`
 
