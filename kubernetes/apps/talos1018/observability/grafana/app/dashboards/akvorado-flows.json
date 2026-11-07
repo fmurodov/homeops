@@ -1,0 +1,786 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "WAN traffic from Akvorado's ClickHouse (flows_1m0s rollup): direction, IP family, protocol, VLAN, AS and country. For per-port or per-address views use the Akvorado console or the raw flows table.",
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [],
+  "preload": false,
+  "refresh": "1m",
+  "schemaVersion": 40,
+  "tags": [
+    "network",
+    "akvorado",
+    "ipv6"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "family",
+        "label": "IP family",
+        "type": "custom",
+        "query": "IPv4 : 2048,IPv6 : 34525",
+        "multi": true,
+        "includeAll": true,
+        "allValue": "2048,34525",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": [],
+        "hide": 0
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Akvorado flows",
+  "uid": "akvorado-flows",
+  "version": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "id": 1,
+      "title": "WAN traffic",
+      "description": "Bits per second crossing the WAN: inbound positive, outbound negative. Gateway IPFIX, 1:16 random sampling, scaled. Routed VLAN-to-VLAN traffic is not exported.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, 'in' AS d, sum(Bytes * SamplingRate) * 8 / $__interval_s AS bps FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY time ORDER BY time",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, 'out' AS d, -sum(Bytes * SamplingRate) * 8 / $__interval_s AS bps FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND OutIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY time ORDER BY time",
+          "refId": "B"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 2,
+      "title": "By IP family",
+      "description": "WAN bits per second by family, both directions together. Gateway IPFIX, 1:16 random sampling, scaled. Routed VLAN-to-VLAN traffic is not exported.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, if(EType = 2048, 'IPv4', 'IPv6') AS family, sum(Bytes * SamplingRate) * 8 / $__interval_s AS bps FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND (InIfBoundary = 'external' OR OutIfBoundary = 'external') AND EType IN (${family:csv}) GROUP BY time, family ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "fillOpacity": 20,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 3,
+      "title": "By protocol",
+      "description": "WAN bits per second by IP protocol, both directions. Gateway IPFIX, 1:16 random sampling, scaled. Routed VLAN-to-VLAN traffic is not exported.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, dictGetOrDefault('protocols', 'name', Proto, toString(Proto)) AS proto, sum(Bytes * SamplingRate) * 8 / $__interval_s AS bps FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND (InIfBoundary = 'external' OR OutIfBoundary = 'external') AND EType IN (${family:csv}) GROUP BY time, proto ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "fillOpacity": 20,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 4,
+      "title": "By home network",
+      "description": "Bits per second by VLAN (Akvorado network name): downloads to each network plus uploads from it. Gateway IPFIX, 1:16 random sampling, scaled. Routed VLAN-to-VLAN traffic is not exported.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, if(DstNetName = '', 'other', DstNetName) AS net, sum(Bytes * SamplingRate) * 8 / $__interval_s AS bps FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY time, net ORDER BY time",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, if(SrcNetName = '', 'other', SrcNetName) AS net, -sum(Bytes * SamplingRate) * 8 / $__interval_s AS bps FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND OutIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY time, net ORDER BY time",
+          "refId": "B"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "piechart",
+      "id": 5,
+      "title": "IP family share",
+      "description": "Bytes by IP family over the range, both directions.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT if(EType = 2048, 'IPv4', 'IPv6') AS family, sum(Bytes * SamplingRate) AS bytes FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND (InIfBoundary = 'external' OR OutIfBoundary = 'external') AND EType IN (${family:csv}) GROUP BY family",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 6,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "type": "piechart",
+      "id": 6,
+      "title": "Protocol share",
+      "description": "Bytes by IP protocol over the range.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT dictGetOrDefault('protocols', 'name', Proto, toString(Proto)) AS proto, sum(Bytes * SamplingRate) AS bytes FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND (InIfBoundary = 'external' OR OutIfBoundary = 'external') AND EType IN (${family:csv}) GROUP BY proto",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 6,
+        "y": 16,
+        "w": 6,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "type": "piechart",
+      "id": 7,
+      "title": "WAN interface",
+      "description": "Bytes by the external interface they crossed (PPPoE vs WireGuard).",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT if(InIfBoundary = 'external', InIfName, OutIfName) AS iface, sum(Bytes * SamplingRate) AS bytes FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND (InIfBoundary = 'external' OR OutIfBoundary = 'external') AND EType IN (${family:csv}) GROUP BY iface",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 6,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "type": "piechart",
+      "id": 8,
+      "title": "Packet size",
+      "description": "Packets by size bucket, both directions.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT PacketSizeBucket AS size, sum(Packets * SamplingRate) AS packets FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND (InIfBoundary = 'external' OR OutIfBoundary = 'external') AND EType IN (${family:csv}) GROUP BY size",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 18,
+        "y": 16,
+        "w": 6,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "type": "table",
+      "id": 9,
+      "title": "Top source networks (download)",
+      "description": "Inbound bytes by the remote AS sending them.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT SrcAS AS asn, dictGetOrDefault('asns', 'name', SrcAS, '') AS name, sum(Bytes * SamplingRate) AS bytes, sum(Packets * SamplingRate) AS packets FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY asn ORDER BY bytes DESC LIMIT 20",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 12,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bytes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "packets"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "type": "table",
+      "id": 10,
+      "title": "Top destination networks (upload)",
+      "description": "Outbound bytes by the remote AS receiving them.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT DstAS AS asn, dictGetOrDefault('asns', 'name', DstAS, '') AS name, sum(Bytes * SamplingRate) AS bytes, sum(Packets * SamplingRate) AS packets FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND OutIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY asn ORDER BY bytes DESC LIMIT 20",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 24,
+        "w": 12,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bytes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "packets"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "type": "table",
+      "id": 11,
+      "title": "Top countries (download)",
+      "description": "Inbound bytes by remote country.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT if(SrcCountry = '', '??', SrcCountry) AS country, sum(Bytes * SamplingRate) AS bytes, sum(Packets * SamplingRate) AS packets FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY country ORDER BY bytes DESC LIMIT 20",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 34,
+        "w": 12,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bytes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "packets"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "type": "table",
+      "id": 12,
+      "title": "Top countries (upload)",
+      "description": "Outbound bytes by remote country.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT if(DstCountry = '', '??', DstCountry) AS country, sum(Bytes * SamplingRate) AS bytes, sum(Packets * SamplingRate) AS packets FROM flows_1m0s WHERE $__timeFilter(TimeReceived) AND OutIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY country ORDER BY bytes DESC LIMIT 20",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 34,
+        "w": 12,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bytes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "packets"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    }
+  ]
+}

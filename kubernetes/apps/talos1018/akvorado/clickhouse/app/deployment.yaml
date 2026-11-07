@@ -54,6 +54,10 @@ spec:
               mountPath: /etc/clickhouse-server/config.d/akvorado.xml
               subPath: akvorado.xml
               readOnly: true
+            - name: config
+              mountPath: /etc/clickhouse-server/users.d/grafana.xml
+              subPath: grafana.xml
+              readOnly: true
           startupProbe:
             httpGet:
               path: /ping

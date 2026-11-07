@@ -270,6 +270,19 @@ For reference, raw growth scales close to linearly with the rate: ~1.4 MB/day at
 would need ~256 GiB for a year and is not on the table without growing the PVC by an
 order of magnitude.
 
+## Grafana
+
+Grafana reads ClickHouse directly through the `Akvorado` datasource
+(`grafana-clickhouse-datasource`, HTTP on 8123) as the `grafana` user from
+`clickhouse/app/configmap.yaml`: `readonly=2`, 60 s and 2 GB per query. Two
+dashboards use it: **Akvorado flows** (WAN traffic by direction, family,
+protocol, VLAN, AS and country, from `flows_1m0s`) and the traffic rows of
+**NTP (chrony)**, which need ports and so read raw `flows`.
+
+The rollups drop `SrcAddr`, `DstAddr`, both ports, prefixes and AS paths. A
+panel that filters on any of those has to read `flows`. Byte and packet sums
+multiply by `SamplingRate`, as the console does.
+
 ## Troubleshooting
 
 Flows arriving but not showing up is almost always the outlet dropping them for

@@ -1,0 +1,2455 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Public NTP service ams0.ntp: clock health and upstream sources from chrony_exporter, server counters from chrony serverstats, and client traffic at the gateway from Akvorado (raw flows table; rollups drop ports).",
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [],
+  "preload": false,
+  "refresh": "1m",
+  "schemaVersion": 40,
+  "tags": [
+    "ntp",
+    "chrony",
+    "akvorado"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_VM",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "regex": "VictoriaMetrics",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "includeAll": false,
+        "hide": 0
+      },
+      {
+        "name": "pod",
+        "label": "Pod",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_VM}"
+        },
+        "query": {
+          "query": "label_values(chrony_up, pod)",
+          "refId": "V"
+        },
+        "definition": "label_values(chrony_up, pod)",
+        "current": {},
+        "options": [],
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "sort": 1,
+        "hide": 0
+      },
+      {
+        "name": "family",
+        "label": "IP family",
+        "type": "custom",
+        "query": "IPv4 : 2048,IPv6 : 34525",
+        "multi": true,
+        "includeAll": true,
+        "allValue": "2048,34525",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": [],
+        "hide": 0
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "NTP (chrony)",
+  "uid": "ntp",
+  "version": 1,
+  "panels": [
+    {
+      "type": "row",
+      "id": 1,
+      "title": "Clock health (chrony_exporter)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "id": 2,
+      "title": "Exporter up",
+      "description": "chrony_up per pod: 0 means the exporter could not talk to chronyd.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "min(chrony_up{pod=~\"$pod\"})",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 3,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN"
+                },
+                "1": {
+                  "text": "UP"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 3,
+      "title": "Stratum",
+      "description": "Highest stratum across the pods. 16 means unsynchronised.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "max(chrony_tracking_stratum{pod=~\"$pod\"})",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 3,
+        "y": 1,
+        "w": 3,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 4
+              },
+              {
+                "color": "red",
+                "value": 16
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 4,
+      "title": "Max clock error",
+      "description": "Worst pod: |last offset| + root dispersion + root delay / 2, the bound chronyc documents.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "max(abs(chrony_tracking_last_offset_seconds{pod=~\"$pod\"}) + chrony_tracking_root_dispersion_seconds{pod=~\"$pod\"} + 0.5 * chrony_tracking_root_delay_seconds{pod=~\"$pod\"})",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 6,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 5,
+      "title": "System clock offset",
+      "description": "Worst pod: how far the kernel clock is from chrony's estimate of true time. Positive is fast.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "max(abs(chrony_tracking_system_time_seconds{pod=~\"$pod\"}))",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 10,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.005
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 6,
+      "title": "Selected sources",
+      "description": "Sources in state sync across the pods (one per pod when healthy).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "count(chrony_sources_state_info{pod=~\"$pod\",source_state=\"sync\"})",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 14,
+        "y": 1,
+        "w": 3,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 7,
+      "title": "Unreachable sources",
+      "description": "Sources whose last 8 polls all failed.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "count(chrony_sources_reachability_ratio{pod=~\"$pod\"} == 0) or vector(0)",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 17,
+        "y": 1,
+        "w": 3,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "table",
+      "id": 8,
+      "title": "Reference per pod",
+      "description": "The source each pod is synchronised to.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "chrony_tracking_info{pod=~\"$pod\"}",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "gridPos": {
+        "x": 20,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "app_kubernetes_io_name": true,
+              "instance": true,
+              "job": true,
+              "namespace": true,
+              "tracking_address": true,
+              "tracking_refid": true
+            },
+            "renameByName": {
+              "tracking_name": "reference"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "id": 9,
+      "title": "System clock offset",
+      "description": "chrony_tracking_system_time_seconds. chronyd runs with -x, so it measures the node clock but does not steer it; Talos' own timesyncd does.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "chrony_tracking_system_time_seconds{pod=~\"$pod\"}",
+          "legendFormat": "{{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 10,
+      "title": "Clock error bound",
+      "description": "|last offset| + root dispersion + root delay / 2 per pod.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "abs(chrony_tracking_last_offset_seconds{pod=~\"$pod\"}) + chrony_tracking_root_dispersion_seconds{pod=~\"$pod\"} + 0.5 * chrony_tracking_root_delay_seconds{pod=~\"$pod\"}",
+          "legendFormat": "{{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 11,
+      "title": "Last and RMS offset",
+      "description": "Offset of the last clock update, and its long-term RMS.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "chrony_tracking_last_offset_seconds{pod=~\"$pod\"}",
+          "legendFormat": "last {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "chrony_tracking_rms_offset_seconds{pod=~\"$pod\"}",
+          "legendFormat": "rms {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "B"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 12,
+      "title": "Root delay and dispersion",
+      "description": "Round trip and accumulated error back to the stratum 1 servers.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "chrony_tracking_root_delay_seconds{pod=~\"$pod\"}",
+          "legendFormat": "delay {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "chrony_tracking_root_dispersion_seconds{pod=~\"$pod\"}",
+          "legendFormat": "dispersion {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "B"
+        }
+      ],
+      "gridPos": {
+        "x": 8,
+        "y": 13,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 13,
+      "title": "Frequency",
+      "description": "Frequency error of the node clock, and how uncertain it is (skew).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "chrony_tracking_frequency_ppms{pod=~\"$pod\"}",
+          "legendFormat": "freq {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "chrony_tracking_skew_ppms{pod=~\"$pod\"}",
+          "legendFormat": "skew {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "B"
+        }
+      ],
+      "gridPos": {
+        "x": 16,
+        "y": 13,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ppm",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "row",
+      "id": 14,
+      "title": "Upstream sources",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "panels": []
+    },
+    {
+      "type": "table",
+      "id": 15,
+      "title": "Sources",
+      "description": "State, stratum, reach and the last sample of every upstream source, per pod.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "chrony_sources_stratum{pod=~\"$pod\"} * on (pod, source_address, source_name) group_left (source_state, source_mode) chrony_sources_state_info{pod=~\"$pod\"}",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "B",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "expr": "chrony_sources_reachability_ratio{pod=~\"$pod\"} * on (pod, source_address, source_name) group_left (source_state, source_mode) chrony_sources_state_info{pod=~\"$pod\"}",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "C",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "expr": "chrony_sources_last_sample_offset_seconds{pod=~\"$pod\"} * on (pod, source_address, source_name) group_left (source_state, source_mode) chrony_sources_state_info{pod=~\"$pod\"}",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "D",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "expr": "chrony_sources_last_sample_error_margin_seconds{pod=~\"$pod\"} * on (pod, source_address, source_name) group_left (source_state, source_mode) chrony_sources_state_info{pod=~\"$pod\"}",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "E",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "expr": "chrony_sources_polling_interval_seconds{pod=~\"$pod\"} * on (pod, source_address, source_name) group_left (source_state, source_mode) chrony_sources_state_info{pod=~\"$pod\"}",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "F",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 24,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reach"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "offset"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error margin"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "poll"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "app_kubernetes_io_name": true,
+              "instance": true,
+              "job": true,
+              "namespace": true
+            },
+            "indexByName": {
+              "pod": 0,
+              "source_name": 1,
+              "source_address": 2,
+              "source_state": 3,
+              "source_mode": 4
+            },
+            "renameByName": {
+              "source_name": "name",
+              "source_address": "address",
+              "source_state": "state",
+              "source_mode": "mode",
+              "Value #B": "stratum",
+              "Value #C": "reach",
+              "Value #D": "offset",
+              "Value #E": "error margin",
+              "Value #F": "poll"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "id": 16,
+      "title": "Source offsets",
+      "description": "Last sample offset of each source. A source far from the rest is a falseticker.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "chrony_sources_last_sample_offset_seconds{pod=~\"$pod\"}",
+          "legendFormat": "{{source_name}} {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 31,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 17,
+      "title": "Source jitter",
+      "description": "Standard deviation of each source's recent samples (chronyc sourcestats Std Dev).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "chrony_sourcestats_stddev{pod=~\"$pod\"}",
+          "legendFormat": "{{source_name}} {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 31,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "row",
+      "id": 18,
+      "title": "Serving clients (chrony serverstats)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "id": 19,
+      "title": "NTP requests",
+      "description": "NTP packets received by chronyd, per pod. Each pod serves the clients its node's L2 lease or the IPv4 port forward sends it (externalTrafficPolicy Local).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "rate(chrony_serverstats_ntp_packets_received_total{pod=~\"$pod\"}[$__rate_interval])",
+          "legendFormat": "{{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "custom": {
+            "fillOpacity": 20,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 20,
+      "title": "Dropped by rate limit",
+      "description": "NTP requests chronyd dropped (ratelimit), and client log records it had to recycle because the log was full.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "rate(chrony_serverstats_ntp_packets_dropped_total{pod=~\"$pod\"}[$__rate_interval])",
+          "legendFormat": "ntp dropped {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "rate(chrony_serverstats_client_log_records_dropped_total{pod=~\"$pod\"}[$__rate_interval])",
+          "legendFormat": "log recycled {{pod}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "B"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 40,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "id": 21,
+      "title": "Requests",
+      "description": "Total NTP requests over all pods.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(chrony_serverstats_ntp_packets_received_total{pod=~\"$pod\"}[5m]))",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 48,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 22,
+      "title": "Dropped share",
+      "description": "Share of requests dropped by the rate limit.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(chrony_serverstats_ntp_packets_dropped_total{pod=~\"$pod\"}[5m])) / sum(rate(chrony_serverstats_ntp_packets_received_total{pod=~\"$pod\"}[5m]))",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 4,
+        "y": 48,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.2
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 23,
+      "title": "Clients in log",
+      "description": "Clients in chronyd's client log (NTP vs NTS). Saturates at clientloglimit (about 4096 per pod with the default 512 KiB).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (protocol) (chrony_clients_connected{pod=~\"$pod\"})",
+          "legendFormat": "{{protocol}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 8,
+        "y": 48,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 24,
+      "title": "Interleaved",
+      "description": "Requests answered in interleaved mode (more accurate transmit timestamps).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(chrony_serverstats_interleaved_ntp_packets_total{pod=~\"$pod\"}[5m]))",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 48,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 25,
+      "title": "Kernel RX timestamps",
+      "description": "Share of received packets timestamped by the kernel rather than by chronyd.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(chrony_serverstats_ntp_kernel_rx_timestamps_total{pod=~\"$pod\"}[5m])) / sum(rate(chrony_serverstats_ntp_packets_received_total{pod=~\"$pod\"}[5m]))",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 16,
+        "y": 48,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 26,
+      "title": "NTS-KE connections",
+      "description": "NTS key exchanges accepted. The pods do not serve NTS (no ntsserverkey), so this stays 0.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(chrony_serverstats_nts_ke_connections_accepted_total{pod=~\"$pod\"}[5m]))",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 20,
+        "y": 48,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "bargauge",
+      "id": 27,
+      "title": "Client poll interval",
+      "description": "How often each client in the log polls (chrony_clients_ntp_interval_seconds, cumulative buckets: clients polling at most every N seconds).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (le) (chrony_clients_ntp_interval_seconds_bucket{pod=~\"$pod\"})",
+          "legendFormat": "≤ {{le}} s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 52,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "displayMode": "basic",
+        "orientation": "horizontal",
+        "showUnfilled": true,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "valueMode": "color",
+        "namePlacement": "left",
+        "sizing": "auto"
+      }
+    },
+    {
+      "type": "bargauge",
+      "id": 28,
+      "title": "Last request age",
+      "description": "Time since each client in the log last asked (cumulative buckets).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (le) (chrony_clients_last_ntp_hit_ago_seconds_bucket{pod=~\"$pod\"})",
+          "legendFormat": "≤ {{le}} s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "gridPos": {
+        "x": 8,
+        "y": 52,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "displayMode": "basic",
+        "orientation": "horizontal",
+        "showUnfilled": true,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "valueMode": "color",
+        "namePlacement": "left",
+        "sizing": "auto"
+      }
+    },
+    {
+      "type": "bargauge",
+      "id": 29,
+      "title": "Drops per client",
+      "description": "How many requests chronyd dropped per client (cumulative buckets). Clients past 2 or 5 are polling too fast.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (le) (chrony_clients_ntp_drops_bucket{pod=~\"$pod\"})",
+          "legendFormat": "≤ {{le}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "gridPos": {
+        "x": 16,
+        "y": 52,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "displayMode": "basic",
+        "orientation": "horizontal",
+        "showUnfilled": true,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "valueMode": "color",
+        "namePlacement": "left",
+        "sizing": "auto"
+      }
+    },
+    {
+      "type": "row",
+      "id": 30,
+      "title": "Traffic at the gateway (Akvorado)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 60
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "id": 31,
+      "title": "Requests by IP family",
+      "description": "Client requests arriving on the WAN to UDP 123. From Akvorado: the gateway samples 1 in 16 packets at random, so counts are scaled estimates and unique-client figures undercount.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, if(EType = 2048, 'IPv4', 'IPv6') AS family, sum(Packets * SamplingRate) / $__interval_s AS pps FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY time, family ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 61,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "custom": {
+            "fillOpacity": 20,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 32,
+      "title": "Bandwidth by direction",
+      "description": "Requests in and replies out, in bits per second. From Akvorado: the gateway samples 1 in 16 packets at random, so counts are scaled estimates and unique-client figures undercount.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, concat('in ', if(EType = 2048, 'IPv4', 'IPv6')) AS s, sum(Bytes * SamplingRate) * 8 / $__interval_s AS bps FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY time, s ORDER BY time",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, concat('out ', if(EType = 2048, 'IPv4', 'IPv6')) AS s, -sum(Bytes * SamplingRate) * 8 / $__interval_s AS bps FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND SrcPort = 123 AND OutIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY time, s ORDER BY time",
+          "refId": "B"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 61,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "id": 33,
+      "title": "Requests in range",
+      "description": "Estimated client requests over the selected range. From Akvorado: the gateway samples 1 in 16 packets at random, so counts are scaled estimates and unique-client figures undercount.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT sum(Packets * SamplingRate) AS requests FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv})",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 69,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 34,
+      "title": "Traffic in range",
+      "description": "Estimated NTP bytes in plus out over the selected range. From Akvorado: the gateway samples 1 in 16 packets at random, so counts are scaled estimates and unique-client figures undercount.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT sum(Bytes * SamplingRate) AS bytes FROM flows WHERE $__timeFilter(TimeReceived) AND ((Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv})) OR (Proto = 17 AND SrcPort = 123 AND OutIfBoundary = 'external' AND EType IN (${family:csv})))",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 4,
+        "y": 69,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 35,
+      "title": "Sampled clients",
+      "description": "Distinct client addresses seen in the sample. A lower bound: clients that poll rarely are often missed at 1:16. From Akvorado: the gateway samples 1 in 16 packets at random, so counts are scaled estimates and unique-client figures undercount.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT uniq(SrcAddr) AS clients FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv})",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 8,
+        "y": 69,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 36,
+      "title": "Client networks",
+      "description": "Distinct source AS numbers in the sample.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT uniq(SrcAS) AS networks FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv})",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 69,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 37,
+      "title": "NTP share of WAN bytes",
+      "description": "NTP (both directions) as a share of all bytes crossing the WAN in the range.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT sumIf(Bytes * SamplingRate, ((Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv})) OR (Proto = 17 AND SrcPort = 123 AND OutIfBoundary = 'external' AND EType IN (${family:csv})))) / sumIf(Bytes * SamplingRate, InIfBoundary = 'external' OR OutIfBoundary = 'external') AS share FROM flows WHERE $__timeFilter(TimeReceived)",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 16,
+        "y": 69,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 38,
+      "title": "Sampled clients per family",
+      "description": "Distinct client addresses per IP family.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT if(EType = 2048, 'IPv4', 'IPv6') AS family, uniq(SrcAddr) AS clients FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY family ORDER BY family",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 20,
+        "y": 69,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "piechart",
+      "id": 39,
+      "title": "IP family",
+      "description": "Share of client requests by IP family.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT if(EType = 2048, 'IPv4', 'IPv6') AS family, sum(Packets * SamplingRate) AS requests FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY family",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 73,
+        "w": 6,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "type": "piechart",
+      "id": 40,
+      "title": "Client source port",
+      "description": "Clients sending from port 123 are usually NTP daemons (ntpd, chrony, routers); ephemeral ports are SNTP clients and phones.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT if(SrcPort = 123, 'port 123 (daemon)', 'ephemeral (SNTP)') AS kind, sum(Packets * SamplingRate) AS requests FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY kind",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 6,
+        "y": 73,
+        "w": 6,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "type": "piechart",
+      "id": 41,
+      "title": "Packet size",
+      "description": "IP packet size of requests. 76 B (IPv4) and 96 B (IPv6) are plain 48-byte NTP; larger ones carry extension fields or MACs.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT toString(PacketSize) AS size, sum(Packets * SamplingRate) AS requests FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY size ORDER BY requests DESC LIMIT 8",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 73,
+        "w": 6,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 42,
+      "title": "Sampled clients over time",
+      "description": "Distinct client addresses per interval, by family. From Akvorado: the gateway samples 1 in 16 packets at random, so counts are scaled estimates and unique-client figures undercount.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT $__timeInterval(TimeReceived) AS time, if(EType = 2048, 'IPv4', 'IPv6') AS family, uniq(SrcAddr) AS clients FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY time, family ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 18,
+        "y": 73,
+        "w": 6,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "table",
+      "id": 43,
+      "title": "Top countries",
+      "description": "Client requests by source country (GeoLite2).",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT if(SrcCountry = '', '??', SrcCountry) AS country, sum(Packets * SamplingRate) AS requests, uniq(SrcAddr) AS clients, round(100 * countIf(EType = 34525) / count(), 1) AS ipv6_pct FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY country ORDER BY requests DESC LIMIT 25",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 81,
+        "w": 8,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "type": "table",
+      "id": 44,
+      "title": "Top networks",
+      "description": "Client requests by source AS.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT SrcAS AS asn, dictGetOrDefault('asns', 'name', SrcAS, '') AS name, sum(Packets * SamplingRate) AS requests, uniq(SrcAddr) AS clients FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY asn ORDER BY requests DESC LIMIT 25",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 8,
+        "y": 81,
+        "w": 8,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "type": "table",
+      "id": 45,
+      "title": "Top clients",
+      "description": "The busiest client addresses. Heavy hitters here are what ratelimit drops.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "akvorado"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "akvorado"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT replaceRegexpOne(IPv6NumToString(SrcAddr), '^::ffff:', '') AS client, any(SrcCountry) AS country, dictGetOrDefault('asns', 'name', any(SrcAS), '') AS network, sum(Packets * SamplingRate) AS requests, round(sum(Packets * SamplingRate) / greatest(1, dateDiff('second', $__fromTime, $__toTime)), 3) AS pps FROM flows WHERE $__timeFilter(TimeReceived) AND Proto = 17 AND DstPort = 123 AND InIfBoundary = 'external' AND EType IN (${family:csv}) GROUP BY SrcAddr ORDER BY requests DESC LIMIT 25",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 16,
+        "y": 81,
+        "w": 8,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    }
+  ]
+}
