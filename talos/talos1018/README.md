@@ -76,7 +76,7 @@ talosctl kubeconfig --nodes fd6d:cefe:ddc3:5:10:18:6:90
 
 > **⚠️ IMPORTANT - Bootstrap Preparation**
 >
-> The Cilium config files use variable substitution (`${IPV6_PREFIX_GUA}`) which only works after Flux is running.
+> The Cilium values and config files use variable substitution (`${IPV6_PREFIX_GUA}`) which only works after Flux is running.
 > For the initial bootstrap, you need to temporarily replace these variables with actual values.
 >
 > Before proceeding, run this command to substitute the variables:
@@ -88,7 +88,9 @@ talosctl kubeconfig --nodes fd6d:cefe:ddc3:5:10:18:6:90
 > # Extract IPv6 prefix
 > IPV6_PREFIX_GUA=$(grep IPV6_PREFIX_GUA /tmp/cluster-secrets.yaml | awk '{print $2}')
 > 
-> # Temporarily replace variables in external-pool.yaml
+> # Temporarily replace variables in values.yaml (pod native routing CIDR) and external-pool.yaml
+> sed "s/\${IPV6_PREFIX_GUA}/$IPV6_PREFIX_GUA/g" \
+>     ../../kubernetes/apps/talos1018/kube-system/cilium/app/values.yaml > /tmp/cilium-values.yaml
 > sed "s/\${IPV6_PREFIX_GUA}/$IPV6_PREFIX_GUA/g" \
 >     ../../kubernetes/apps/talos1018/kube-system/cilium/config/external-pool.yaml > /tmp/external-pool.yaml
 > 
@@ -107,9 +109,9 @@ so the bootstrap matches what Flux will manage:
 helm repo add cilium https://helm.cilium.io/
 helm repo update
 helm install cilium cilium/cilium \
-    --version 1.19.6 \
+    --version 1.20.4 \
     --namespace kube-system \
-    -f ../../kubernetes/apps/talos1018/kube-system/cilium/app/values.yaml \
+    -f /tmp/cilium-values.yaml \
     --create-namespace
 ```
 
@@ -228,9 +230,9 @@ For manual upgrades (before Flux takeover), match the version pinned in
 
 ```bash
 helm upgrade cilium cilium/cilium \
-    --version 1.19.6 \
+    --version 1.20.4 \
     --namespace kube-system \
-    -f ../../kubernetes/apps/talos1018/kube-system/cilium/app/values.yaml \
+    -f /tmp/cilium-values.yaml \
     --reuse-values
 ```
 

@@ -17,15 +17,15 @@ During initial cluster setup, install Cilium manually.
 > You need to temporarily replace this variable with actual values from `cluster-secrets.sops.yaml`.
 > See `talos/talos1018/README.md` for the complete bootstrap procedure with variable substitution.
 
-Quick bootstrap command (after preparing the external-pool.yaml with actual values):
+Quick bootstrap command (after preparing `values.yaml` and `external-pool.yaml` with actual values):
 
 ```bash
 helm repo add cilium https://helm.cilium.io/
 helm repo update
 helm install cilium cilium/cilium \
-    --version 1.20.0 \
+    --version 1.20.4 \
     --namespace kube-system \
-    -f kubernetes/apps/talos1018/kube-system/cilium/app/values.yaml
+    -f /tmp/cilium-values.yaml
 ```
 
 ## Flux Management
@@ -43,7 +43,7 @@ With Flux managing Cilium, upgrades are done by updating the version in `helmrel
 spec:
   chart:
     spec:
-      version: 1.20.0  # Update this version
+      version: 1.20.4  # Update this version
 ```
 
 Commit and push the change, and Flux will perform the upgrade.
@@ -57,6 +57,23 @@ Cilium configuration is in `values.yaml`. Key features enabled:
 - Gateway API access logs (see below)
 - Native routing (direct node routes, no tunnel)
 - IPv4 masquerading; pods use global IPv6 addresses, not masqueraded
+
+## Pod addressing
+
+Pods get IPv6 from `${IPV6_PREFIX_GUA}:100::/56`, one /64 per node
+(talos-1018-N gets `:10N::/64`), plus IPv4 from `10.244.0.0/16`. With global
+source addresses, RFC 6724 makes pods prefer IPv6. Pod IPv6 is not
+masqueraded, so the UniFi gateway has a static route for each node's /64 via
+that node's `fd6d:cefe:ddc3:5:10:18:6:9N` address. Its zone firewall drops
+unsolicited WAN and LAN traffic to pods; services are reached through the LB
+pools. dn42 traffic from pods is prefix-translated on rock64
+(`fd6d:cefe:ddc3:100::/56`, fmurodov/dn42).
+
+Node `spec.podCIDRs` can't be changed in place. Moving a node to another range
+means drain, delete the Node, restart kubelet, patch the podCIDRs by hand and
+recycle the pods left with old IPs: see the runbook and lessons in
+fmurodov/homeops-project#113. Apps that trust proxies by IP range (Caddy
+`trusted_proxies`, Home Assistant `trusted_proxies`) must include the pod range.
 
 ## Gateway API access logs
 
