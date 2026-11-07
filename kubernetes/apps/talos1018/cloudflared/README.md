@@ -58,6 +58,12 @@ means a new id and a DNS repoint — treat it as a migration, not a rotation.
 
 ## Adding a public hostname
 
-The ingress rule is a wildcard on `${DOMAIN}`, so a new external app needs no
-change here — just an HTTPRoute on the `https-external` listener and a proxied
-CNAME to `<tunnel-id>.cfargotunnel.com`.
+Three places, all with the same name:
+
+1. an HTTPRoute on the `https-external` listener,
+2. a proxied CNAME to the tunnel (`tunnel_subdomains` in fmurodov-tf),
+3. a `hostname:` rule in `app/configmap.yaml`.
+
+The ingress rules list each hostname instead of `*.${DOMAIN}`, because that
+wildcard also matches `*.${CLUSTER_DOMAIN}`, which main-gateway serves on its
+`https-internal` listener: one proxied record there would publish internal apps.
