@@ -3,6 +3,8 @@
   "extends": [
     "config:recommended",
     "docker:enableMajor",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests",
     "local>fmurodov/homeops//.renovate/autoMerge.json5",
     "local>fmurodov/homeops//.renovate/changelogs.json5",
     "local>fmurodov/homeops//.renovate/customManagers.json5",
