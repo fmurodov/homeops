@@ -83,6 +83,10 @@ enableIPv4Masquerade: true
 # without it keep the default SNAT, so this is inert until a service opts in.
 bpf:
   lbModeAnnotation: true
+  # VLANs 2 (LAN) and 3 ride net0 as tagged sub-interfaces for Multus pods
+  # (otbr, Home Assistant). Without this, Cilium's VLAN filter drops their
+  # frames, e.g. the router advertisements otbr needs (homeops-project#109).
+  vlanBypass: [2, 3]
 #   masquerade: true
 
 # Prometheus metrics for Cilium agent
