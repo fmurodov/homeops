@@ -1,0 +1,311 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "IPv4 vs IPv6 bytes through the cluster nodes, from node_exporter netstat counters. For traffic through the gateway by family, use Akvorado with the EType dimension.",
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [],
+  "preload": false,
+  "refresh": "1m",
+  "schemaVersion": 40,
+  "tags": [
+    "network",
+    "ipv6"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_VM",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "regex": "VictoriaMetrics",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "includeAll": false,
+        "hide": 0
+      },
+      {
+        "name": "instance",
+        "label": "Node",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_VM}"
+        },
+        "query": {
+          "query": "label_values(node_netstat_Ip6_InOctets, instance)",
+          "refId": "V"
+        },
+        "definition": "label_values(node_netstat_Ip6_InOctets, instance)",
+        "current": {},
+        "options": [],
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "sort": 1,
+        "hide": 0
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "IPv4 vs IPv6 Traffic",
+  "uid": "ip-family-traffic",
+  "version": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "id": 1,
+      "title": "Received by IP family",
+      "description": "Kernel IP counters on the nodes (node_exporter netstat). Forwarded pod traffic is counted too, since Cilium uses legacy host routing (no BPF masquerade).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "fillOpacity": 30,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(node_netstat_IpExt_InOctets{instance=~\"$instance\"}[$__rate_interval])) * 8",
+          "legendFormat": "IPv4",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(node_netstat_Ip6_InOctets{instance=~\"$instance\"}[$__rate_interval])) * 8",
+          "legendFormat": "IPv6",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "id": 2,
+      "title": "Sent by IP family",
+      "description": "Kernel IP counters on the nodes (node_exporter netstat). Forwarded pod traffic is counted too, since Cilium uses legacy host routing (no BPF masquerade).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "fillOpacity": 30,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(node_netstat_IpExt_OutOctets{instance=~\"$instance\"}[$__rate_interval])) * 8",
+          "legendFormat": "IPv4",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(node_netstat_Ip6_OutOctets{instance=~\"$instance\"}[$__rate_interval])) * 8",
+          "legendFormat": "IPv6",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "id": 3,
+      "title": "IPv6 share of bytes",
+      "description": "IPv6 bytes / (IPv4 + IPv6 bytes), in and out together.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(node_netstat_Ip6_InOctets{instance=~\"$instance\"}[$__rate_interval]) + rate(node_netstat_Ip6_OutOctets{instance=~\"$instance\"}[$__rate_interval])) / (sum(rate(node_netstat_Ip6_InOctets{instance=~\"$instance\"}[$__rate_interval]) + rate(node_netstat_Ip6_OutOctets{instance=~\"$instance\"}[$__rate_interval])) + sum(rate(node_netstat_IpExt_InOctets{instance=~\"$instance\"}[$__rate_interval]) + rate(node_netstat_IpExt_OutOctets{instance=~\"$instance\"}[$__rate_interval])))",
+          "legendFormat": "all nodes",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "id": 4,
+      "title": "IPv6 share per node",
+      "description": "IPv6 bytes / (IPv4 + IPv6 bytes) on each node.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_VM}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (instance)(rate(node_netstat_Ip6_InOctets{instance=~\"$instance\"}[$__rate_interval]) + rate(node_netstat_Ip6_OutOctets{instance=~\"$instance\"}[$__rate_interval])) / (sum by (instance)(rate(node_netstat_Ip6_InOctets{instance=~\"$instance\"}[$__rate_interval]) + rate(node_netstat_Ip6_OutOctets{instance=~\"$instance\"}[$__rate_interval])) + sum by (instance)(rate(node_netstat_IpExt_InOctets{instance=~\"$instance\"}[$__rate_interval]) + rate(node_netstat_IpExt_OutOctets{instance=~\"$instance\"}[$__rate_interval])))",
+          "legendFormat": "{{instance}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_VM}"
+          },
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
