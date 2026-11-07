@@ -7,7 +7,9 @@ metadata:
   labels:
     app.kubernetes.io/name: unpoller
 spec:
-  ipFamilyPolicy: PreferDualStack
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
   ports:
     - port: 9130
       targetPort: metrics

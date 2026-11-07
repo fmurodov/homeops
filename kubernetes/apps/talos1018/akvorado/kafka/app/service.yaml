@@ -7,7 +7,9 @@ metadata:
   labels:
     app.kubernetes.io/name: akvorado-kafka
 spec:
-  ipFamilyPolicy: PreferDualStack
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
   ports:
     - port: 9092
       targetPort: client
