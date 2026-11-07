@@ -20,8 +20,12 @@ data:
       num-threads: 1
       so-reuseport: yes
 
-      # Host network, so not 53 (Talos host DNS); the Service maps 53 here
-      interface: ::@1053
+      # Host network, so not 53 (Talos host DNS); the Service maps 53 here.
+      # interface-automatic answers UDP from the address the query came to;
+      # with a plain wildcard socket, replies to GUA pods left from the node's
+      # GUA and were dropped (homeops-project#113).
+      port: 1053
+      interface-automatic: yes
       do-ip4: no
       do-ip6: yes
       prefer-ip6: yes
