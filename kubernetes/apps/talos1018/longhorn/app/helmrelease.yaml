@@ -29,10 +29,10 @@ spec:
             patch: |
               - op: add
                 path: /spec/ipFamilies
-                value: ["IPv6", "IPv4"]
+                value: ["IPv6"]
               - op: add
                 path: /spec/ipFamilyPolicy
-                value: PreferDualStack
+                value: SingleStack
   values:
     defaultSettings:
       backupTarget: s3://talos1018-longhorn@auto/1018/
