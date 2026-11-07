@@ -70,6 +70,11 @@ apiVersion: v1alpha1
 kind: KubeControllerManagerConfig
 extraArgs:
   bind-address: "::"
+  # Temporary, while nodes move from the ULA pod CIDR to the GUA one
+  # (homeops-project#113): the range allocator crashes on startup if any
+  # node's podCIDR is outside --cluster-cidr. Nodes get their new podCIDRs by
+  # hand on re-registration; remove this once all three have moved.
+  allocate-node-cidrs: "false"
 ---
 apiVersion: v1alpha1
 kind: KubeSchedulerConfig
@@ -126,11 +131,14 @@ taints:
 ---
 # The IPv6 service subnet was /96 until Oct 2026; KubeNetworkConfig rejects
 # anything wider than /108, so it was shrunk to the /108 holding ::1 and ::a
+# Pods get global addresses (homeops-project#113) so they prefer IPv6 by
+# RFC 6724; was fd00:1018:1000::/56. Nodes keep their podCIDR until they are
+# deleted and re-registered. ${IPV6_PREFIX_GUA} is filled in by generate.sh.
 apiVersion: v1alpha1
 kind: KubeNetworkConfig
 dnsDomain: cluster.local
 podSubnets:
-  - fd00:1018:1000::/56
+  - ${IPV6_PREFIX_GUA}:100::/56
   - 10.244.0.0/16
 serviceSubnets:
   - fd00:1018:2000::/108
