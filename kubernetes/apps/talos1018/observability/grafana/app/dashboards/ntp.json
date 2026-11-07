@@ -29,6 +29,18 @@
         "hide": 0
       },
       {
+        "name": "DS_VL",
+        "label": "Logs datasource",
+        "type": "datasource",
+        "query": "victoriametrics-logs-datasource",
+        "regex": "VictoriaLogs",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "includeAll": false,
+        "hide": 0
+      },
+      {
         "name": "pod",
         "label": "Pod",
         "type": "query",
@@ -2449,6 +2461,112 @@
       "options": {
         "showHeader": true,
         "cellHeight": "sm"
+      }
+    },
+    {
+      "type": "row",
+      "id": 46,
+      "title": "chronyd logs (VictoriaLogs)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 91
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "id": 47,
+      "title": "Log lines",
+      "description": "chronyd log lines per interval: source changes, clock steps and NTS-KE errors show up here.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VL}"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VL}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_namespace_name=\"network\", kubernetes_container_name=\"chrony\"} | stats count()",
+          "legendFormat": "lines",
+          "queryType": "statsRange",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 92,
+        "w": 24,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "logs",
+      "id": 48,
+      "title": "chronyd log",
+      "description": "Newest 200 lines from the chrony containers.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "${DS_VL}"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "${DS_VL}"
+          },
+          "editorMode": "code",
+          "expr": "_stream: {kubernetes_namespace_name=\"network\", kubernetes_container_name=\"chrony\"} | sort desc | limit 200",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 97,
+        "w": 24,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
       }
     }
   ]
