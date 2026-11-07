@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: longhorn-ui-allow-oauth2-proxy
+  namespace: longhorn-system
+spec:
+  # longhorn-ui proxies the whole manager API (delete volumes, backups) with no
+  # auth of its own; the login is oauth2-proxy at the gateway. Without this any
+  # pod in the cluster could reach longhorn-frontend directly and skip it.
+  # Homepage's longhorn provider reads node stats through the same service.
+  # kubelet probes come from the host, which Cilium allows by default.
+  podSelector:
+    matchLabels:
+      app: longhorn-ui
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: oauth2-proxy
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: homepage
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: homepage
+      ports:
+        - protocol: TCP
+          port: 8000
