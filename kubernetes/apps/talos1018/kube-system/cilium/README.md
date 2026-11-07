@@ -56,7 +56,7 @@ Cilium configuration is in `values.yaml`. Key features enabled:
 - Hubble observability (relay and UI)
 - Gateway API access logs (see below)
 - Native routing (direct node routes, no tunnel)
-- IPv4/IPv6 masquerading
+- IPv4 masquerading; pods use global IPv6 addresses, not masqueraded
 
 ## Gateway API access logs
 
