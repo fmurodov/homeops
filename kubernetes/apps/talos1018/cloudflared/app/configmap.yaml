@@ -16,7 +16,24 @@ data:
       http2Origin: true
       matchSNItoHost: true
       noTLSVerify: true
+    # One rule per public hostname, matching the tunnel CNAMEs in fmurodov-tf
+    # (modules/cloudflare/main.tf, tunnel_subdomains). Not "*.${DOMAIN}": that
+    # also matches *.${CLUSTER_DOMAIN}, which main-gateway serves on its
+    # https-internal listener, so a proxied record there would publish internal
+    # apps. A new public app needs a line here and a CNAME there.
     ingress:
-      - hostname: "*.${DOMAIN}"
+      - hostname: "hass.${DOMAIN}"
+        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
+      - hostname: "ip.${DOMAIN}"
+        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
+      - hostname: "n8n-webhook.${DOMAIN}"
+        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
+      - hostname: "ntfy.${DOMAIN}"
+        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
+      - hostname: "pid.${DOMAIN}"
+        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
+      - hostname: "recipe.${DOMAIN}"
+        service: https://cilium-gateway-main-gateway.network.svc.cluster.local
+      - hostname: "wishlist.${DOMAIN}"
         service: https://cilium-gateway-main-gateway.network.svc.cluster.local
       - service: http_status:404
