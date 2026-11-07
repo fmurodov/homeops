@@ -73,10 +73,11 @@ autoDirectNodeRoutes: true
 
 # Pod CIDRs are treated as internal (not masqueraded); must match clusterPodNets.
 ipv4NativeRoutingCIDR: "10.244.0.0/16"
-ipv6NativeRoutingCIDR: "fd00:1018:1000::/56"
+# Pods have global addresses (homeops-project#113); the UCG routes each node's
+# /64 back to it, so IPv6 needs no masquerade. Filled in by Flux postBuild.
+ipv6NativeRoutingCIDR: "${IPV6_PREFIX_GUA}:100::/56"
 
-# Masquerade is essential for ULA pods to reach the Internet
-enableIPv6Masquerade: true
+enableIPv6Masquerade: false
 enableIPv4Masquerade: true
 # Enables the per-service service.cilium.io/forwarding-mode annotation. Services
 # without it keep the default SNAT, so this is inert until a service opts in.

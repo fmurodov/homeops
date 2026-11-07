@@ -20,6 +20,10 @@ spec:
   # Losing this object must not take the CNI down with it.
   deletionPolicy: Orphan
   wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
 ---
 # Cilium CNI - Config (CRDs - depends on controller)
 apiVersion: kustomize.toolkit.fluxcd.io/v1
