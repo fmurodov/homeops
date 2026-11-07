@@ -112,6 +112,8 @@ data:
           "${IPV6_PREFIX_GUA}:5::/64": {name: srv, role: servers}
           "${IPV6_PREFIX_GUA}:6::/64": {name: lan6, role: clients}
           fd6d:cefe:ddc3:5::/64: {name: srv, role: servers}
+          # Pod range since the GUA pod move (homeops-project#113).
+          "${IPV6_PREFIX_GUA}:100::/56": {name: pods, role: servers}
       core:
         # The gateway never advertises its rate, so this must mirror the UniFi
         # setting by hand or every byte figure is scaled by the mismatch.
