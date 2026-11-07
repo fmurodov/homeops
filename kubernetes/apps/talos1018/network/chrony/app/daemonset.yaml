@@ -16,6 +16,9 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: chrony
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9123"
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
@@ -41,3 +44,42 @@ spec:
           ports:
             - containerPort: 123
               protocol: UDP
+          volumeMounts:
+            - name: run
+              mountPath: /run/chrony
+        # The clients collector needs chronyd's command socket, not UDP 323.
+        # The exporter binds its reply socket next to chronyd.sock, so it runs
+        # as the image's chrony user (uid 100) to write into /run/chrony (0750).
+        - name: chrony-exporter
+          image: quay.io/superq/chrony-exporter:v0.15.0
+          args:
+            - --chrony.address=unix:///run/chrony/chronyd.sock
+            - --collector.sources
+            - --collector.sourcestats
+            - --collector.serverstats
+            - --collector.clients
+          securityContext:
+            runAsUser: 100
+            runAsGroup: 101
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              memory: "64Mi"
+            requests:
+              cpu: "0.01"
+              memory: "16Mi"
+          ports:
+            - name: metrics
+              containerPort: 9123
+              protocol: TCP
+          volumeMounts:
+            - name: run
+              mountPath: /run/chrony
+      volumes:
+        - name: run
+          emptyDir: {}

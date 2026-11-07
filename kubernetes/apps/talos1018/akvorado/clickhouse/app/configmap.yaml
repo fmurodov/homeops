@@ -41,3 +41,24 @@ data:
       <!-- Ships without a TTL, so it grows forever. -->
       <background_schedule_pool_log><ttl>event_date + INTERVAL 7 DAY DELETE</ttl></background_schedule_pool_log>
     </clickhouse>
+  # Grafana's login. readonly=2 because the plugin sets per-query settings,
+  # which readonly=1 refuses. No password, like `default` that Akvorado uses.
+  grafana.xml: |
+    <clickhouse>
+      <profiles>
+        <grafana>
+          <readonly>2</readonly>
+          <max_execution_time>60</max_execution_time>
+          <max_memory_usage>2000000000</max_memory_usage>
+        </grafana>
+      </profiles>
+      <users>
+        <grafana>
+          <password></password>
+          <networks><ip>::/0</ip></networks>
+          <profile>grafana</profile>
+          <quota>default</quota>
+          <access_management>0</access_management>
+        </grafana>
+      </users>
+    </clickhouse>

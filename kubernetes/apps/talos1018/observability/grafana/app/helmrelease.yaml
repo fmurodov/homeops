@@ -68,6 +68,7 @@ spec:
     # Grafana plugins
     plugins:
       - victoriametrics-logs-datasource
+      - grafana-clickhouse-datasource
 
     # Datasources
     datasources:
@@ -85,6 +86,17 @@ spec:
             url: http://victoria-logs-victoria-logs-single-server:9428
             jsonData:
               maxLines: 1000
+          # Akvorado's flow store, through a read-only ClickHouse user.
+          # Raw `flows` keeps ports and addresses; the flows_* rollups drop them.
+          - name: Akvorado
+            uid: akvorado
+            type: grafana-clickhouse-datasource
+            jsonData:
+              host: akvorado-clickhouse.akvorado.svc.cluster.local
+              port: 8123
+              protocol: http
+              username: grafana
+              defaultDatabase: default
           - name: Alertmanager
             type: alertmanager
             url: http://alertmanager:9093
