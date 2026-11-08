@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: victoria-logs-mcp
+  labels:
+    app.kubernetes.io/name: victoria-logs-mcp
+spec:
+  selector:
+    app.kubernetes.io/name: victoria-logs-mcp
+  ports:
+    - name: http
+      port: 8081
+      targetPort: http
+      protocol: TCP

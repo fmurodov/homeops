@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubernetes-mcp
+  labels:
+    app.kubernetes.io/name: kubernetes-mcp
+spec:
+  selector:
+    app.kubernetes.io/name: kubernetes-mcp
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP

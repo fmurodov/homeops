@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-mcp
+  labels:
+    app.kubernetes.io/name: kubernetes-mcp
+data:
+  config.toml: |
+    port = "8080"
+    metrics_port = "8081"
+    stateless = true
+    read_only = true
+    disable_destructive = true
+    toolsets = ["core"]
+
+    # No bearer token, no access. The token is forwarded to the API server,
+    # which validates it, so callers get exactly their own RBAC.
+    require_oauth = true
+    skip_jwt_verification = true
+    cluster_auth_mode = "passthrough"
+
+    [[denied_resources]]
+    group = ""
+    version = "v1"
+    kind = "Secret"
