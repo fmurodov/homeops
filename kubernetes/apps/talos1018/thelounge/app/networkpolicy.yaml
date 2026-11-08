@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: thelounge-allow-oauth2-proxy
+spec:
+  # The login is oauth2-proxy at the gateway, so without this any pod in the
+  # cluster could reach The Lounge directly and skip it (homeops-project#132).
+  # kubelet probes come from the host, which Cilium allows by default.
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: thelounge
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: oauth2-proxy
+      ports:
+        - protocol: TCP
+          port: 9000

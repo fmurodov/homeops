@@ -8,6 +8,7 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
+  - networkpolicy.yaml
   - oauth2-proxy-secret.sops.yaml
   - httproute.yaml
 components:
