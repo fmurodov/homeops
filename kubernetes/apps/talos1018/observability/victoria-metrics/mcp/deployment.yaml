@@ -58,8 +58,9 @@ spec:
             capabilities:
               drop: [ALL]
           resources:
+            # OOMKilled at 256Mi a few seconds after start.
             requests:
               cpu: 10m
-              memory: 32Mi
-            limits:
               memory: 256Mi
+            limits:
+              memory: 1Gi
