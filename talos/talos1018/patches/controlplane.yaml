@@ -15,6 +15,17 @@ machine:
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
 
+  # VLANs 2 and 3 exist only as parents for Multus pods (otbr, Home Assistant).
+  # Without these the nodes take SLAAC addresses on them, which puts the API
+  # server, kubelet, apid and etcd metrics on-link in LAN and IoT, past the UniFi
+  # firewall (homeops-project#130). The '/' stands for the '.' in the interface
+  # name. RA handling inside the pods is separate, so otbr still gets its RAs.
+  sysctls:
+    net.ipv6.conf.net0/2.autoconf: "0"
+    net.ipv6.conf.net0/2.accept_ra: "0"
+    net.ipv6.conf.net0/3.autoconf: "0"
+    net.ipv6.conf.net0/3.accept_ra: "0"
+
 cluster:
   etcd:
     # Peer URLs come from these. The IPv4 one keeps peers reachable while the

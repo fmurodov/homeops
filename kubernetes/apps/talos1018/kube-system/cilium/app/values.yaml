@@ -7,6 +7,13 @@ l2announcements:
 
 kubeProxyReplacement: true
 
+# Only the physical uplink (enp0s31f6 on node 1, enp1s0 on the others). By
+# default Cilium also attaches to net0.2 and net0.3 whenever they hold a global
+# address, which serves NodePorts and LB addresses on LAN and IoT
+# (homeops-project#130).
+devices:
+  - enp+
+
 # Cilium is what resolves ClusterIPs, so it cannot reach the API server through
 # the kubernetes ClusterIP that kubelet injects — on a rebooting node that
 # deadlocks and the agent never starts. KubePrism proxies to the control plane on

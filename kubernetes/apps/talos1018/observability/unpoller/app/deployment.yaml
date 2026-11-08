@@ -36,7 +36,7 @@ spec:
               protocol: TCP
           env:
             - name: UP_UNIFI_DEFAULT_URL
-              value: "https://[${GATEWAY_IPV6}]"
+              value: "https://[${IPV6_PREFIX_GUA}::1]"
             - name: UP_UNIFI_DEFAULT_API_KEY
               valueFrom:
                 secretKeyRef:
