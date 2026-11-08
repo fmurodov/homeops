@@ -31,7 +31,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: wishlist
-          image: ghcr.io/cmintey/wishlist:v0.69.0
+          image: ghcr.io/cmintey/wishlist:v0.69.0@sha256:a3c0482c5d55155a3aa96c4cbb63d2aa379f02ae3bbeb76909ffed2b15980f36
           ports:
             - name: http
               containerPort: 3280

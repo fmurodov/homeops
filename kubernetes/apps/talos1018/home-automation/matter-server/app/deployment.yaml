@@ -31,7 +31,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: matter-server
-          image: ghcr.io/matter-js/matterjs-server:1.5.5
+          image: ghcr.io/matter-js/matterjs-server:1.5.5@sha256:ee149c7c67eff0e90f131e8f0d628f7b099591ec58473c8cda1209e8ae4df66e
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true

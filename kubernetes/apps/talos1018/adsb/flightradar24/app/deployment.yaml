@@ -22,7 +22,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: flightradar24
-          image: ghcr.io/sdr-enthusiasts/docker-flightradar24:1.0.48-0
+          image: ghcr.io/sdr-enthusiasts/docker-flightradar24:1.0.48-0@sha256:fb3d01117f1a690dfc31c21295eb13edd970a98b77e440cb04717bb5f2ac9f52
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false

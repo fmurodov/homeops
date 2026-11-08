@@ -34,7 +34,7 @@ spec:
                   topologyKey: kubernetes.io/hostname
           containers:
             - name: exporter
-              image: ghcr.io/paperless-ngx/paperless-ngx:3.4.1
+              image: ghcr.io/paperless-ngx/paperless-ngx:3.4.1@sha256:1a08d8dfc2b51a08de09652dd86ad4d0c611c362382f944533ad38b73125fbc4
               command:
                 - /bin/bash
                 - -c
@@ -83,7 +83,7 @@ spec:
                   memory: 2Gi
 
             - name: uploader
-              image: rclone/rclone:1.76.0
+              image: rclone/rclone:1.76.0@sha256:7cbeec24a44f206067597c0368be4de90ae19a64d5113c7d1938bd737a81e466
               command:
                 - /bin/sh
                 - -c

@@ -26,7 +26,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: adsbexchange
-          image: ghcr.io/sdr-enthusiasts/docker-adsbexchange:20250210.1909
+          image: ghcr.io/sdr-enthusiasts/docker-adsbexchange:20250210.1909@sha256:b622a492b8f4dc5b90fcbd96c297340dcbc37ac96b305d199a221289a1648db2
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false

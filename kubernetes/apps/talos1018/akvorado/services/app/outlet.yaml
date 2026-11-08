@@ -37,7 +37,7 @@ spec:
       terminationGracePeriodSeconds: 40
       containers:
         - name: outlet
-          image: quay.io/akvorado/akvorado:2026.10.1
+          image: quay.io/akvorado/akvorado:2026.10.1@sha256:6454527fcbe27a88f5031e6ad46b9b1514c285ef7548ae18ad95d69b114fc818
           args:
             - outlet
             - http://akvorado-orchestrator:8080
@@ -92,7 +92,7 @@ spec:
         # A plain sidecar, not an init container: bad credentials must degrade
         # to no geo data, never stop the outlet from consuming flows.
         - name: geoipupdate
-          image: ghcr.io/maxmind/geoipupdate:v8
+          image: ghcr.io/maxmind/geoipupdate:v8@sha256:51e70dd6f16cd3e4d845ac02d09940b10772a75b9d741427d235a78570923c1d
           env:
             - name: GEOIPUPDATE_EDITION_IDS
               value: GeoLite2-ASN GeoLite2-Country

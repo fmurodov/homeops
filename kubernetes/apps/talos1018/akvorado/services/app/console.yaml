@@ -36,7 +36,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: console
-          image: quay.io/akvorado/akvorado:2026.10.1
+          image: quay.io/akvorado/akvorado:2026.10.1@sha256:6454527fcbe27a88f5031e6ad46b9b1514c285ef7548ae18ad95d69b114fc818
           args:
             - console
             - http://akvorado-orchestrator:8080

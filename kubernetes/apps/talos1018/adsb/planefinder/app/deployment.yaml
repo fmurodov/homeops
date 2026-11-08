@@ -22,7 +22,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: planefinder
-          image: ghcr.io/sdr-enthusiasts/docker-planefinder:latest-build-427
+          image: ghcr.io/sdr-enthusiasts/docker-planefinder:latest-build-427@sha256:335a338db4fc81776fdb15de2d2deaa534895e2081dd791b9b613190523ae5eb
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false

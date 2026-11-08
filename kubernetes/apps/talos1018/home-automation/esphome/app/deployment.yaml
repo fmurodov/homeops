@@ -24,7 +24,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: esphome
-          image: "ghcr.io/esphome/esphome:2026.10.0"
+          image: "ghcr.io/esphome/esphome:2026.10.0@sha256:1dff19a59070cdb523b76576cdc74d200f862d43c1407809088855920cf57145"
           imagePullPolicy: IfNotPresent
           command: ["esphome-device-builder"]
           args: ["--host", "::", "/config"]

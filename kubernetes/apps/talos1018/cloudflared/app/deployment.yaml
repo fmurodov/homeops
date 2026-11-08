@@ -36,7 +36,7 @@ spec:
         fsGroup: 65532
       containers:
         - name: cloudflared
-          image: cloudflare/cloudflared:2026.10.7
+          image: cloudflare/cloudflared:2026.10.7@sha256:4955524aeaa379e154023d5a027c250f7b35041a2e7e950cf13f144bc9b9c5ba
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

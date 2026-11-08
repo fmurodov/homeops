@@ -19,13 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Setup yq
-        uses: fluxcd/pkg/actions/yq@main
+        uses: fluxcd/pkg/actions/yq@7fb9589778fa8045a1000cb6cfcf9ddd4cd0bf65 # main
       - name: Setup kubeconform
-        uses: fluxcd/pkg/actions/kubeconform@main
+        uses: fluxcd/pkg/actions/kubeconform@7fb9589778fa8045a1000cb6cfcf9ddd4cd0bf65 # main
       - name: Setup kustomize
-        uses: fluxcd/pkg/actions/kustomize@main
+        uses: fluxcd/pkg/actions/kustomize@7fb9589778fa8045a1000cb6cfcf9ddd4cd0bf65 # main
       - name: Setup yamllint
         run: pip install yamllint
       - name: Validate manifests

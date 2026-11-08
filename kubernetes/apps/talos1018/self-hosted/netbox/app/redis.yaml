@@ -24,7 +24,7 @@ spec:
       containers:
         - name: netbox-redis
           # renovate: datasource=docker depName=ghcr.io/valkey-io/valkey
-          image: ghcr.io/valkey-io/valkey:9.1.2
+          image: ghcr.io/valkey-io/valkey:9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
           command:
             - valkey-server
             - --appendonly

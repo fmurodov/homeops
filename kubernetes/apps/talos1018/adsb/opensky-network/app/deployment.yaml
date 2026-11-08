@@ -22,7 +22,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: opensky-network
-          image: ghcr.io/sdr-enthusiasts/docker-opensky-network:latest-build-844
+          image: ghcr.io/sdr-enthusiasts/docker-opensky-network:latest-build-844@sha256:3db40e3942781387711ef08696112e0ff5f398bb86406023c1734d5aef3a92b7
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
