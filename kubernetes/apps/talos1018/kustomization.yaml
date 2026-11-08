@@ -22,6 +22,9 @@ resources:
 
   - ./security
 
+  # MCP servers for Claude (read-only)
+  - ./mcp
+
   # Cluster lifecycle
   - ./system-upgrade
 

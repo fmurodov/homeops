@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Only the gateway may reach the MCP port, so its /mcp-only route is the one way in.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: netbox-mcp
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: netbox-mcp
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP

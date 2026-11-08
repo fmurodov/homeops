@@ -33,7 +33,7 @@ spec:
               protocol: TCP
           env:
             - name: VL_INSTANCE_ENTRYPOINT
-              value: http://victoria-logs-victoria-logs-single-server:9428
+              value: http://victoria-logs-victoria-logs-single-server.observability.svc.cluster.local:9428
             - name: MCP_SERVER_MODE
               value: http
             - name: MCP_LISTEN_ADDR

@@ -55,6 +55,10 @@ spec:
               value: "false"
             - name: UNIFI_POLICY_DELETE
               value: "false"
+            # The event websocket is refused for View Only, and its failed
+            # re-auth trips the client's lockout for the REST calls too.
+            - name: UNIFI_NETWORK_WEBSOCKET_ENABLED
+              value: "false"
             - name: HOME
               value: /tmp
           livenessProbe:
