@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: victoria-metrics-mcp
+  labels:
+    app.kubernetes.io/name: victoria-metrics-mcp
+spec:
+  selector:
+    app.kubernetes.io/name: victoria-metrics-mcp
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
