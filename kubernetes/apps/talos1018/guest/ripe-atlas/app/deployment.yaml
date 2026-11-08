@@ -22,7 +22,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: ripe-atlas
-          image: ghcr.io/jamesits/ripe-atlas:5130
+          image: ghcr.io/jamesits/ripe-atlas:5130@sha256:841459abe5aac56833e94832b2460423b5b9532b6420df73bfec54dd3303643b
           securityContext:
             runAsUser: 0
             capabilities:

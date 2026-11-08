@@ -16,9 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Setup Flux
-        uses: fluxcd/flux2/action@main
+        uses: fluxcd/flux2/action@22c6ee1a6099ce252b729199c105a38319b587d4 # main
       - name: Setup Kubernetes
         uses: helm/kind-action@ea822c7bf1874f08e5a491df991c228edffc3376 # v1.15.2
         with:

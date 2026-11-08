@@ -27,7 +27,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: redis
-          image: ghcr.io/valkey-io/valkey:9.1.2
+          image: ghcr.io/valkey-io/valkey:9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false

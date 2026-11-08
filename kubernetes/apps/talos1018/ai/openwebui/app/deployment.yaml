@@ -34,7 +34,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: openwebui
-          image: ghcr.io/open-webui/open-webui:v0.13.0
+          image: ghcr.io/open-webui/open-webui:v0.13.0@sha256:2272b0fb7c8783a016bcc179abb467cfa34590c99c5e6560fe0e9155b4820a09
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

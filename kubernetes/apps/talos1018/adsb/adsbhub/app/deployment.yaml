@@ -22,7 +22,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: adsbhub
-          image: ghcr.io/sdr-enthusiasts/docker-adsbhub:latest-build-530
+          image: ghcr.io/sdr-enthusiasts/docker-adsbhub:latest-build-530@sha256:ca7615a577deb94be5b3a004c80fc291f325ec767802edf057ad0944596cf01a
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false

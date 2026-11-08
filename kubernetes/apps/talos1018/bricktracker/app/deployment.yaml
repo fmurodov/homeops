@@ -35,7 +35,7 @@ spec:
         # (rebrickable_image.download, instructions). Pre-create them on the
         # fresh volume so the first download does not hit FileNotFoundError.
         - name: init-data-dirs
-          image: "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.4.2"
+          image: "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.4.2@sha256:296c03b0cd30c96acc7f8914bfb9d1087600bb01586251df58fe3d74dda735df"
           imagePullPolicy: IfNotPresent
           command:
             - sh
@@ -52,7 +52,7 @@ spec:
                 - ALL
       containers:
         - name: bricktracker
-          image: "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.4.2"
+          image: "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.4.2@sha256:296c03b0cd30c96acc7f8914bfb9d1087600bb01586251df58fe3d74dda735df"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

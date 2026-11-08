@@ -22,7 +22,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: airnavradar
-          image: ghcr.io/sdr-enthusiasts/docker-airnavradar:latest-build-883
+          image: ghcr.io/sdr-enthusiasts/docker-airnavradar:latest-build-883@sha256:ccbd54e6bc146c9aacb304a54ff2c1671952fb3df71849afa5917a3b15eaab56
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false

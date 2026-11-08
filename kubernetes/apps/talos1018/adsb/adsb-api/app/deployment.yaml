@@ -39,7 +39,7 @@ spec:
           # which left the /v2/* router's _reapi_route() factory uncalled
           # and never actually registers any routes (all /v2/* 404, no fork
           # available with a fix - see adsblol/api commit dfdd419f).
-          image: ghcr.io/adsblol/api:sha-534a7c5
+          image: ghcr.io/adsblol/api:sha-534a7c5@sha256:945b5dbc8e04a1232d003a98e4a10e9d618301461291e988eeebf946d38efb53
           # Image's default CMD binds --host 0.0.0.0 (IPv4-only). This
           # cluster's Services are IPv6-only, so the Gateway can't reach it
           # without also binding IPv6.

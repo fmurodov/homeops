@@ -22,7 +22,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: radarvirtuel
-          image: ghcr.io/sdr-enthusiasts/docker-radarvirtuel:latest-build-800
+          image: ghcr.io/sdr-enthusiasts/docker-radarvirtuel:latest-build-800@sha256:428a60bb83f61eaea7e351b6a1dd65573da828b716fcd94dacc593e5cf238b4e
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false

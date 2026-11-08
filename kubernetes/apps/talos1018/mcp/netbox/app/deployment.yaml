@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: netbox-mcp
-          image: docker.io/netboxlabs/netbox-mcp-server:1.2.1
+          image: docker.io/netboxlabs/netbox-mcp-server:1.2.1@sha256:eba97a5ce807a8a77d627d55f46a5fdc70799e84383224de8dba5436e3cac92d
           ports:
             - name: http
               containerPort: 8000

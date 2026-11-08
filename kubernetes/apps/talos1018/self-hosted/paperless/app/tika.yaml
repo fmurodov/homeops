@@ -35,7 +35,7 @@ spec:
               app.kubernetes.io/name: paperless-tika
       containers:
         - name: paperless-tika
-          image: docker.io/apache/tika:3.3.3.0
+          image: docker.io/apache/tika:3.3.3.0@sha256:326b238b37904c94ff61fed87afe0af72e6a29fa715933b10af97b7d56f1d4cb
           command:
             - /bin/sh
             - -c

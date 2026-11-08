@@ -22,7 +22,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: netbootxyz
-          image: ghcr.io/netbootxyz/netbootxyz:0.7.6-nbxyz10
+          image: ghcr.io/netbootxyz/netbootxyz:0.7.6-nbxyz10@sha256:e95b81cebf3af6f7223666289ff3841c607b83914a6c13a9c05fd6b7524ab190
           imagePullPolicy: IfNotPresent
           env:
             - name: TZ

@@ -24,7 +24,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: changedetection
-          image: ghcr.io/dgtlmoon/changedetection.io:0.70.1
+          image: ghcr.io/dgtlmoon/changedetection.io:0.70.1@sha256:72e761d84463553c4a276127df46a4967e9feea8878b88b05d8c058ddbe1a4c8
           ports:
             - name: http
               containerPort: 5000
@@ -63,7 +63,7 @@ spec:
             - name: data
               mountPath: /datastore
         - name: browser
-          image: ghcr.io/browserless/chrome:v2.60.0
+          image: ghcr.io/browserless/chrome:v2.60.0@sha256:a1aaa809544211bfc19c654f3187789b7ec33f546958eb0c1345567c0c353e2f
           env:
             - name: HOST
               value: "::"

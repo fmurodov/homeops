@@ -34,7 +34,7 @@ spec:
         # Runs migrations once, before netbox and worker start, so they never race.
         - name: migrate
           # renovate: datasource=docker depName=ghcr.io/netbox-community/netbox
-          image: ghcr.io/netbox-community/netbox:v4.7.3
+          image: ghcr.io/netbox-community/netbox:v4.7.3@sha256:22cf3c61fc367fb74a5cf6de018e9d7e10a7da8d09a695eab30740793040de08
           args: [/opt/netbox/docker-entrypoint.sh, "true"]
           envFrom: &envFrom
             - configMapRef:
@@ -74,7 +74,7 @@ spec:
       containers:
         - name: netbox
           # renovate: datasource=docker depName=ghcr.io/netbox-community/netbox
-          image: ghcr.io/netbox-community/netbox:v4.7.3
+          image: ghcr.io/netbox-community/netbox:v4.7.3@sha256:22cf3c61fc367fb74a5cf6de018e9d7e10a7da8d09a695eab30740793040de08
           ports:
             - name: http
               containerPort: 8080
@@ -114,7 +114,7 @@ spec:
               subPath: scripts
         - name: worker
           # renovate: datasource=docker depName=ghcr.io/netbox-community/netbox
-          image: ghcr.io/netbox-community/netbox:v4.7.3
+          image: ghcr.io/netbox-community/netbox:v4.7.3@sha256:22cf3c61fc367fb74a5cf6de018e9d7e10a7da8d09a695eab30740793040de08
           # Bypasses the entrypoint so the worker never runs migrations itself.
           command:
             - /opt/netbox/venv/bin/python
