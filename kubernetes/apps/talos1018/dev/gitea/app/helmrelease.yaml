@@ -60,12 +60,12 @@ spec:
           RUN_RETENTION_DAYS: 90
         service:
           DISABLE_REGISTRATION: true
-        # DISABLE_REGISTRATION blocks local/manual signup; it also blocks the
-        # OIDC "Register New Account" confirmation step unless auto-registration
-        # is explicitly enabled here, so trusted Pocket ID logins need this to
-        # provision an account on first sign-in.
+        # DISABLE_REGISTRATION blocks local/manual signup. Auto-registration stays
+        # off too: the Actions runner uses privileged Docker-in-Docker, so a new
+        # account could get root on a node (homeops-project#135). Existing
+        # Pocket ID accounts keep working; create any new one by hand first.
         oauth2_client:
-          ENABLE_AUTO_REGISTRATION: true
+          ENABLE_AUTO_REGISTRATION: false
         # File-backed sessions survive pod restarts without needing Redis/Valkey
         # (cache stays memory, queue stays level — both fine for a single replica).
         session:
