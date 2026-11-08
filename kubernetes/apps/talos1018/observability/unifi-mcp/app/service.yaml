@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Service
+metadata:
+  name: unifi-mcp
+  labels:
+    app.kubernetes.io/name: unifi-mcp
+spec:
+  selector:
+    app.kubernetes.io/name: unifi-mcp
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP
