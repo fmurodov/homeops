@@ -115,6 +115,13 @@ operator:
 hubble:
   enabled: true
 
+  # The default "helm" method keeps reusing the existing Secrets, so the
+  # one-year certificates never renew and Hubble Relay fails once they expire.
+  # A CronJob regenerates them on the chart's schedule (every four months).
+  tls:
+    auto:
+      method: cronJob
+
   relay:
     enabled: true
     resources:
