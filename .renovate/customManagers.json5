@@ -38,6 +38,18 @@
     },
     {
       customType: "regex",
+      description: "Match Talos external manifest URLs pinned to a release tag",
+      managerFilePatterns: ["/^talos/.+\\.yaml$/"],
+      matchStrings: [
+        "url: https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentValue>v[^/]+)/",
+        "url: https://github\\.com/(?<depName>[^/]+/[^/]+)/releases/download/(?<currentValue>v[^/]+)/",
+      ],
+      datasourceTemplate: "github-releases",
+      // metrics-server also publishes metrics-server-helm-chart-* tags
+      versioningTemplate: "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+    },
+    {
+      customType: "regex",
       description: "Process OCI dependencies",
       managerFilePatterns: [
         "/\\.yaml(?:\\.j2)?$/",
