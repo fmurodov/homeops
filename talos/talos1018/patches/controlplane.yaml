@@ -153,12 +153,12 @@ serviceSubnets:
 apiVersion: v1alpha1
 kind: KubeExternalManifestConfig
 name: kubelet-serving-cert-approver
-url: https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+url: https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.12.1/deploy/standalone-install.yaml
 ---
 apiVersion: v1alpha1
 kind: KubeExternalManifestConfig
 name: metrics-server
-url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+url: https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.9.1/components.yaml
 ---
 apiVersion: v1alpha1
 kind: ResolverConfig
