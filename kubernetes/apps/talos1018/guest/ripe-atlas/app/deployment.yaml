@@ -32,13 +32,21 @@ spec:
               value: "yes"
           securityContext:
             runAsUser: 0
+            # Same set as upstream's compose example: the entrypoint runs as root to fix
+            # ownership, then setpriv drops to ripe-atlas with only NET_RAW.
             capabilities:
+              drop:
+                - ALL
               add:
                 - NET_RAW
+                - KILL # tini signals the non-root probe processes
                 - CHOWN
+                - FOWNER
                 - SETUID
                 - SETGID
                 - DAC_OVERRIDE
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - name: data
               mountPath: /etc/ripe-atlas
