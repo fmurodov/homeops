@@ -5,4 +5,5 @@ kind: Namespace
 metadata:
   name: guest
   labels:
-    pod-security.kubernetes.io/enforce: baseline
+    # baseline would reject the probe: it doesn't allow adding NET_RAW
+    pod-security.kubernetes.io/enforce: privileged
