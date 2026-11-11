@@ -23,15 +23,30 @@ spec:
       containers:
         - name: ripe-atlas
           image: ghcr.io/jamesits/ripe-atlas:5130@sha256:841459abe5aac56833e94832b2460423b5b9532b6420df73bfec54dd3303643b
+          env:
+            # Report the pod's /proc/net/dev counters (lo, eth0: only the probe's own
+            # traffic) as built-in measurement 9002 every ~3 min. The entrypoint appends
+            # to config.txt on the PVC and the probe reads the first match, so to turn
+            # this off again, delete /etc/ripe-atlas/config.txt as well.
+            - name: RXTXRPT
+              value: "yes"
           securityContext:
             runAsUser: 0
+            # Same set as upstream's compose example: the entrypoint runs as root to fix
+            # ownership, then setpriv drops to ripe-atlas with only NET_RAW.
             capabilities:
+              drop:
+                - ALL
               add:
                 - NET_RAW
+                - KILL # tini signals the non-root probe processes
                 - CHOWN
+                - FOWNER
                 - SETUID
                 - SETGID
                 - DAC_OVERRIDE
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - name: data
               mountPath: /etc/ripe-atlas

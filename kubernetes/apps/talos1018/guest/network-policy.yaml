@@ -7,6 +7,10 @@ metadata:
   namespace: guest
 spec:
   endpointSelector: {}
+  # Nothing in guest serves anything; an empty rule makes ingress default-deny
+  # (replies to the probe's own traffic still pass via conntrack).
+  ingress:
+    - {}
   egress:
     # DNS via kube-dns
     - toEndpoints:
