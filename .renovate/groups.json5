@@ -41,6 +41,28 @@
       minimumReleaseAge: "14 days",
     },
     {
+      description: "Hold Kubernetes at 1.36 until Cilium 1.21",
+      // Cilium 1.20 doesn't support Kubernetes 1.37 (homeops-project#148).
+      // Patch releases still come through. Remove once Cilium is on 1.21.
+      matchDatasources: ["docker"],
+      matchPackageNames: [
+        "/kube-apiserver/",
+        "/kube-controller-manager/",
+        "/kube-proxy/",
+        "/kube-scheduler/",
+        "/kubelet/",
+      ],
+      allowedVersions: "/^v?1\\.36\\./",
+    },
+    {
+      description: "Hold Gateway API at 1.6 until Cilium 1.21",
+      // Cilium 1.20 is built against Gateway API 1.6 (homeops-project#148).
+      // Patch releases still come through. Remove once Cilium is on 1.21.
+      matchDatasources: ["github-releases"],
+      matchPackageNames: ["kubernetes-sigs/gateway-api"],
+      allowedVersions: "/^v?1\\.6\\./",
+    },
+    {
       description: "Flux Group",
       groupName: "flux",
       matchDatasources: ["docker", "github-releases"],
