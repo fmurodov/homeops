@@ -1,0 +1,147 @@
+# Host ingress firewall (homeops-project#130): new connections to the node are
+# dropped unless a rule below allows them. Talos always lets in loopback,
+# replies, ICMP/ICMPv6 (5 packets/s each), pod/service to pod/service, and
+# pods to host DNS.
+#
+# LB traffic that Cilium sends to ordinary pods never reaches these rules. Only
+# host listeners need one: Talos and Kubernetes components, hostNetwork pods
+# (like dn42-resolver) and the gateways' Envoy.
+#
+# Each rule takes one protocol and lists its sources in full. The anchors
+# (&name) let later rules reuse the same list.
+apiVersion: v1alpha1
+kind: NetworkDefaultActionConfig
+ingress: block
+---
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: talos-apid
+portSelector:
+  ports:
+    - 50000
+  protocol: tcp
+ingress: &admins-nodes-pods
+  # Admins, IPv6 only: VLANs core, lan, srv (with the nodes, and rock64 where
+  # NetBird arrives masqueraded) and lan6. IoT, guest and security are left out.
+  - subnet: ${IPV6_PREFIX_GUA}::/64
+  - subnet: ${IPV6_PREFIX_GUA}:1::/64
+  - subnet: ${IPV6_PREFIX_GUA}:5::/64
+  - subnet: ${IPV6_PREFIX_GUA}:6::/64
+  - subnet: fd6d:cefe:ddc3:5::/64
+  # UniFi WireGuard wgsrv1; its clients use IPv4 until homeops-project#123
+  - subnet: 10.18.201.0/24
+  - subnet: fda3:972:16a0::/64
+  # Nodes over IPv4
+  - subnet: 10.18.6.91/32
+  - subnet: 10.18.6.92/32
+  - subnet: 10.18.6.93/32
+  # Pods (tuppr and talos-backup use the Talos API)
+  - subnet: ${IPV6_PREFIX_GUA}:100::/56
+  - subnet: 10.244.0.0/16
+---
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: kube-apiserver
+portSelector:
+  ports:
+    - 6443
+  protocol: tcp
+ingress: *admins-nodes-pods
+---
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: talos-trustd
+portSelector:
+  ports:
+    - 50001
+  protocol: tcp
+ingress: &nodes
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:91/128
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:92/128
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:93/128
+  - subnet: 10.18.6.91/32
+  - subnet: 10.18.6.92/32
+  - subnet: 10.18.6.93/32
+---
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: etcd
+portSelector:
+  ports:
+    - 2379-2380
+  protocol: tcp
+ingress: *nodes
+---
+# kubelet, metrics (etcd 2381, node-exporter 9100, Cilium 9962-9965,
+# controller-manager 10257, scheduler 10259), cilium-health 4240 and the
+# Hubble peer 4244. Callers are the nodes and pods (metrics-server, vmagent,
+# hubble-relay).
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: cluster-internal
+portSelector:
+  ports:
+    - 2381
+    - 4240
+    - 4244
+    - 9100
+    - 9962-9965
+    - 10250
+    - 10257
+    - 10259
+  protocol: tcp
+ingress:
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:91/128
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:92/128
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:93/128
+  - subnet: 10.18.6.91/32
+  - subnet: 10.18.6.92/32
+  - subnet: 10.18.6.93/32
+  - subnet: ${IPV6_PREFIX_GUA}:100::/56
+  - subnet: 10.244.0.0/16
+---
+# Gateway listener ports. Cilium hands Gateway traffic to Envoy on the host,
+# so it passes this firewall. Nothing else on the host listens on them, and
+# UniFi plus the routes decide who reaches each gateway.
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: gateway-tcp
+portSelector:
+  ports:
+    - 22
+    - 80
+    - 443
+  protocol: tcp
+ingress: &anywhere
+  - subnet: ::/0
+  - subnet: 0.0.0.0/0
+---
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: gateway-udp
+portSelector:
+  ports:
+    - 69
+  protocol: udp
+ingress: *anywhere
+---
+# dn42-resolver (hostNetwork, 1053): same ranges as its unbound access-control
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: dn42-resolver-udp
+portSelector:
+  ports:
+    - 1053
+  protocol: udp
+ingress: &home
+  - subnet: fd6d:cefe:ddc3::/48
+  - subnet: ${IPV6_PREFIX_GUA}::/48
+---
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: dn42-resolver-tcp
+portSelector:
+  ports:
+    - 1053
+  protocol: tcp
+ingress: *home

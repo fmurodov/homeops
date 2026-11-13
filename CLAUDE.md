@@ -21,7 +21,7 @@ This document provides essential guidance for AI assistants working with this In
 homeops/
 ├── talos/talos1018/           # Talos cluster config (plain talosctl + sops)
 │   ├── generate.sh            # Versions + talosctl gen config; writes clusterconfig/
-│   ├── patches/               # controlplane.yaml + one file per node (edit these)
+│   ├── patches/               # controlplane.yaml, firewall.yaml + one file per node (edit these)
 │   ├── secrets.sops.yaml      # Talos secrets bundle
 │   └── clusterconfig/         # Generated configs (DO NOT EDIT)
 │

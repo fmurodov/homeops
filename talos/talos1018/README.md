@@ -161,7 +161,7 @@ talosctl apply-config -n fd6d:cefe:ddc3:5:10:18:6:93 --file clusterconfig/talos1
 
 ## Host ingress firewall
 
-`patches/controlplane.yaml` sets the Talos ingress firewall to block, with
+`patches/firewall.yaml` sets the Talos ingress firewall to block, with
 `NetworkRuleConfig` allow rules per port (homeops-project#130). Anything new
 that listens on the host needs a rule there first, or it is silently dropped:
 
@@ -177,7 +177,8 @@ with `--mode=try` first, so a mistake reverts by itself:
 talosctl apply-config -n <node> --file clusterconfig/<config>.yaml --mode=try --timeout=5m
 ```
 
-To see the rules a node is running: `talosctl -n <node> get nftableschains -o yaml`.
+To see the rules a node is running: `talosctl -n <node> get chains -o yaml`
+(chains `ingress` and `prerouting`).
 
 ## Talos upgrade
 tuppr drives upgrades from `kubernetes/apps/talos1018/system-upgrade/tuppr/config/`. Renovate bumps
