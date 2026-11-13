@@ -167,9 +167,10 @@ ports: apid, the API server, trustd, etcd, kubelet and the metrics ports
 sources it doesn't list, and new host listeners (hostNetwork pods, Gateway
 Envoy, BGP) need no rule.
 
-Don't switch `NetworkDefaultActionConfig` to block: it caps inbound ICMPv6 at
-5 packets/s, which breaks neighbour discovery on nodes that announce
-LoadBalancer IPs, and it cut nodes 2 and 3 off on 2026-11-13.
+Block mode (`NetworkDefaultActionConfig`) is left out on purpose: it needs a
+rule for every host listener and caps inbound ICMPv6, neighbour discovery
+included, at 5 packets/s. Admin ranges list both the GUA and the ULA /64 of
+each VLAN: clients pick a ULA source for the nodes' ULA addresses.
 
 Change firewall rules with `--mode=try` first, so a mistake reverts by itself:
 

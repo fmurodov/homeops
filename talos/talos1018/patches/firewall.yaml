@@ -1,8 +1,8 @@
 # Host ingress firewall (homeops-project#130). The default stays accept; each
 # rule below drops new connections to its ports from any source not listed.
-# Block mode cut nodes 2 and 3 off on 2026-11-13, most likely because it
-# rate-limits all inbound ICMPv6 to 5 packets/s and those nodes answer
-# neighbour discovery for Cilium's LB addresses.
+# Not block mode: that needs a rule for every host listener (hostNetwork pods,
+# Gateway Envoy, BGP) and caps all inbound ICMPv6, neighbour discovery
+# included, at 5 packets/s.
 #
 # Each rule takes one protocol and lists its sources in full (YAML anchors
 # don't cross documents).
@@ -14,13 +14,17 @@ portSelector:
     - 50000
   protocol: tcp
 ingress:
-  # Admins, IPv6 only: VLANs core, lan, srv (with the nodes, and rock64 where
-  # NetBird arrives masqueraded) and lan6. IoT, guest and security are left out.
+  # Admins, IPv6 only, GUA and ULA: VLANs core, lan, srv (with the nodes, and
+  # rock64 where NetBird arrives masqueraded) and lan6. IoT, guest and security
+  # are left out.
   - subnet: ${IPV6_PREFIX_GUA}::/64
   - subnet: ${IPV6_PREFIX_GUA}:1::/64
   - subnet: ${IPV6_PREFIX_GUA}:5::/64
   - subnet: ${IPV6_PREFIX_GUA}:6::/64
+  - subnet: fd6d:cefe:ddc3::/64
+  - subnet: fd6d:cefe:ddc3:1::/64
   - subnet: fd6d:cefe:ddc3:5::/64
+  - subnet: fd6d:cefe:ddc3:6::/64
   # UniFi WireGuard wgsrv1; its clients use IPv4 until homeops-project#123
   - subnet: 10.18.201.0/24
   - subnet: fda3:972:16a0::/64
@@ -40,13 +44,17 @@ portSelector:
     - 6443
   protocol: tcp
 ingress:
-  # Admins, IPv6 only: VLANs core, lan, srv (with the nodes, and rock64 where
-  # NetBird arrives masqueraded) and lan6. IoT, guest and security are left out.
+  # Admins, IPv6 only, GUA and ULA: VLANs core, lan, srv (with the nodes, and
+  # rock64 where NetBird arrives masqueraded) and lan6. IoT, guest and security
+  # are left out.
   - subnet: ${IPV6_PREFIX_GUA}::/64
   - subnet: ${IPV6_PREFIX_GUA}:1::/64
   - subnet: ${IPV6_PREFIX_GUA}:5::/64
   - subnet: ${IPV6_PREFIX_GUA}:6::/64
+  - subnet: fd6d:cefe:ddc3::/64
+  - subnet: fd6d:cefe:ddc3:1::/64
   - subnet: fd6d:cefe:ddc3:5::/64
+  - subnet: fd6d:cefe:ddc3:6::/64
   # UniFi WireGuard wgsrv1; its clients use IPv4 until homeops-project#123
   - subnet: 10.18.201.0/24
   - subnet: fda3:972:16a0::/64
