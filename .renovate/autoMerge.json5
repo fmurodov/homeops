@@ -47,7 +47,8 @@
       description: "Automerge listed apps",
       // To automerge another app, add its package name here. Renovate merges
       // only after every check on the PR passes: the branch ruleset requires
-      // none, so GitHub auto-merge (platformAutomerge) would merge at once.
+      // only manifests and gitleaks, so GitHub auto-merge (platformAutomerge)
+      // would not wait for the others.
       matchPackageNames: [
         "LomotHo/minecraft-bedrock",
         "itzg/minecraft-bedrock-server",

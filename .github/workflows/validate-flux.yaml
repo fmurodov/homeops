@@ -3,14 +3,11 @@ name: validate-flux
 
 on:
   workflow_dispatch:
+  # No paths filter: `manifests` is a required check on master, and a filtered
+  # workflow never reports on a commit it skips, which would block that PR.
   push:
     branches: ["**"]
     tags-ignore: ["*"]
-    paths:
-      - "kubernetes/**"
-      - "scripts/validate-flux.sh"
-      - ".yamllint.yaml"
-      - ".github/workflows/validate-flux.yaml"
 
 jobs:
   manifests:
