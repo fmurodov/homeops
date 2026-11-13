@@ -270,9 +270,10 @@ parent: net0
 # replies, ICMP/ICMPv6 (5 packets/s each), pod/service to pod/service, and pods
 # to host DNS. It does not see LB traffic Cilium hands to pods (that bypasses
 # the host), but it does see traffic to hostNetwork pods and to the gateways'
-# Envoy. Admin ranges: VLANs core, lan, srv and lan6 (IoT, guest and security
-# are left out), wgsrv1 and NetBird. NetBird routing peers masquerade, so its
-# traffic usually arrives from rock64 on srv.
+# Envoy. Admin ranges are IPv6 only: VLANs core, lan, srv and lan6 (IoT, guest
+# and security are left out), plus wgsrv1. NetBird routing peers masquerade, so
+# NetBird arrives from rock64 on srv. Node-to-node and pod rules keep IPv4,
+# which the cluster itself still uses.
 apiVersion: v1alpha1
 kind: NetworkDefaultActionConfig
 ingress: block
@@ -285,20 +286,21 @@ portSelector:
     - 50000
   protocol: tcp
 ingress: &admin-and-pods
-  - subnet: 10.18.1.0/24
-  - subnet: 10.18.2.0/24
-  - subnet: 10.18.6.0/24
-  - subnet: 10.18.7.0/24
+  # Admins over IPv6 only: VLANs core, lan, srv, lan6
   - subnet: ${IPV6_PREFIX_GUA}::/64
   - subnet: ${IPV6_PREFIX_GUA}:1::/64
   - subnet: ${IPV6_PREFIX_GUA}:5::/64
   - subnet: ${IPV6_PREFIX_GUA}:6::/64
   - subnet: fd6d:cefe:ddc3:5::/64
-  # UniFi WireGuard wgsrv1 (backup VPN)
+  # UniFi WireGuard wgsrv1 (backup VPN). Its clients only use IPv4 until
+  # homeops-project#123, so this is the one IPv4 admin range.
   - subnet: 10.18.201.0/24
   - subnet: fda3:972:16a0::/64
-  # NetBird overlay, in case a peer stops masquerading
-  - subnet: 100.64.0.0/10
+  # Nodes over IPv4 (apid proxies between nodes; etcd and KubePrism may use
+  # the IPv4 member and endpoint addresses)
+  - subnet: 10.18.6.91/32
+  - subnet: 10.18.6.92/32
+  - subnet: 10.18.6.93/32
   # tuppr and talos-backup use the Talos API from pods
   - subnet: ${IPV6_PREFIX_GUA}:100::/56
   - subnet: 10.244.0.0/16
