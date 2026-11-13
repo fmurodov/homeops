@@ -8,4 +8,5 @@ resources:
   - ./n8n-secret.sops.yaml
   - ./deployment.yaml
   - ./service.yaml
+  - ./networkpolicy.yaml
   - ./httproute.yaml
