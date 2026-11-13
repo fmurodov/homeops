@@ -161,17 +161,17 @@ talosctl apply-config -n fd6d:cefe:ddc3:5:10:18:6:93 --file clusterconfig/talos1
 
 ## Host ingress firewall
 
-`patches/firewall.yaml` sets the Talos ingress firewall to block, with
-`NetworkRuleConfig` allow rules per port (homeops-project#130). Anything new
-that listens on the host needs a rule there first, or it is silently dropped:
+`patches/firewall.yaml` limits who can open connections to the sensitive host
+ports: apid, the API server, trustd, etcd, kubelet and the metrics ports
+(homeops-project#130). The default action stays accept, so each rule only drops
+sources it doesn't list, and new host listeners (hostNetwork pods, Gateway
+Envoy, BGP) need no rule.
 
-- a `hostNetwork` pod, or a LoadBalancer Service backed by one (like
-  dn42-resolver on 1053);
-- a new Gateway listener port (Envoy runs on the host);
-- BGP (TCP 179) if Cilium BGP is turned on, KubeSpan (UDP 51871) if enabled.
+Don't switch `NetworkDefaultActionConfig` to block: it caps inbound ICMPv6 at
+5 packets/s, which breaks neighbour discovery on nodes that announce
+LoadBalancer IPs, and it cut nodes 2 and 3 off on 2026-11-13.
 
-LB Services backed by ordinary pods don't need a rule. Change firewall rules
-with `--mode=try` first, so a mistake reverts by itself:
+Change firewall rules with `--mode=try` first, so a mistake reverts by itself:
 
 ```bash
 talosctl apply-config -n <node> --file clusterconfig/<config>.yaml --mode=try --timeout=5m
