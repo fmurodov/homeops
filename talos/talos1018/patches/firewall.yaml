@@ -7,8 +7,8 @@
 # host listeners need one: Talos and Kubernetes components, hostNetwork pods
 # (like dn42-resolver) and the gateways' Envoy.
 #
-# Each rule takes one protocol and lists its sources in full. The anchors
-# (&name) let later rules reuse the same list.
+# Each rule takes one protocol and lists its sources in full (YAML anchors
+# don't cross documents).
 apiVersion: v1alpha1
 kind: NetworkDefaultActionConfig
 ingress: block
@@ -20,7 +20,7 @@ portSelector:
   ports:
     - 50000
   protocol: tcp
-ingress: &admins-nodes-pods
+ingress:
   # Admins, IPv6 only: VLANs core, lan, srv (with the nodes, and rock64 where
   # NetBird arrives masqueraded) and lan6. IoT, guest and security are left out.
   - subnet: ${IPV6_PREFIX_GUA}::/64
@@ -46,7 +46,24 @@ portSelector:
   ports:
     - 6443
   protocol: tcp
-ingress: *admins-nodes-pods
+ingress:
+  # Admins, IPv6 only: VLANs core, lan, srv (with the nodes, and rock64 where
+  # NetBird arrives masqueraded) and lan6. IoT, guest and security are left out.
+  - subnet: ${IPV6_PREFIX_GUA}::/64
+  - subnet: ${IPV6_PREFIX_GUA}:1::/64
+  - subnet: ${IPV6_PREFIX_GUA}:5::/64
+  - subnet: ${IPV6_PREFIX_GUA}:6::/64
+  - subnet: fd6d:cefe:ddc3:5::/64
+  # UniFi WireGuard wgsrv1; its clients use IPv4 until homeops-project#123
+  - subnet: 10.18.201.0/24
+  - subnet: fda3:972:16a0::/64
+  # Nodes over IPv4
+  - subnet: 10.18.6.91/32
+  - subnet: 10.18.6.92/32
+  - subnet: 10.18.6.93/32
+  # Pods (tuppr and talos-backup use the Talos API)
+  - subnet: ${IPV6_PREFIX_GUA}:100::/56
+  - subnet: 10.244.0.0/16
 ---
 apiVersion: v1alpha1
 kind: NetworkRuleConfig
@@ -55,7 +72,7 @@ portSelector:
   ports:
     - 50001
   protocol: tcp
-ingress: &nodes
+ingress:
   - subnet: fd6d:cefe:ddc3:5:10:18:6:91/128
   - subnet: fd6d:cefe:ddc3:5:10:18:6:92/128
   - subnet: fd6d:cefe:ddc3:5:10:18:6:93/128
@@ -70,7 +87,13 @@ portSelector:
   ports:
     - 2379-2380
   protocol: tcp
-ingress: *nodes
+ingress:
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:91/128
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:92/128
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:93/128
+  - subnet: 10.18.6.91/32
+  - subnet: 10.18.6.92/32
+  - subnet: 10.18.6.93/32
 ---
 # kubelet, metrics (etcd 2381, node-exporter 9100, Cilium 9962-9965,
 # controller-manager 10257, scheduler 10259), cilium-health 4240 and the
@@ -112,7 +135,7 @@ portSelector:
     - 80
     - 443
   protocol: tcp
-ingress: &anywhere
+ingress:
   - subnet: ::/0
   - subnet: 0.0.0.0/0
 ---
@@ -123,7 +146,9 @@ portSelector:
   ports:
     - 69
   protocol: udp
-ingress: *anywhere
+ingress:
+  - subnet: ::/0
+  - subnet: 0.0.0.0/0
 ---
 # dn42-resolver (hostNetwork, 1053): same ranges as its unbound access-control
 apiVersion: v1alpha1
@@ -133,7 +158,7 @@ portSelector:
   ports:
     - 1053
   protocol: udp
-ingress: &home
+ingress:
   - subnet: fd6d:cefe:ddc3::/48
   - subnet: ${IPV6_PREFIX_GUA}::/48
 ---
@@ -144,4 +169,6 @@ portSelector:
   ports:
     - 1053
   protocol: tcp
-ingress: *home
+ingress:
+  - subnet: fd6d:cefe:ddc3::/48
+  - subnet: ${IPV6_PREFIX_GUA}::/48
