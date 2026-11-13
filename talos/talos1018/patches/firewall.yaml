@@ -77,6 +77,9 @@ ingress:
   - subnet: fd6d:cefe:ddc3:5:10:18:6:91/128
   - subnet: fd6d:cefe:ddc3:5:10:18:6:92/128
   - subnet: fd6d:cefe:ddc3:5:10:18:6:93/128
+  # The VIP holder's own connections to the other nodes come from the VIP
+  # (longest-prefix source selection picks the /128 over the node's /64).
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:90/128
   - subnet: 10.18.6.91/32
   - subnet: 10.18.6.92/32
   - subnet: 10.18.6.93/32
@@ -92,6 +95,9 @@ ingress:
   - subnet: fd6d:cefe:ddc3:5:10:18:6:91/128
   - subnet: fd6d:cefe:ddc3:5:10:18:6:92/128
   - subnet: fd6d:cefe:ddc3:5:10:18:6:93/128
+  # The VIP holder's own connections to the other nodes come from the VIP
+  # (longest-prefix source selection picks the /128 over the node's /64).
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:90/128
   - subnet: 10.18.6.91/32
   - subnet: 10.18.6.92/32
   - subnet: 10.18.6.93/32
@@ -118,6 +124,9 @@ ingress:
   - subnet: fd6d:cefe:ddc3:5:10:18:6:91/128
   - subnet: fd6d:cefe:ddc3:5:10:18:6:92/128
   - subnet: fd6d:cefe:ddc3:5:10:18:6:93/128
+  # The VIP holder's own connections to the other nodes come from the VIP
+  # (longest-prefix source selection picks the /128 over the node's /64).
+  - subnet: fd6d:cefe:ddc3:5:10:18:6:90/128
   - subnet: 10.18.6.91/32
   - subnet: 10.18.6.92/32
   - subnet: 10.18.6.93/32
