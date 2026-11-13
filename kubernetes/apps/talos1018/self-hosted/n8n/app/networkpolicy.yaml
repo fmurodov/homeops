@@ -1,7 +1,9 @@
 ---
 # yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
 # n8n runs user code and has a public webhook route, so only the gateway (its
-# HTTPRoutes) and the metrics scrape may reach it (homeops-project#132).
+# HTTPRoutes) and the metrics scrape may reach it, and it may only reach DNS
+# and the internet, not the cluster or LAN (homeops-project#132). A workflow
+# that needs an internal service needs a rule here first.
 # kubelet probes come from the host, which Cilium allows by default.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -26,3 +28,29 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Internet only, as in dev-isolated: no private, ULA or home GUA ranges.
+    - toCIDRSet:
+        - cidr: "0.0.0.0/0"
+          except:
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+            - "192.168.0.0/16"
+            - "127.0.0.0/8"
+            - "169.254.0.0/16"
+        - cidr: "::/0"
+          except:
+            - "fc00::/7"
+            - "fe80::/10"
+            - "::1/128"
+            - "${IPV6_PREFIX_GUA}::/48"
