@@ -271,7 +271,8 @@ parent: net0
 # to host DNS. It does not see LB traffic Cilium hands to pods (that bypasses
 # the host), but it does see traffic to hostNetwork pods and to the gateways'
 # Envoy. Admin ranges: VLANs core, lan, srv and lan6 (IoT, guest and security
-# are left out); NetBird arrives masqueraded from rock64 on srv.
+# are left out), wgsrv1 and NetBird. NetBird routing peers masquerade, so its
+# traffic usually arrives from rock64 on srv.
 apiVersion: v1alpha1
 kind: NetworkDefaultActionConfig
 ingress: block
@@ -293,6 +294,11 @@ ingress: &admin-and-pods
   - subnet: ${IPV6_PREFIX_GUA}:5::/64
   - subnet: ${IPV6_PREFIX_GUA}:6::/64
   - subnet: fd6d:cefe:ddc3:5::/64
+  # UniFi WireGuard wgsrv1 (backup VPN)
+  - subnet: 10.18.201.0/24
+  - subnet: fda3:972:16a0::/64
+  # NetBird overlay, in case a peer stops masquerading
+  - subnet: 100.64.0.0/10
   # tuppr and talos-backup use the Talos API from pods
   - subnet: ${IPV6_PREFIX_GUA}:100::/56
   - subnet: 10.244.0.0/16
