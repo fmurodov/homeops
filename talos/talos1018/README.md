@@ -159,6 +159,27 @@ talosctl apply-config -n fd6d:cefe:ddc3:5:10:18:6:92 --file clusterconfig/talos1
 talosctl apply-config -n fd6d:cefe:ddc3:5:10:18:6:93 --file clusterconfig/talos1018-talos-1018-3.yaml
 ```
 
+## Host ingress firewall
+
+`patches/firewall.yaml` sets the Talos ingress firewall to block, with
+`NetworkRuleConfig` allow rules per port (homeops-project#130). Anything new
+that listens on the host needs a rule there first, or it is silently dropped:
+
+- a `hostNetwork` pod, or a LoadBalancer Service backed by one (like
+  dn42-resolver on 1053);
+- a new Gateway listener port (Envoy runs on the host);
+- BGP (TCP 179) if Cilium BGP is turned on, KubeSpan (UDP 51871) if enabled.
+
+LB Services backed by ordinary pods don't need a rule. Change firewall rules
+with `--mode=try` first, so a mistake reverts by itself:
+
+```bash
+talosctl apply-config -n <node> --file clusterconfig/<config>.yaml --mode=try --timeout=5m
+```
+
+To see the rules a node is running: `talosctl -n <node> get chains -o yaml`
+(chains `ingress` and `prerouting`).
+
 ## Talos upgrade
 tuppr drives upgrades from `kubernetes/apps/talos1018/system-upgrade/tuppr/config/`. Renovate bumps
 `TALOS_VERSION`/`KUBERNETES_VERSION` in `generate.sh` in the same PR, so regenerated configs carry the new

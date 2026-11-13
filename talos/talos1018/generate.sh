@@ -29,7 +29,9 @@ if [[ -z "${IPV6_PREFIX_GUA:-}" ]]; then
     IPV6_PREFIX_GUA="$(sops --decrypt --extract '["stringData"]["IPV6_PREFIX_GUA"]' \
         ../../kubernetes/components/common/cluster-secrets.sops.yaml)"
 fi
-sed "s/\${IPV6_PREFIX_GUA}/$IPV6_PREFIX_GUA/g" patches/controlplane.yaml > "$WORK/controlplane.yaml"
+for patch in controlplane firewall; do
+    sed "s/\${IPV6_PREFIX_GUA}/$IPV6_PREFIX_GUA/g" "patches/$patch.yaml" > "$WORK/$patch.yaml"
+done
 
 # The endpoint is also the service-account issuer. The old fd00 issuer stays
 # accepted in patches/controlplane.yaml (KubeServiceAccountConfig).
@@ -39,6 +41,7 @@ talosctl gen config talos1018 "https://[fd6d:cefe:ddc3:5:10:18:6:90]:6443" \
     --kubernetes-version "$KUBERNETES_VERSION" \
     --install-image "$INSTALL_IMAGE" \
     --config-patch-control-plane "@$WORK/controlplane.yaml" \
+    --config-patch-control-plane "@$WORK/firewall.yaml" \
     --output-types controlplane,talosconfig \
     --with-docs=false \
     --with-examples=false \
