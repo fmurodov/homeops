@@ -210,7 +210,7 @@ Manual upgrade:
 ./generate.sh
 
 # renovate: datasource=github-releases depName=siderolabs/talos
-set TALOS_VERSION v1.14.5
+set TALOS_VERSION v1.14.6
 set TALOS_IMAGE "factory.talos.dev/metal-installer/36cd6536eaec8ba802be2d38974108359069cedba8857302f69792b26b87c010:$TALOS_VERSION"
 
 talosctl upgrade -n fd6d:cefe:ddc3:5:10:18:6:91 --image "$TALOS_IMAGE" --wait
