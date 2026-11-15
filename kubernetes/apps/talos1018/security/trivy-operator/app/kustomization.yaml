@@ -6,3 +6,4 @@ namespace: security
 resources:
   - ./helmrepository.yaml
   - ./helmrelease.yaml
+  - ./trivy-server-configmap.yaml

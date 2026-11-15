@@ -25,6 +25,10 @@ spec:
       # bloats etcd and the apiserver's watch cache. Vulnerability reports don't
       # need them; only ClusterVulnerabilityReports would.
       sbomGenerationEnabled: false
+      # Standalone scan jobs run one trivy per workload container against a
+      # shared cache, and all but one lose its lock after 5s, so pods with init
+      # containers or sidecars never got a report (aquasecurity/trivy-operator#2967).
+      builtInTrivyServer: true
     # Top level, not under operator: the chart never reads operator.resources.
     resources:
       requests:
@@ -38,6 +42,12 @@ spec:
       enabled: false
     trivy:
       ignoreUnfixed: true
+      # esphome's full report (4.6k CVEs, mostly kernel headers) is over the
+      # 2 MiB limit on a single object write, so it was never stored.
+      severity: CRITICAL,HIGH
+      # The vulnerability DB is a re-downloadable cache.
+      storageClassEnabled: false
+      valuesFromConfigMap: trivy-server-env
       resources:
         requests:
           cpu: 100m
