@@ -16,9 +16,6 @@ metadata:
     gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_PAPERLESS_APIKEY}}"
 spec:
   parentRefs:
-    - name: main-gateway
-      namespace: network
-      sectionName: https-internal
     - name: internal-gateway
       namespace: network
       sectionName: https-internal

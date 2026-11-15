@@ -13,9 +13,6 @@ metadata:
     gethomepage.dev/description: Personal finance
 spec:
   parentRefs:
-    - name: main-gateway
-      namespace: network
-      sectionName: https-internal
     - name: internal-gateway
       namespace: network
       sectionName: https-internal
