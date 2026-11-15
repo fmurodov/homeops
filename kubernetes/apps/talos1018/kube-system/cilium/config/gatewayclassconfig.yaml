@@ -3,15 +3,18 @@
 # this into an Envoy access_log and ships it over xDS, so the lines appear on
 # cilium-envoy's stdout — already tailed by fluent-bit — without a restart.
 #
-# `spec.service` must stay unset: Cilium skips the service model when it is
-# nil, and anything set there starts rewriting the gateway's LoadBalancer
-# service and its pinned IPs.
+# Also the Service settings for the `cilium` class (main and internal gateway).
+# Leave ipFamilies/ipFamilyPolicy unset here: Cilium's default is IPv4-primary
+# dual stack, and the API rejects a change of the primary family in place.
 apiVersion: cilium.io/v2alpha1
 kind: CiliumGatewayClassConfig
 metadata:
   name: gateway-access-logs
   namespace: kube-system
 spec:
+  service:
+    # The LB IPs and the node-local Envoy carry all gateway traffic.
+    allocateLoadBalancerNodePorts: false
   telemetry:
     accessLogs:
       # TCP would need a second entry; every listener here terminates TLS.
@@ -55,3 +58,33 @@ spec:
           # Null for those direct clients, so this doubles as the
           # tunnelled-vs-direct flag.
           client_country: "%REQ(CF-IPCOUNTRY)%"
+---
+# IPv6-only gateways (dn42-gateway). spec.telemetry is copied from
+# gateway-access-logs by the replacement in kustomization.yaml.
+apiVersion: cilium.io/v2alpha1
+kind: CiliumGatewayClassConfig
+metadata:
+  name: gateway-ipv6-only
+  namespace: kube-system
+spec:
+  service:
+    ipFamilyPolicy: SingleStack
+    ipFamilies:
+      - IPv6
+    allocateLoadBalancerNodePorts: false
+  telemetry: {}
+---
+# Not Helm-owned like `cilium`: deleting this class tears down the Service of
+# every Gateway on it.
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: cilium-ipv6-only
+spec:
+  controllerName: io.cilium/gateway-controller
+  description: Cilium gateways with an IPv6-only LoadBalancer Service
+  parametersRef:
+    group: cilium.io
+    kind: CiliumGatewayClassConfig
+    name: gateway-ipv6-only
+    namespace: kube-system

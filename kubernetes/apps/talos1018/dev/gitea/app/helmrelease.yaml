@@ -94,7 +94,7 @@ spec:
             gethomepage.dev/app: gitea
             gethomepage.dev/description: Self-hosted git server
           parentRefs:
-            - name: main-gateway
+            - name: internal-gateway
               namespace: network
               sectionName: https-internal
           hostnames:
@@ -119,6 +119,6 @@ spec:
         tcpRoute:
           enabled: true
           parentRefs:
-            - name: main-gateway
+            - name: internal-gateway
               namespace: network
               sectionName: ssh

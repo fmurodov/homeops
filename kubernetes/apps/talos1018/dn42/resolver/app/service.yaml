@@ -12,6 +12,7 @@ metadata:
     io.cilium/lb-ipam-ips: "fd6d:cefe:ddc3:5:3000::53"
 spec:
   type: LoadBalancer
+  allocateLoadBalancerNodePorts: false
   ipFamilyPolicy: SingleStack
   ipFamilies:
     - IPv6

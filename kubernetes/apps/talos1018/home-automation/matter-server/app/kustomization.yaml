@@ -9,6 +9,7 @@ resources:
   - ./service.yaml
   - ./oauth2-proxy-secret.sops.yaml
   - ./httproute.yaml
+  - ./networkpolicy.yaml
 components:
   - ../../../../../components/oauth2-proxy
 configMapGenerator:

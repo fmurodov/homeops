@@ -76,6 +76,14 @@ certExtraSANs:
   - 10.18.6.92
   - 10.18.6.93
   - 127.0.0.1
+# Talos defaults to 512Mi, under half of what it uses. Memory is the highest
+# node's 7-day p95 working set (1.27 GiB); CPU stays at the default, which
+# covers the p95. No limits: an OOM-killed apiserver takes the node's control
+# plane with it.
+resources:
+  requests:
+    cpu: 200m
+    memory: 1300Mi
 ---
 apiVersion: v1alpha1
 kind: KubeControllerManagerConfig

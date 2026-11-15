@@ -17,10 +17,9 @@ data:
       matchSNItoHost: true
       noTLSVerify: true
     # One rule per public hostname, matching the tunnel CNAMEs in fmurodov-tf
-    # (modules/cloudflare/main.tf, tunnel_subdomains). Not "*.${DOMAIN}": that
-    # also matches *.${CLUSTER_DOMAIN}, which main-gateway serves on its
-    # https-internal listener, so a proxied record there would publish internal
-    # apps. A new public app needs a line here and a CNAME there.
+    # (modules/cloudflare/main.tf, tunnel_subdomains). Not "*.${DOMAIN}", so
+    # only names listed here and there are public. A new public app needs a
+    # line here and a CNAME there.
     ingress:
       - hostname: "hass.${DOMAIN}"
         service: https://cilium-gateway-main-gateway.network.svc.cluster.local

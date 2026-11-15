@@ -6,7 +6,7 @@ metadata:
   name: homepage
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
       namespace: network
       sectionName: https-internal
   hostnames:

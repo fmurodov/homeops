@@ -1,6 +1,7 @@
 ---
 # The only thing DN42 peers may reach (rock64 dn42-fw opens it per port).
-# IPv6 only: DN42 here is IPv6 only and dn42-pool has no IPv4 block.
+# IPv6 only: DN42 here is IPv6 only and dn42-pool has no IPv4 block, so the
+# class makes its Service SingleStack IPv6.
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -9,7 +10,7 @@ metadata:
     # dn42 ACME CA, HTTP-01 over this gateway's http listener
     cert-manager.io/cluster-issuer: dn42
 spec:
-  gatewayClassName: cilium
+  gatewayClassName: cilium-ipv6-only
   infrastructure:
     annotations:
       io.cilium/lb-ipam-ips: "fd6d:cefe:ddc3:5:4000::1"

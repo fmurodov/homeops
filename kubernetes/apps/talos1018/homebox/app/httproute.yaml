@@ -16,7 +16,7 @@ metadata:
     gethomepage.dev/widget.password: "{{HOMEPAGE_VAR_HOMEBOX_PASSWORD}}"
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
       namespace: network
       sectionName: https-internal
   hostnames:

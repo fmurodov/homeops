@@ -8,3 +8,14 @@ resources:
   - ./external-pool.yaml
   - ./dn42-pool.yaml
   - ./gatewayclassconfig.yaml
+replacements:
+  - source:
+      kind: CiliumGatewayClassConfig
+      name: gateway-access-logs
+      fieldPath: spec.telemetry
+    targets:
+      - select:
+          kind: CiliumGatewayClassConfig
+          name: gateway-ipv6-only
+        fieldPaths:
+          - spec.telemetry

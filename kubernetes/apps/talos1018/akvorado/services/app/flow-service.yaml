@@ -13,6 +13,7 @@ metadata:
     service.cilium.io/forwarding-mode: dsr
 spec:
   type: LoadBalancer
+  allocateLoadBalancerNodePorts: false
   ipFamilyPolicy: PreferDualStack
   # Cilium's L2 announcer does not follow the pod, so Local blackholes.
   externalTrafficPolicy: Cluster

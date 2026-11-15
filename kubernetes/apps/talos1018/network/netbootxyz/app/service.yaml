@@ -7,16 +7,19 @@ metadata:
     app.kubernetes.io/name: netbootxyz
   annotations:
 spec:
+  # Needs IPv4: Cilium fills the internal-gateway's TFTP (UDPRoute)
+  # EndpointSlices per family from this Service's endpoints, and PXE clients
+  # use IPv4. The image's nginx assets server is IPv4-only and unused, so its
+  # port is not exposed.
   ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+    - IPv6
+    - IPv4
   ports:
     - port: 3000
       targetPort: http
       protocol: TCP
       name: http
-    - port: 80
-      targetPort: http-assets
-      protocol: TCP
-      name: http-assets
     - port: 69
       targetPort: tftp
       protocol: UDP

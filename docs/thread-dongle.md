@@ -211,7 +211,7 @@ The exit code distinguishes a recoverable wedge from a dead radio:
 
 | Exit | Log line | Meaning |
 |------|----------|---------|
-| 6 | `HandleRcpTimeout` after running | RCP stopped answering mid-flight. Self-recovers on restart. Baseline is a handful per day. |
+| 6 | `radio tx timeout`, then `HandleRcpTimeout` after running | RCP stopped answering mid-flight. Self-recovers on restart in ~4s. Baseline (Nov 2026) is 5-25 per day per dongle, flat across the day, otbr-3 about twice otbr-1. |
 | 1 | `Init() at spinel_driver.cpp:87: Failure` at `00:00:00.000` | RCP never answered the initial handshake. Restarts will not fix it. |
 | 0 | clean s6 shutdown | The container was killed from outside, e.g. by a liveness probe. |
 

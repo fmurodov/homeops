@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# The dashboard's login is oauth2-proxy, and Home Assistant talks to the
+# websocket directly; nothing else may reach it (homeops-project#132).
+# kubelet probes come from the host, which Cilium allows by default.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: matter-server
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: matter-server
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: oauth2-proxy
+        - matchLabels:
+            app.kubernetes.io/name: home-assistant
+      toPorts:
+        - ports:
+            - port: "5580"
+              protocol: TCP

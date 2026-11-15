@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# The UI's login is oauth2-proxy, so only it may reach the UI (homeops-project#132).
+# TFTP comes through the internal-gateway UDPRoute. Cilium load-balances it to
+# this pod and SNATs the client to the announcing node's address when that node
+# is not this pod's, so 69/udp is open to the nodes (and to the gateway proxy,
+# in case Cilium routes it there) as well as to anything outside the cluster.
+# kubelet probes come from the host, which Cilium allows by default.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: netbootxyz
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: netbootxyz
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: oauth2-proxy
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    - fromEntities:
+        - world
+        - remote-node
+        - host
+        - ingress
+      toPorts:
+        - ports:
+            - port: "69"
+              protocol: UDP

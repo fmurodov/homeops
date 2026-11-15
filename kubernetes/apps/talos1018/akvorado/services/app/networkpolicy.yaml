@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# The console's login is oauth2-proxy, so only it and the metrics scrape may
+# reach the console (homeops-project#132).
+# kubelet probes come from the host, which Cilium allows by default.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: akvorado-console
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: akvorado-console
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: oauth2-proxy
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: observability
+            app.kubernetes.io/name: victoria-metrics-single
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

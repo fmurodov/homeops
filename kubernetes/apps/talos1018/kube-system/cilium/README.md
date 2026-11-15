@@ -103,8 +103,13 @@ Non-obvious bits:
   `Accepted=False` on the GatewayClass during a first apply, which is cosmetic:
   Gateways do not read that condition, and a missing config means "no
   parameters", not an error.
-- `spec.service` must stay unset, or it starts rewriting the gateway's
-  LoadBalancer service and its pinned IPs.
+- `spec.service` only sets `allocateLoadBalancerNodePorts: false`. Cilium
+  creates gateway Services IPv4-primary dual stack, and the API rejects a
+  change of the primary family in place, so `ipFamilies` stays unset there.
+  IPv6-only gateways (dn42-gateway) use the `cilium-ipv6-only` GatewayClass and
+  its `gateway-ipv6-only` config instead, which copies the access-log format
+  from `gateway-access-logs`. Moving an existing Gateway onto that class needs
+  its `cilium-gateway-<name>` Service deleted once, so Cilium recreates it.
 - Only `%CILIUM_GATEWAY_*%` is Cilium's. Everything else must be a real Envoy
   [command operator](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage).
 - `client_ip` prefers Cloudflare's header and falls back to `X-Forwarded-For`

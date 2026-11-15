@@ -13,7 +13,7 @@ metadata:
     gethomepage.dev/widget.url: http://spoolman-http.spoolman.svc.cluster.local:8000
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: internal-gateway
       namespace: network
       sectionName: https-internal
   hostnames:
