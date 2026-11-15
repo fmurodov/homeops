@@ -1,0 +1,9 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trivy-server-env
+data:
+  # The chart hardcodes 0.0.0.0:4954, which the IPv6-only Service can't reach.
+  TRIVY_LISTEN: "[::]:4954"
