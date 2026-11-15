@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Public via the tunnel, so only the gateways and the metrics scrape may reach
+# it (homeops-project#132). Ingress only: HA talks to many LAN devices, and its
+# extra macvlan interfaces bypass Cilium anyway, so an egress policy would add
+# little. kubelet probes come from the host, which Cilium allows by default.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: home-assistant
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: home-assistant
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8123"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: observability
+            app.kubernetes.io/name: victoria-metrics-single
+      toPorts:
+        - ports:
+            - port: "8123"
+              protocol: TCP

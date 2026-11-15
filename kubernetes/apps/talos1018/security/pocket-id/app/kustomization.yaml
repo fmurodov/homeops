@@ -8,4 +8,5 @@ resources:
   - ./pocket-id-secret.sops.yaml
   - ./deployment.yaml
   - ./service.yaml
+  - ./networkpolicy.yaml
   - ./httproute.yaml
