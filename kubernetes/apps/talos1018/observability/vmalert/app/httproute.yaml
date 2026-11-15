@@ -29,5 +29,5 @@ spec:
               - name: Strict-Transport-Security
                 value: max-age=31536000
       backendRefs:
-        - name: vmalert-victoria-metrics-alert-server
-          port: 8880
+        - name: oauth2-proxy-vmalert
+          port: 4180

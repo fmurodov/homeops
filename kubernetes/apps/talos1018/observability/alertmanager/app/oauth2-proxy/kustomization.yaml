@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Several apps share this namespace, so each oauth2-proxy gets a suffix and its
+# own selector label.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+nameSuffix: -alertmanager
+labels:
+  - pairs:
+      app.kubernetes.io/instance: oauth2-proxy-alertmanager
+    includeSelectors: true
+resources:
+  - ./oauth2-proxy-secret.sops.yaml
+components:
+  - ../../../../../../components/oauth2-proxy
+configMapGenerator:
+  - name: oauth2-proxy
+    literals:
+      - OAUTH2_PROXY_UPSTREAMS=http://alertmanager:9093
+      - OAUTH2_PROXY_REDIRECT_URL=https://alertmanager.${CLUSTER_DOMAIN}/oauth2/callback
+      - OAUTH2_PROXY_COOKIE_NAME=_oauth2_proxy_alertmanager

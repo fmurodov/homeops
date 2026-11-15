@@ -8,6 +8,10 @@ metadata:
   name: victoria-logs
   namespace: flux-system
 spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   dependsOn:
     - name: longhorn-config
       namespace: flux-system

@@ -7,3 +7,4 @@ resources:
   - ./alertmanager-secret.sops.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
+  - ./oauth2-proxy

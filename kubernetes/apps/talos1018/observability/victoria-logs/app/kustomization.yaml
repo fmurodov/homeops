@@ -7,3 +7,5 @@ resources:
   - ./pvc.yaml
   - ./helmrelease.yaml
   - ./syslog-service.yaml
+  - ./httproute.yaml
+  - ./oauth2-proxy

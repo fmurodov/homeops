@@ -48,6 +48,9 @@ spec:
             - --oidc-issuer-url=https://pid.${DOMAIN}
             - --http-address=[::]:4180
             - --email-domain=*
+            # only members of this Pocket ID group get in, not every Pocket ID user
+            - --scope=openid email profile groups
+            - --allowed-group=homeops-admins
             - --cookie-secure=true
             - --silence-ping-logging=true
             - --code-challenge-method=S256

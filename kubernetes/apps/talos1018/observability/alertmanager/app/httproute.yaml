@@ -29,5 +29,5 @@ spec:
               - name: Strict-Transport-Security
                 value: max-age=31536000
       backendRefs:
-        - name: alertmanager
-          port: 9093
+        - name: oauth2-proxy-alertmanager
+          port: 4180
