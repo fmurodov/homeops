@@ -1,0 +1,28 @@
+---
+# Origin for the Cloudflare tunnel only: no LoadBalancer address (see the
+# cilium-cluster-only class), so nothing outside the cluster can reach it
+# directly. cloudflared connects to its ClusterIP Service
+# cilium-gateway-internet-gateway. Only *.${DOMAIN} routes attach here;
+# the hostnames that are actually public are the ones listed in cloudflared's
+# config and the tunnel CNAMEs in fmurodov-tf.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: internet-gateway
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  gatewayClassName: cilium-cluster-only
+  listeners:
+    - name: https-external
+      hostname: "*.${DOMAIN}"
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          # Own secret: gateway-shim can't share one Certificate across Gateways.
+          - name: internet-gateway-tls
+      allowedRoutes:
+        namespaces:
+          from: All

@@ -88,3 +88,36 @@ spec:
     kind: CiliumGatewayClassConfig
     name: gateway-ipv6-only
     namespace: kube-system
+---
+# Tunnel-only gateways (internet-gateway): reachable only on their ClusterIP,
+# which is all cloudflared needs. Cilium can't make a gateway Service of type
+# ClusterIP, so this sets a loadBalancerClass that no controller handles:
+# LB-IPAM skips it, the Service gets no external IP, and the Gateway reports
+# Programmed=False (AddressNotAssigned) while its listeners serve normally.
+# spec.telemetry is copied from gateway-access-logs by the replacement in
+# kustomization.yaml.
+apiVersion: cilium.io/v2alpha1
+kind: CiliumGatewayClassConfig
+metadata:
+  name: gateway-cluster-only
+  namespace: kube-system
+spec:
+  service:
+    loadBalancerClass: homeops/cluster-only
+    allocateLoadBalancerNodePorts: false
+  telemetry: {}
+---
+# Not Helm-owned like `cilium`: deleting this class tears down the Service of
+# every Gateway on it.
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: cilium-cluster-only
+spec:
+  controllerName: io.cilium/gateway-controller
+  description: Cilium gateways with no external address, reachable only in the cluster
+  parametersRef:
+    group: cilium.io
+    kind: CiliumGatewayClassConfig
+    name: gateway-cluster-only
+    namespace: kube-system

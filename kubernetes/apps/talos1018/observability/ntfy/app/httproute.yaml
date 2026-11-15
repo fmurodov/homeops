@@ -16,6 +16,9 @@ spec:
     - name: main-gateway
       namespace: network
       sectionName: https-external
+    - name: internet-gateway
+      namespace: network
+      sectionName: https-external
   hostnames:
     - "ntfy.${DOMAIN}"
   rules:
