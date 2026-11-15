@@ -7,11 +7,14 @@ metadata:
     app.kubernetes.io/name: netbootxyz
   annotations:
 spec:
-  # The webapp and dnsmasq (TFTP) listen on IPv6. The image's nginx assets
-  # server listens on IPv4 only, and nothing uses it, so it is not exposed.
-  ipFamilyPolicy: SingleStack
+  # Needs IPv4: Cilium fills the internal-gateway's TFTP (UDPRoute)
+  # EndpointSlices per family from this Service's endpoints, and PXE clients
+  # use IPv4. The image's nginx assets server is IPv4-only and unused, so its
+  # port is not exposed.
+  ipFamilyPolicy: PreferDualStack
   ipFamilies:
     - IPv6
+    - IPv4
   ports:
     - port: 3000
       targetPort: http
