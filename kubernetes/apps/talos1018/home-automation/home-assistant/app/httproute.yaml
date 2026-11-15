@@ -10,9 +10,6 @@ metadata:
     gethomepage.dev/enabled: "false"
 spec:
   parentRefs:
-    - name: main-gateway
-      namespace: network
-      sectionName: https-external
     - name: internet-gateway
       namespace: network
       sectionName: https-external

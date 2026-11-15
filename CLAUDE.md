@@ -33,7 +33,7 @@ homeops/
 │   │   ├── kube-system/cilium/    # CNI, L2 announcements, LB pools (+ config/)
 │   │   ├── cert-manager/          # Let's Encrypt issuers (+ config/)
 │   │   ├── longhorn/              # Storage, backups (+ config/)
-│   │   └── network/gateway-api/   # Gateway API CRDs + main-gateway, internal-gateway, dn42-gateway
+│   │   └── network/gateway-api/   # Gateway API CRDs + internal-gateway, internet-gateway, dn42-gateway
 │   └── components/common/     # Shared components (cluster-secrets)
 │
 ├── scripts/
@@ -186,7 +186,7 @@ sops --encrypt --in-place kubernetes/apps/talos1018/<category>/<app-name>/app/<a
 
 **Routing**: All apps use Cilium Gateway API. Gateways live in the `network` namespace.
 - Internal apps: `internal-gateway`, hostname `<name>.${CLUSTER_DOMAIN}`, listener `https-internal`. The `*.${CLUSTER_DOMAIN}` DNS wildcard (fmurodov-tf) points at it, so a new host needs no DNS change. It's on a dn42 ULA and a private IPv4, so the internet can't reach it, and dn42-fw on rock64 only lets dn42 reach `dn42-pool`. Gitea ssh uses its `ssh` listener.
-- External apps: `main-gateway`, hostname `<name>.${DOMAIN}`, listener `https-external`. Never attach a `${CLUSTER_DOMAIN}` host to it; an app with both gets two HTTPRoutes (see home-assistant)
+- External apps: `internet-gateway`, hostname `<name>.${DOMAIN}`, listener `https-external`. It has no external address (class `cilium-cluster-only`); the only way in is the Cloudflare tunnel, which uses its ClusterIP Service `cilium-gateway-internet-gateway`. A host is public only once it also has a line in cloudflared's configmap and a tunnel CNAME in fmurodov-tf. Never attach a `${CLUSTER_DOMAIN}` host to it; an app with both gets two HTTPRoutes (see home-assistant)
 - DN42 apps: `dn42-gateway` (`fd6d:cefe:ddc3:5:4000::1`, Cilium pool `dn42-pool`), hostname `<name>.fmurodov.dn42`. Each name gets its own `https-<name>` listener and certificate (ClusterIssuer `dn42`, Burble ACME over HTTP-01, so no wildcards) and an AAAA in the Knot zone under `dn42/authoritative`. Its `http` listener redirects to HTTPS unless the route also attaches to `http`. Ports other than 80/443 also need a `dn42-fw` rule on rock64 (fmurodov/dn42).
 - Add `gethomepage.dev/*` annotations for Homepage discovery
 - If the Helm chart supports `route:` natively, use that instead of a standalone `httproute.yaml`
