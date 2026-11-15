@@ -18,6 +18,12 @@ spec:
       prometheus.io/port: "8080"
     operator:
       scanJobsConcurrentLimit: 1
+      # The default 24h TTL rescans every workload daily, and the scan jobs were
+      # the top CPU users on the 4-core node. New images still get a report
+      # right away, because each new ReplicaSet is scanned on creation.
+      scannerReportTTL: 168h
+      # Room for the lower per-container CPU limit below.
+      scanJobTimeout: 10m
       vulnerabilityScannerScanOnlyCurrentRevisions: true
       configAuditScannerScanOnlyCurrentRevisions: true
       infraAssessmentScannerEnabled: false
@@ -52,7 +58,9 @@ spec:
         requests:
           cpu: 100m
           memory: 256Mi
+        # Per scan job container, and a job has one per workload container,
+        # so a 3-container pod used to take 1.5 cores.
         limits:
-          cpu: 500m
+          cpu: 200m
           memory: 512Mi
       slow: true
