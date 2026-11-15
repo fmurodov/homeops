@@ -8,4 +8,5 @@ resources:
   - ./configmap.yaml
   - ./deployment.yaml
   - ./service.yaml
+  - ./networkpolicy.yaml
   - ./httproute.yaml
