@@ -24,6 +24,9 @@ spec:
     - name: main-gateway
       namespace: network
       sectionName: https-internal
+    - name: internal-gateway
+      namespace: network
+      sectionName: https-internal
     # DN42 (homeops-project#116); plain HTTP too, for curl from any dn42 host.
     # cert-manager's exact-path HTTP-01 routes still win over this prefix.
     - name: dn42-gateway

@@ -15,6 +15,9 @@ spec:
     - name: main-gateway
       namespace: network
       sectionName: https-internal
+    - name: internal-gateway
+      namespace: network
+      sectionName: https-internal
   hostnames:
     - "vmalert.${CLUSTER_DOMAIN}"
   rules:
