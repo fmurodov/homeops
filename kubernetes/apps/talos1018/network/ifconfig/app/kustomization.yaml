@@ -6,4 +6,5 @@ namespace: network
 resources:
   - deployment.yaml
   - service.yaml
+  - networkpolicy.yaml
   - httproute.yaml

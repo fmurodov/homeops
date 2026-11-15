@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Public via the tunnel and on the internal and dn42 gateways, so only the
+# gateways may reach it, and it needs no egress at all, not even DNS
+# (homeops-project#132). kubelet probes come from the host, which Cilium
+# allows by default.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ifconfig
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: ifconfig
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  # An empty rule turns on default deny without allowing anything.
+  egress:
+    - {}
