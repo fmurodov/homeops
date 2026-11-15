@@ -9,7 +9,7 @@ metadata:
     gethomepage.dev/group: Observability
     gethomepage.dev/icon: sh-victoriametrics
     gethomepage.dev/name: vmalert
-    gethomepage.dev/app: vmalert
+    gethomepage.dev/app: victoria-metrics-alert
 spec:
   parentRefs:
     - name: internal-gateway

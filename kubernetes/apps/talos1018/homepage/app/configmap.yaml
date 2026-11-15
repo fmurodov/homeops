@@ -71,12 +71,6 @@ data:
             serverType: mbe
             url: udp://bds.minecraft-bedrock.svc.cluster.local:19132
             fields: ["name", "players", "status"]
-    - Infra:
-      - pikvm:
-          description: rock64 PiKVM
-          href: https://pikvm.home.
-          icon: sh-pikvm.svg
-          ping: pikvm.home.
     - Network:
       - Unifi Controller:
           description: Unifi Console
@@ -93,7 +87,7 @@ data:
           description: ADSB feeder statuspage
           href: http://adsb-feeder.home.
           ping: adsb-feeder.home.
-          icon: http://adsb-feeder.home:8080/images/tar1090-favicon.png
+          icon: http://adsb-feeder.home.:8080/images/tar1090-favicon.png
           siteMonitor: http://adsb-feeder.home./api/base_info
       - Adsb feeder map:
           description: ADSB feeder map
