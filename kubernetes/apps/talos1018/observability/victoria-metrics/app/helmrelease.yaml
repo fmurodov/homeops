@@ -379,6 +379,9 @@ spec:
           - name: main-gateway
             namespace: network
             sectionName: https-internal
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-internal
         hostnames:
           - "vm.${CLUSTER_DOMAIN}"
         filters:

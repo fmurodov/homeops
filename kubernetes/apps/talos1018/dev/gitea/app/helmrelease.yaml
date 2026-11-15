@@ -97,6 +97,9 @@ spec:
             - name: main-gateway
               namespace: network
               sectionName: https-internal
+            - name: internal-gateway
+              namespace: network
+              sectionName: https-internal
           hostnames:
             - "gitea.${CLUSTER_DOMAIN}"
           rules:
@@ -120,5 +123,8 @@ spec:
           enabled: true
           parentRefs:
             - name: main-gateway
+              namespace: network
+              sectionName: ssh
+            - name: internal-gateway
               namespace: network
               sectionName: ssh
