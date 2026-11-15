@@ -115,7 +115,7 @@ metadata:
   name: cilium-cluster-only
 spec:
   controllerName: io.cilium/gateway-controller
-  description: Cilium gateways with no external address, reachable only in the cluster
+  description: Cilium gateways with no external address
   parametersRef:
     group: cilium.io
     kind: CiliumGatewayClassConfig
