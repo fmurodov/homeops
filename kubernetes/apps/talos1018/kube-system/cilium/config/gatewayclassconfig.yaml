@@ -3,7 +3,7 @@
 # this into an Envoy access_log and ships it over xDS, so the lines appear on
 # cilium-envoy's stdout — already tailed by fluent-bit — without a restart.
 #
-# Also the Service settings for the `cilium` class (main and internal gateway).
+# Also the Service settings for the `cilium` class (internal-gateway).
 # Leave ipFamilies/ipFamilyPolicy unset here: Cilium's default is IPv4-primary
 # dual stack, and the API rejects a change of the primary family in place.
 apiVersion: cilium.io/v2alpha1
@@ -94,6 +94,9 @@ spec:
 # ClusterIP, so this sets a loadBalancerClass that no controller handles:
 # LB-IPAM skips it, the Service gets no external IP, and the Gateway reports
 # Programmed=False (AddressNotAssigned) while its listeners serve normally.
+# The config must exist before a Gateway's Service is first created:
+# loadBalancerClass is immutable and the operator keeps whatever the Service
+# was created with. If the class is ever missing, delete the Service once.
 # spec.telemetry is copied from gateway-access-logs by the replacement in
 # kustomization.yaml.
 apiVersion: cilium.io/v2alpha1

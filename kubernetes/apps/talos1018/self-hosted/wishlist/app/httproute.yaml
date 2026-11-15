@@ -12,9 +12,6 @@ metadata:
     gethomepage.dev/app: wishlist
 spec:
   parentRefs:
-    - name: main-gateway
-      namespace: network
-      sectionName: https-external
     - name: internet-gateway
       namespace: network
       sectionName: https-external
