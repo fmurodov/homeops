@@ -31,16 +31,17 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
-    # Pocket ID's token, userinfo and JWKS endpoints are on its internal host,
-    # which resolves to internal-gateway (a ULA and a private IPv4), so the
-    # internet rule below doesn't cover them. Without this, Envoy answers 403
-    # and login fails. Same addresses as internal-gateway's lb-ipam-ips.
-    - toCIDR:
-        - "fd6d:cefe:ddc3:5:3000::45/128"
-        - "10.18.6.45/32"
+    # Pocket ID's token, userinfo and JWKS endpoints are on its internal host
+    # (internal-gateway). Cilium's Envoy checks this pod's egress against the
+    # backend it routes to, not the gateway address, so allow Pocket ID's pods
+    # on their container port. Without this, Envoy answers 403.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: security
+            app.kubernetes.io/name: pocket-id
       toPorts:
         - ports:
-            - port: "443"
+            - port: "1411"
               protocol: TCP
     # Internet only, as in n8n: no private, ULA or home GUA ranges.
     - toPorts:
