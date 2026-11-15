@@ -18,6 +18,7 @@ spec:
       targetPort: 19132
   # Use LoadBalancer if running on a provider that supports that
   type: LoadBalancer
+  allocateLoadBalancerNodePorts: false
   ipFamilyPolicy: PreferDualStack
   # or use NodePort on a non-managed system;
   # however, you'll need to lookup port assigned to the service

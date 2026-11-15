@@ -7,16 +7,16 @@ metadata:
     app.kubernetes.io/name: netbootxyz
   annotations:
 spec:
-  ipFamilyPolicy: PreferDualStack
+  # The webapp and dnsmasq (TFTP) listen on IPv6. The image's nginx assets
+  # server listens on IPv4 only, and nothing uses it, so it is not exposed.
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+    - IPv6
   ports:
     - port: 3000
       targetPort: http
       protocol: TCP
       name: http
-    - port: 80
-      targetPort: http-assets
-      protocol: TCP
-      name: http-assets
     - port: 69
       targetPort: tftp
       protocol: UDP
