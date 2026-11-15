@@ -664,3 +664,26 @@ spec:
                     severity: warning
                   annotations:
                     summary: "{{ $value | humanizePercentage }} of Matter devices are unavailable"
+
+            # ----------------------------------------------------------------
+            # Image vulnerabilities (trivy-operator)
+            # ----------------------------------------------------------------
+            - name: vulnerabilities
+              rules:
+                # trivy-operator runs with ignoreUnfixed, so every count here has
+                # a fix somewhere. Many images carry a standing Critical that only
+                # upstream can clear (homeops-project#144), so this fires when the
+                # count goes up, not while it sits above zero. Grouped by
+                # repository, not tag, so a Renovate bump that keeps the same
+                # CVEs stays quiet and two tags mid-rollout don't add up. High
+                # stays out: it rose 35 times in two weeks, Critical once.
+                - alert: ImageNewCriticalVulnerability
+                  expr: >-
+                    max by (namespace, image_repository) (trivy_image_vulnerabilities{severity="Critical"})
+                    >
+                    max by (namespace, image_repository) (trivy_image_vulnerabilities{severity="Critical"} offset 1d)
+                  for: 1h
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "{{ $labels.image_repository }} in {{ $labels.namespace }} has new fixable Critical CVEs ({{ $value }} now)"
