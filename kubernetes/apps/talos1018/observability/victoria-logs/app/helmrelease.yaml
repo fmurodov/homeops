@@ -60,9 +60,6 @@ spec:
           gethomepage.dev/name: VictoriaLogs
           gethomepage.dev/app: victoria-logs-single
         parentRefs:
-          - name: main-gateway
-            namespace: network
-            sectionName: https-internal
           - name: internal-gateway
             namespace: network
             sectionName: https-internal

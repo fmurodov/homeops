@@ -185,8 +185,8 @@ sops --encrypt --in-place kubernetes/apps/talos1018/<category>/<app-name>/app/<a
 ```
 
 **Routing**: All apps use Cilium Gateway API. Gateways live in the `network` namespace.
-- New internal apps: `internal-gateway`, hostname `<name>.${CLUSTER_DOMAIN}`, listener `https-internal`. It has no wildcard DNS record, so each host needs an explicit DNS record (managed outside this repo). Older internal apps still use `main-gateway` `https-internal`.
-- External apps: `main-gateway`, hostname `<name>.${DOMAIN}`, listener `https-external`
+- Internal apps: `internal-gateway`, hostname `<name>.${CLUSTER_DOMAIN}`, listener `https-internal`. The `*.${CLUSTER_DOMAIN}` DNS wildcard (fmurodov-tf) points at it, so a new host needs no DNS change. It's on a dn42 ULA and a private IPv4, so the internet can't reach it, and dn42-fw on rock64 only lets dn42 reach `dn42-pool`. Gitea ssh uses its `ssh` listener.
+- External apps: `main-gateway`, hostname `<name>.${DOMAIN}`, listener `https-external`. Never attach a `${CLUSTER_DOMAIN}` host to it; an app with both gets two HTTPRoutes (see home-assistant)
 - DN42 apps: `dn42-gateway` (`fd6d:cefe:ddc3:5:4000::1`, Cilium pool `dn42-pool`), hostname `<name>.fmurodov.dn42`. Each name gets its own `https-<name>` listener and certificate (ClusterIssuer `dn42`, Burble ACME over HTTP-01, so no wildcards) and an AAAA in the Knot zone under `dn42/authoritative`. Its `http` listener redirects to HTTPS unless the route also attaches to `http`. Ports other than 80/443 also need a `dn42-fw` rule on rock64 (fmurodov/dn42).
 - Add `gethomepage.dev/*` annotations for Homepage discovery
 - If the Helm chart supports `route:` natively, use that instead of a standalone `httproute.yaml`
