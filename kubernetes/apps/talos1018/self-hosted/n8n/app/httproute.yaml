@@ -45,9 +45,10 @@ spec:
   hostnames:
     - "n8n-webhook.${DOMAIN}"
   rules:
-    # Only n8n's production trigger endpoints, plus /healthz for the external
-    # uptime monitor. Test URLs (*-test/) and MCP Server Triggers (/mcp*) are
-    # reachable only on the internal route, like the editor, login and REST API.
+    # Only production webhook triggers, plus /healthz for the external uptime
+    # monitor. Everything else, including forms, wait-for-webhook resumes, test
+    # URLs and MCP Server Triggers, is reachable only on the internal route.
+    # A workflow that needs a public form or Wait node needs its path added here.
     - matches:
         - path:
             type: Exact
@@ -55,15 +56,6 @@ spec:
         - path:
             type: PathPrefix
             value: /webhook/
-        - path:
-            type: PathPrefix
-            value: /webhook-waiting/
-        - path:
-            type: PathPrefix
-            value: /form/
-        - path:
-            type: PathPrefix
-            value: /form-waiting/
       filters:
         - type: ResponseHeaderModifier
           responseHeaderModifier:
