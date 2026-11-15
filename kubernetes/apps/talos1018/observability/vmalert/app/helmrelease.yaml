@@ -620,14 +620,16 @@ spec:
             # ----------------------------------------------------------------
             - name: thread
               rules:
-                # Baseline is a few RCP crashes/day (SL-OT 2.4.4 firmware bug);
-                # the radio-TX liveness probe also lands here. A burst = mesh churn.
+                # Baseline is 5-25 RCP crashes/day per dongle (exit 6, "radio tx
+                # timeout", SL-OT 2.4.4 firmware), flat across the day and up to 4
+                # in a single hour by chance (homeops-project#141). Each one
+                # self-recovers in ~4s. Real storms ran 6-15/h, so alert above 5.
                 - alert: OtbrRestartStorm
-                  expr: 'increase(kube_pod_container_status_restarts_total{namespace="home-automation", pod=~"otbr-.*"}[1h]) > 2'
+                  expr: 'increase(kube_pod_container_status_restarts_total{namespace="home-automation", pod=~"otbr-.*"}[1h]) > 5'
                   labels:
                     severity: warning
                   annotations:
-                    summary: "OTBR {{ $labels.pod }} restarted more than twice in the last hour"
+                    summary: "OTBR {{ $labels.pod }} restarted more than 5 times in the last hour"
                     # 6 = otbr-agent exited on its own (RCP crash); 137 = SIGKILL from
                     # the radio-TX liveness probe. Tells us which failure mode is winning.
                     # Gauge, not a counter — this is the most recent termination only.
