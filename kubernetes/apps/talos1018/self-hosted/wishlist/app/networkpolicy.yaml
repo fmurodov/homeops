@@ -1,8 +1,9 @@
 ---
 # yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
 # Public via the tunnel, so only the gateway may reach it, and it may only
-# reach DNS and the internet: Pocket ID by its public name for login, and the
-# shops whose item pages it reads (homeops-project#132).
+# reach DNS, Pocket ID on internal-gateway and the internet: Pocket ID by its
+# public name for discovery, and the shops whose item pages it reads
+# (homeops-project#132).
 # kubelet probes come from the host, which Cilium allows by default.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -29,6 +30,17 @@ spec:
             - port: "53"
               protocol: UDP
             - port: "53"
+              protocol: TCP
+    # Pocket ID's token, userinfo and JWKS endpoints are on its internal host,
+    # which resolves to internal-gateway (a ULA and a private IPv4), so the
+    # internet rule below doesn't cover them. Without this, Envoy answers 403
+    # and login fails. Same addresses as internal-gateway's lb-ipam-ips.
+    - toCIDR:
+        - "fd6d:cefe:ddc3:5:3000::45/128"
+        - "10.18.6.45/32"
+      toPorts:
+        - ports:
+            - port: "443"
               protocol: TCP
     # Internet only, as in n8n: no private, ULA or home GUA ranges.
     - toPorts:
