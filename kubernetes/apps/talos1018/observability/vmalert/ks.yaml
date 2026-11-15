@@ -8,6 +8,10 @@ metadata:
   name: vmalert
   namespace: flux-system
 spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   dependsOn:
     - name: victoria-metrics
     - name: alertmanager

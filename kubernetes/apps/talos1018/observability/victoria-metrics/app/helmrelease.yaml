@@ -367,26 +367,9 @@ spec:
                   regex: (.+):(.+)
                   target_label: __address__
                   replacement: "$${1}:2381"
+      # route in httproute.yaml, so it can point at oauth2-proxy
       route:
-        enabled: true
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Observability
-          gethomepage.dev/icon: sh-victoriametrics
-          gethomepage.dev/name: VictoriaMetrics
-          gethomepage.dev/app: victoria-metrics-single
-        parentRefs:
-          - name: internal-gateway
-            namespace: network
-            sectionName: https-internal
-        hostnames:
-          - "vm.${CLUSTER_DOMAIN}"
-        filters:
-          - type: ResponseHeaderModifier
-            responseHeaderModifier:
-              set:
-                - name: Strict-Transport-Security
-                  value: max-age=31536000
+        enabled: false
     # Standalone charts are used for these — disable the bundled ones
     vmagent:
       enabled: false

@@ -51,23 +51,6 @@ spec:
         clusterIP: ""
       ingress:
         enabled: false
+      # route in httproute.yaml, so it can point at oauth2-proxy
       route:
-        enabled: true
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Observability
-          gethomepage.dev/icon: sh-victoriametrics
-          gethomepage.dev/name: VictoriaLogs
-          gethomepage.dev/app: victoria-logs-single
-        parentRefs:
-          - name: internal-gateway
-            namespace: network
-            sectionName: https-internal
-        hostnames:
-          - "vlogs.${CLUSTER_DOMAIN}"
-        filters:
-          - type: ResponseHeaderModifier
-            responseHeaderModifier:
-              set:
-                - name: Strict-Transport-Security
-                  value: max-age=31536000
+        enabled: false

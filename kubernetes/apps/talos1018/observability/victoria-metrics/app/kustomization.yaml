@@ -8,3 +8,5 @@ resources:
   - ./pvc.yaml
   - ./ha-token-secret.sops.yaml
   - ./helmrelease.yaml
+  - ./httproute.yaml
+  - ./oauth2-proxy

@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.30.0/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: victoria-metrics
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Observability
+    gethomepage.dev/icon: sh-victoriametrics
+    gethomepage.dev/name: VictoriaMetrics
+    gethomepage.dev/app: victoria-metrics-single
+spec:
+  parentRefs:
+    - name: internal-gateway
+      namespace: network
+      sectionName: https-internal
+  hostnames:
+    - "vm.${CLUSTER_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Strict-Transport-Security
+                value: max-age=31536000
+      backendRefs:
+        - name: oauth2-proxy-victoria-metrics
+          port: 4180
