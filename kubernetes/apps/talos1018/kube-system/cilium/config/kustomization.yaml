@@ -19,3 +19,8 @@ replacements:
           name: gateway-ipv6-only
         fieldPaths:
           - spec.telemetry
+      - select:
+          kind: CiliumGatewayClassConfig
+          name: gateway-cluster-only
+        fieldPaths:
+          - spec.telemetry
