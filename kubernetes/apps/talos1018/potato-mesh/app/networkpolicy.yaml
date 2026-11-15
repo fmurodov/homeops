@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# The web UI's login is oauth2-proxy, and the ingestor posts to its API;
+# nothing else may reach it (homeops-project#132).
+# kubelet probes come from the host, which Cilium allows by default.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: potato-mesh-web
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: potato-mesh-web
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: oauth2-proxy
+        - matchLabels:
+            app.kubernetes.io/name: potato-mesh-ingestor
+      toPorts:
+        - ports:
+            - port: "41447"
+              protocol: TCP
