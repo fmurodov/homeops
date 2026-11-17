@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: unifi-mcp
-          image: ghcr.io/sirkirby/unifi-network-mcp:0.45.0@sha256:5c14d804e23b714850b58c4b45b722aeed9159d0acf47b182a3bfa92d2d17e7c
+          image: ghcr.io/sirkirby/unifi-network-mcp:0.48.0@sha256:0e7aa0dd506e8c921acb7ec1ad9089a73e8be4531db1f4f13944d406c7e936c2
           ports:
             - name: http
               containerPort: 3000
