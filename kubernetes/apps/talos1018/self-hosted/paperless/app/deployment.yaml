@@ -26,7 +26,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: paperless
-          image: ghcr.io/paperless-ngx/paperless-ngx:3.4.1@sha256:1a08d8dfc2b51a08de09652dd86ad4d0c611c362382f944533ad38b73125fbc4
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.5.0@sha256:8c1e2c4e0abb50576c7a09f062ed581e2d955e298a302e1e196a35338639005e
           ports:
             - name: http
               containerPort: 8000
