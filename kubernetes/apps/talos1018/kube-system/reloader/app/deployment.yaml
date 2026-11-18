@@ -26,7 +26,7 @@ spec:
     spec:
       enableServiceLinks: false
       containers:
-        - image: "ghcr.io/stakater/reloader:v1.4.22@sha256:def2480040adc164b3a57340e77674eadfd88fb7f0593df25e93297f29c7fd7c"
+        - image: "ghcr.io/stakater/reloader:v1.4.24@sha256:3ab43d3eb96c59798644bf826b0444a846c0197d22ab4b6c101c4da3e1d6ef23"
           imagePullPolicy: IfNotPresent
           name: reloader-reloader
           env:
