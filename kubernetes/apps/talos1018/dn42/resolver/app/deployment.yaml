@@ -42,7 +42,7 @@ spec:
       containers:
         - name: unbound
           # Upstream only publishes "main"; Renovate updates the digest
-          image: docker.io/klutchell/unbound:main@sha256:5af26c41f24021dc58a19dd641b09f008a66b90229723117c085293429c684f5
+          image: docker.io/klutchell/unbound:main@sha256:080a311c22ebe5a3f1fb7c49520ad05f4049bef3f9ff77706ecedf5c919b1886
           args:
             - -d
             - -c
