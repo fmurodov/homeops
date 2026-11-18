@@ -24,7 +24,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: spoolman
-          image: "ghcr.io/donkie/spoolman:0.27.0@sha256:7aba565eff774c6dda212d4204de8fa30bf68d513127ef875cc7ef3197a4664e"
+          image: "ghcr.io/donkie/spoolman:0.27.1@sha256:1ebb4f6a62c2e72a07f18b07ebfdbd96322f5bc2eb72570af3088f68d7c393b1"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
