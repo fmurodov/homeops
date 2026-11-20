@@ -25,6 +25,12 @@ machine:
     net.ipv6.conf.net0/2.accept_ra: "0"
     net.ipv6.conf.net0/3.autoconf: "0"
     net.ipv6.conf.net0/3.accept_ra: "0"
+    # Talos ships 0, which turns user namespaces off. Rootless DinD for the
+    # Gitea runner and pods with hostUsers: false both need them
+    # (homeops-project#135). Ordinary pods still can't create one: the
+    # kubelet's default seccomp profile blocks unshare/clone of a user
+    # namespace without CAP_SYS_ADMIN. The value is the one Talos documents.
+    user.max_user_namespaces: "11255"
 
 cluster:
   etcd:
