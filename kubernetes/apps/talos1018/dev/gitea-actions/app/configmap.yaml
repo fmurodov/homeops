@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+# Rootless dockerd maps job uids through these ranges. The image ships
+# 100000-165535, but with hostUsers: false the pod only owns uids 0-65535, so
+# newuidmap fails. These cover the pod's range minus uid 1000 (dockerd itself).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitea-actions-dind-subids
+data:
+  subuid: |
+    rootless:1:999
+    rootless:1001:64535
+  subgid: |
+    rootless:1:999
+    rootless:1001:64535

@@ -6,5 +6,6 @@ namespace: dev
 resources:
   - gitea-runner-secret.sops.yaml
   - serviceaccount.yaml
+  - configmap.yaml
   - networkpolicy.yaml
   - helmrelease.yaml
