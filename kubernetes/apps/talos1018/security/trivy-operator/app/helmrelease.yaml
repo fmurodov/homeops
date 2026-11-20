@@ -32,6 +32,9 @@ spec:
       # shared cache, and all but one lose its lock after 5s, so pods with init
       # containers or sidecars never got a report (aquasecurity/trivy-operator#2967).
       builtInTrivyServer: true
+      # Per-CVE metrics (vuln_id label) for the Trivy Vulnerabilities Grafana
+      # dashboard; set here so chart upgrades don't revert it.
+      metricsVulnIdEnabled: true
     # Top level, not under operator: the chart never reads operator.resources.
     resources:
       requests:
