@@ -58,6 +58,11 @@ spec:
           LOG_RETENTION_DAYS: 30
           ARTIFACT_RETENTION_DAYS: 14
           RUN_RETENTION_DAYS: 90
+        # New mirrors get Gitea's default units minus Actions, so a mirrored
+        # project's workflows (someone else's code) never run on our runner
+        # unless Actions is turned on for that repo by hand (homeops-project#135).
+        repository:
+          DEFAULT_MIRROR_REPO_UNITS: repo.code,repo.releases,repo.issues,repo.wiki,repo.projects,repo.packages
         service:
           DISABLE_REGISTRATION: true
         # DISABLE_REGISTRATION blocks local/manual signup. Auto-registration stays
