@@ -17,6 +17,7 @@ configMapGenerator:
       - dashboards/ip-family-traffic.json
       - dashboards/ntp.json
       - dashboards/akvorado-flows.json
+      - dashboards/trivy-vulnerabilities.json
     options:
       disableNameSuffixHash: true
       # Grafana's own $var refs would otherwise be eaten by Flux envsubst.
