@@ -2,10 +2,14 @@
 # yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # gitea-actions - CI runner for Gitea Actions
 # Uses the 'gitea' HelmRepository owned by the gitea component
-# PREREQUISITE: Mint a runner registration token before deploying, with
-#   kubectl -n dev exec deploy/gitea -c gitea -- gitea actions generate-runner-token
+# PREREQUISITE: Mint a runner registration token before deploying. Scope it to
+# one user (or org, or owner/repo) so other owners' repos, such as the pull
+# mirrors, can't run jobs on it (homeops-project#135):
+#   kubectl -n dev exec deploy/gitea -c gitea -- gitea actions generate-runner-token --scope <user>
 #   Then fill it into gitea-runner-secret.sops.yaml and encrypt it with:
 #   sops --encrypt --in-place gitea-actions/app/gitea-runner-secret.sops.yaml
+# The runner registers only when /data/.runner (on its PVC) is missing, so a
+# new token needs that file removed and the pod restarted.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

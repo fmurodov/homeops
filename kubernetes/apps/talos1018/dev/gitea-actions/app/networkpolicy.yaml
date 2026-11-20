@@ -1,0 +1,57 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Job containers run inside the DinD sidecar and leave through this pod's
+# network namespace, so this policy is also the policy for every CI job. They
+# may reach DNS, Gitea and the internet, but not the LAN, dn42 or anything else
+# in the cluster (homeops-project#135). Nothing needs to connect in.
+# While DinD is privileged a job can still escape the pod, so this is defence
+# in depth until DinD runs rootless.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: gitea-actions-runner
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: actions-runner
+  # An empty rule turns on default deny without allowing anything.
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # The runner and jobs use Gitea's internal name, which is internal-gateway.
+    # Cilium's Envoy checks this pod's egress against the backend it routes to,
+    # not the gateway address, so allow Gitea's pods on their container port.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: dev
+            app.kubernetes.io/name: gitea
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    # Internet on any port (CI pulls from registries, git hosts and package
+    # mirrors), but no private, ULA or home GUA ranges.
+    - toCIDRSet:
+        - cidr: "0.0.0.0/0"
+          except:
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+            - "192.168.0.0/16"
+            - "127.0.0.0/8"
+            - "169.254.0.0/16"
+        - cidr: "::/0"
+          except:
+            - "fc00::/7"
+            - "fe80::/10"
+            - "::1/128"
+            - "${IPV6_PREFIX_GUA}::/48"
