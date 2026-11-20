@@ -218,18 +218,19 @@ content: |-
   [plugins."io.containerd.cri.v1.images"]
     discard_unpacked_layers = false
 ---
-# useNTS applies to every server and rejects IP literals, so only servers
-# that answer NTS-KE on TCP 4460 belong here
+# Talos uses the first server that answers and fails over in order. Kept
+# apart from chrony's upstreams; useNTS is off because the pool and an IP
+# can't do NTS. The in-cluster chrony LB is last, so boot never needs it.
 apiVersion: v1alpha1
 kind: TimeSyncConfig
 bootTimeout: 2m0s
 ntp:
-  useNTS: true
+  useNTS: false
   servers:
     - time.cloudflare.com
-    - nts.time.nl
-    - nts.netnod.se
-    - ptbtime1.ptb.de
+    - time.apple.com
+    - 2.pool.ntp.org
+    - ${IPV6_PREFIX_GUA}:5:2000:0:6:13
 ---
 # EPHEMERAL used to fill the disk, with Longhorn as a directory on it. Both
 # only apply when a volume is provisioned; resizing either needs a node

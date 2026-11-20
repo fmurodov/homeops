@@ -28,12 +28,13 @@ spec:
           env:
             - name: TZ
               value: "Etc/UTC"
-            # NTS applies to every hostname source, so each one must support NTS-KE
+            # NTS applies to every hostname source, so each one must support NTS-KE.
+            # Stratum 1 only, none in pool.ntp.org (we serve the pool) or used by the nodes.
             - name: ENABLE_NTS
               value: "true"
             - name: NTP_SERVERS
               value: >-
-                time.cloudflare.com,nts.time.nl,nts.netnod.se,ptbtime1.ptb.de
+                nts.time.nl,nts.netnod.se,ptbtime1.ptb.de,ptbtime2.ptb.de,ptbtime3.ptb.de
           resources:
             limits:
               cpu: "0.2"
