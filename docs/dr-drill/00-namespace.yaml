@@ -1,0 +1,20 @@
+---
+# Scratch namespace for restore drills. Apply with kubectl, never through Flux,
+# and delete it when done: kubectl delete -f docs/dr-drill/
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dr-drill
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+---
+# No traffic in or out: a restored Home Assistant must not drive real devices,
+# MQTT or notifications, and Paperless must not fetch mail. kubectl exec still works.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: dr-drill
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
