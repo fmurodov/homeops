@@ -12,6 +12,18 @@ spec:
         kind: HelmRepository
         name: gitea
   interval: 1h
+  # The chart has no value for hostUsers. It is what makes DinD's privileged
+  # flag stop meaning root on the node (homeops-project#135, see README.md).
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: StatefulSet
+              name: gitea-actions-runner
+            patch: |
+              - op: add
+                path: /spec/template/spec/hostUsers
+                value: false
   values:
     enabled: true
 
@@ -41,6 +53,9 @@ spec:
         - name: docker-graph-storage
           emptyDir:
             sizeLimit: 20Gi
+        - name: dind-subids
+          configMap:
+            name: gitea-actions-dind-subids
 
       runner:
         resources:
@@ -49,6 +64,17 @@ spec:
             memory: 256Mi
           limits:
             memory: 512Mi
+        # act_runner bind-mounts docker_host into job containers, and the DinD
+        # daemon resolves that path in its own filesystem, where the rootless
+        # socket lives under /run/user/1000. Mounting the chart's docker-socket
+        # emptyDir as a directory also survives a DinD restart; the chart's
+        # subPath mount of docker.sock keeps pointing at the old socket.
+        extraVolumeMounts:
+          - name: docker-socket
+            mountPath: /run/user/1000
+        extraEnvs:
+          - name: DOCKER_HOST
+            value: unix:///run/user/1000/docker.sock
         config: |
           log:
             level: info
@@ -64,17 +90,44 @@ spec:
           container:
             require_docker: true
             docker_timeout: 300s
+            docker_host: unix:///run/user/1000/docker.sock
             # Both are the defaults, written out so a change is a visible
             # decision: no job container may run privileged or mount a
             # path from the DinD host.
             privileged: false
             valid_volumes: []
 
+      # Rootless: dockerd runs as uid 1000 inside the pod's own user namespace,
+      # so a job's root is an unprivileged uid on the node. The chart still sets
+      # privileged; under hostUsers: false that only grants rights inside the
+      # pod's namespace. Rootless networking needs /dev/net/tun, which only
+      # privileged gives a user-namespaced pod. See README.md.
       dind:
+        rootless: true
+        uid: 1000
+        tag: 29.9.2-dind-rootless
+        # Unix socket only. The entrypoint adds TCP listeners (2375 without TLS
+        # when DOCKER_TLS_CERTDIR is empty) unless the first arg is `dockerd`;
+        # it still wraps that in rootlesskit.
+        extraArgs:
+          - dockerd
+          - --host=unix:///run/user/1000/docker.sock
+        extraEnvs:
+          - name: DOCKER_TLS_CERTDIR
+            value: ""
         extraVolumeMounts:
+          # The parent of the docker dir: rootlesskit must own .../docker
+          # itself, and can't chown a mount point.
           - name: docker-graph-storage
-            mountPath: /var/lib/docker
-        # Also the ceiling for job containers, nested cgroups under this one.
+            mountPath: /home/rootless/.local/share
+          - name: dind-subids
+            mountPath: /etc/subuid
+            subPath: subuid
+          - name: dind-subids
+            mountPath: /etc/subgid
+            subPath: subgid
+        # Also the ceiling for job containers. Rootless dockerd runs without
+        # cgroups, so there are no per-job limits, only this one.
         resources:
           requests:
             cpu: 200m
