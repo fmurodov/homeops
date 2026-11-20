@@ -1,54 +1,60 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  // Automerge temporarily disabled - re-enable by setting automerge: true below
+  // Renovate merges these PRs itself, only after every check on the PR passes.
+  // platformAutomerge stays off: the ruleset requires only manifests and
+  // gitleaks, so GitHub auto-merge would not wait for validate-talos.
+  //
+  // minimumReleaseAge needs a release date. Docker Hub, Helm repositories and
+  // tagged GitHub Actions have one; ghcr.io, quay.io and OCI charts don't, so
+  // their updates stay pending on renovate/stability-days and are never
+  // automerged (minimumReleaseAgeBehaviour: timestamp-required, the default).
   packageRules: [
     {
-      description: "Auto-merge patch versions",
-      matchUpdateTypes: ["patch"],
-      automerge: false,
+      description: "Automerge digest and patch updates after 3 days",
+      matchUpdateTypes: ["digest", "pinDigest", "patch"],
+      automerge: true,
       automergeType: "pr",
-      platformAutomerge: true,
+      automergeStrategy: "squash",
+      platformAutomerge: false,
       minimumReleaseAge: "3 days",
     },
     {
-      description: "Auto-merge trusted container digests",
-      matchDatasources: ["docker"],
-      automerge: false,
-      automergeType: "pr",
-      platformAutomerge: true,
-      matchUpdateTypes: ["digest"],
-      matchPackageNames: ["/home-operations/"],
-      minimumReleaseAge: "3 days",
-    },
-    {
-      description: "Auto-merge GitHub Actions",
+      description: "Automerge GitHub Actions minor updates too",
+      // CI only; a bad action shows up as a red check, not a broken cluster
       matchManagers: ["github-actions"],
-      automerge: false,
+      matchUpdateTypes: ["minor"],
+      automerge: true,
       automergeType: "pr",
-      platformAutomerge: true,
-      matchUpdateTypes: ["minor", "patch", "digest"],
+      automergeStrategy: "squash",
+      platformAutomerge: false,
       minimumReleaseAge: "3 days",
     },
     {
-      description: "Auto-merge trusted GitHub Actions",
-      matchManagers: ["github-actions"],
+      description: "Never automerge the platform or databases",
+      // Talos and Kubernetes roll every node, the CNI/storage/GitOps layers
+      // take the whole cluster with them, and a database can't be rolled back
+      // once it has migrated its data.
       matchPackageNames: [
-        "/^actions\\/",
-        "/^renovatebot\\/",
-        "/^anthropics\\/",
+        "/siderolabs/",
+        "/registry\\.k8s\\.io/",
+        "/cilium/",
+        "/fluxcd/",
+        "/longhorn/",
+        "/cert-manager/",
+        "/gateway-api/",
+        "/multus/",
+        "/postgres/",
+        "/clickhouse/",
+        "/valkey/",
+        "/kafka/",
+        "gitea",
       ],
       automerge: false,
-      automergeType: "pr",
-      platformAutomerge: true,
-      matchUpdateTypes: ["minor", "patch", "digest"],
-      minimumReleaseAge: "1 day",
     },
     {
       description: "Automerge listed apps",
-      // To automerge another app, add its package name here. Renovate merges
-      // only after every check on the PR passes: the branch ruleset requires
-      // only manifests and gitleaks, so GitHub auto-merge (platformAutomerge)
-      // would not wait for the others.
+      // To automerge every update of an app (minor and major too, no release
+      // age), add its package name here.
       matchPackageNames: [
         "LomotHo/minecraft-bedrock",
         "itzg/minecraft-bedrock-server",

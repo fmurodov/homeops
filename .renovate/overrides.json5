@@ -10,10 +10,12 @@
     {
       // sdr-enthusiasts images publish monotonic "latest-build-N" tags that
       // the default docker versioning can't parse; compare by build number.
+      // As a patch number, a new build updates the open PR instead of opening
+      // a new "major" one each time.
       description: "Track sdr-enthusiasts latest-build-N tags by build number",
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder"],
-      versioning: "regex:^latest-build-(?<major>\\d+)$",
+      versioning: "regex:^latest-build-(?<patch>\\d+)$",
     },
   ],
 }
