@@ -1,0 +1,51 @@
+---
+# One StorageClass per backup: Longhorn restores fromBackup into every PVC of
+# the class. Replace BACKUP_URL with status.url of the backup (see the runbook).
+# One replica is enough for a drill and halves the restore write load.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: dr-drill-ha
+provisioner: driver.longhorn.io
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "1"
+  staleReplicaTimeout: "30"
+  fromBackup: "HA_BACKUP_URL"
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: dr-drill-paperless
+provisioner: driver.longhorn.io
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "1"
+  staleReplicaTimeout: "30"
+  fromBackup: "PAPERLESS_BACKUP_URL"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ha-config
+  namespace: dr-drill
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: dr-drill-ha
+  resources:
+    requests:
+      storage: 8Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-data
+  namespace: dr-drill
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: dr-drill-paperless
+  resources:
+    requests:
+      storage: 20Gi

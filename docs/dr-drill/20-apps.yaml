@@ -1,0 +1,79 @@
+---
+# Same image as production, no multus networks, no Service or route.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ha
+  namespace: dr-drill
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: ha}
+  template:
+    metadata:
+      labels: {app: ha}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      containers:
+        - name: home-assistant
+          image: ghcr.io/home-assistant/home-assistant:2026.11.2@sha256:493a07e8f6530fc640223f4a0a5248f20a61ca2f718bb1d31efbf08a2c5ea28f
+          resources:
+            requests: {cpu: 200m, memory: 1536Mi}
+            limits: {memory: 3Gi}
+          volumeMounts:
+            - {name: config, mountPath: /config}
+      volumes:
+        - name: config
+          persistentVolumeClaim: {claimName: ha-config}
+---
+# Throwaway secret key, no OIDC, Tika off, Redis as a sidecar.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless
+  namespace: dr-drill
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: paperless}
+  template:
+    metadata:
+      labels: {app: paperless}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      containers:
+        - name: paperless
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.5.0@sha256:8c1e2c4e0abb50576c7a09f062ed581e2d955e298a302e1e196a35338639005e
+          env:
+            - {name: PAPERLESS_SECRET_KEY, value: dr-drill-throwaway-not-a-secret}
+            - {name: PAPERLESS_PORT, value: "8000"}
+            - {name: PAPERLESS_CONSUMPTION_DIR, value: /data/local/consume}
+            - {name: PAPERLESS_DATA_DIR, value: /data/local/data}
+            - {name: PAPERLESS_MEDIA_ROOT, value: /data/local/media}
+            - {name: PAPERLESS_LOGGING_DIR, value: /tmp/log}
+            - {name: PAPERLESS_REDIS, value: "redis://localhost:6379"}
+            - {name: PAPERLESS_TIKA_ENABLED, value: "0"}
+            # No PAPERLESS_OCR_LANGUAGES: it runs apt-get at every start, which
+            # hangs forever without internet before the web server comes up.
+            - {name: PAPERLESS_OCR_LANGUAGE, value: eng}
+            - {name: USERMAP_GID, value: "65542"}
+          resources:
+            requests: {cpu: 800m, memory: 1Gi}
+            limits: {cpu: "2", memory: 4Gi}
+          volumeMounts:
+            - {name: data, mountPath: /data/local}
+            - {name: logs, mountPath: /tmp/log}
+        - name: redis
+          image: ghcr.io/valkey-io/valkey:9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 256Mi}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: paperless-data}
+        - name: logs
+          emptyDir: {}
