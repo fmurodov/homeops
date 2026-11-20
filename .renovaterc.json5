@@ -1,32 +1,46 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "docker:enableMajor",
-    "docker:pinDigests",
-    "helpers:pinGitHubActionDigests",
-    "local>fmurodov/homeops//.renovate/autoMerge.json5",
-    "local>fmurodov/homeops//.renovate/changelogs.json5",
-    "local>fmurodov/homeops//.renovate/customManagers.json5",
-    "local>fmurodov/homeops//.renovate/groups.json5",
-    "local>fmurodov/homeops//.renovate/labels.json5",
-    "local>fmurodov/homeops//.renovate/overrides.json5",
-    "local>fmurodov/homeops//.renovate/semanticCommits.json5",
-    ":disableRateLimiting",
-    ":dependencyDashboard",
-    ":semanticCommits",
-    ":timezone(UTC)"
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+    'docker:enableMajor',
+    'docker:pinDigests',
+    'helpers:pinGitHubActionDigests',
+    'local>fmurodov/homeops//.renovate/autoMerge.json5',
+    'local>fmurodov/homeops//.renovate/changelogs.json5',
+    'local>fmurodov/homeops//.renovate/customManagers.json5',
+    'local>fmurodov/homeops//.renovate/groups.json5',
+    'local>fmurodov/homeops//.renovate/labels.json5',
+    'local>fmurodov/homeops//.renovate/overrides.json5',
+    'local>fmurodov/homeops//.renovate/semanticCommits.json5',
+    ':disableRateLimiting',
+    ':dependencyDashboard',
+    ':semanticCommits',
+    ':timezone(UTC)',
   ],
-  "dependencyDashboardTitle": "Renovate Dashboard 🤖",
-  "suppressNotifications": ["prEditedNotification", "prIgnoreNotification"],
-  "ignorePaths": ["**/*.sops.*", "**/resources/**"],
-  "flux": {
-    "managerFilePatterns": ["/\\.yaml(?:\\.j2)?$/"]
+  dependencyDashboard: {
+    title: 'Renovate Dashboard 🤖',
   },
-  "helm-values": {
-    "managerFilePatterns": ["/\\.yaml(?:\\.j2)?$/"]
+  suppressNotifications: [
+    'prEditedNotification',
+    'prIgnoreNotification',
+  ],
+  ignorePaths: [
+    '**/*.sops.*',
+    '**/resources/**',
+  ],
+  flux: {
+    managerFilePatterns: [
+      '/\\.yaml(?:\\.j2)?$/',
+    ],
   },
-  "kubernetes": {
-    "managerFilePatterns": ["/\\.yaml(?:\\.j2)?$/"]
-  }
+  'helm-values': {
+    managerFilePatterns: [
+      '/\\.yaml(?:\\.j2)?$/',
+    ],
+  },
+  kubernetes: {
+    managerFilePatterns: [
+      '/\\.yaml(?:\\.j2)?$/',
+    ],
+  },
 }
