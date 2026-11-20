@@ -27,6 +27,8 @@ spec:
 
     statefulset:
       replicas: 1
+      # No API token in the pod; see serviceaccount.yaml.
+      serviceAccountName: gitea-actions-runner
       timezone: ${TIMEZONE}
 
       persistence:
@@ -62,6 +64,11 @@ spec:
           container:
             require_docker: true
             docker_timeout: 300s
+            # Both are the defaults, written out so a change is a visible
+            # decision: no job container may run privileged or mount a
+            # path from the DinD host.
+            privileged: false
+            valid_volumes: []
 
       dind:
         extraVolumeMounts:
