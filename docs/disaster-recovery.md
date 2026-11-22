@@ -198,11 +198,37 @@ docker exec ha-dr python3 -c "import urllib.request as u;u.urlopen('http://local
 is meant to take over. Then it also needs internet once, because custom
 integrations reinstall their Python packages on a fresh container.
 
-Paperless needs internet at start-up with the production settings:
-`PAPERLESS_OCR_LANGUAGES` makes it `apt-get install` the extra Tesseract
-languages on every start, and without network it hangs before the web server
-comes up. For an offline start leave that variable out and set
-`PAPERLESS_OCR_LANGUAGE=eng`, as in `dr-drill/20-apps.yaml`.
+### Boot Paperless from the image
+
+Paperless needs its files with their original owners and a Redis, so extract
+inside a throwaway Linux container onto a Docker volume (no `sudo` needed) and
+run Paperless with Valkey on an internal-only network. Use the image tags from
+`self-hosted/paperless/app/deployment.yaml` and `redis.yaml`.
+
+```bash
+cd ~/dr/paperless && E=$(brew --prefix e2fsprogs)/sbin
+$E/e2fsck -fy pvc-*.img && $E/e2fsck -fn pvc-*.img
+docker volume create paperless-dr
+docker run --rm -v "$PWD":/img:ro -v paperless-dr:/dst alpine:3.22 \
+  sh -c 'apk add -q --no-cache e2fsprogs-extra && debugfs -R "rdump / /dst" /img/pvc-*.img'
+docker network create --internal paperless-dr
+docker run -d --name paperless-dr-redis --network paperless-dr ghcr.io/valkey-io/valkey:<tag>
+docker run -d --name paperless-dr --network paperless-dr -v paperless-dr:/data/local \
+  -e PAPERLESS_SECRET_KEY=dr-drill-throwaway-not-a-secret -e PAPERLESS_PORT=8000 \
+  -e PAPERLESS_CONSUMPTION_DIR=/data/local/consume -e PAPERLESS_DATA_DIR=/data/local/data \
+  -e PAPERLESS_MEDIA_ROOT=/data/local/media -e PAPERLESS_REDIS=redis://paperless-dr-redis:6379 \
+  -e PAPERLESS_TIKA_ENABLED=0 -e PAPERLESS_OCR_LANGUAGE=eng -e USERMAP_GID=65542 \
+  ghcr.io/paperless-ngx/paperless-ngx:<tag>
+docker exec paperless-dr python3 -c "import urllib.request as u;u.urlopen('http://localhost:8000/api/documents/')"  # HTTP Error 401 = up
+docker exec paperless-dr sh -c 'cd /usr/src/paperless/src && s6-setuidgid paperless python3 manage.py document_sanity_checker --no-progress-bar'
+# done:
+docker rm -f paperless-dr paperless-dr-redis && docker network rm paperless-dr && docker volume rm paperless-dr && rm -rf ~/dr
+```
+
+Offline, leave `PAPERLESS_OCR_LANGUAGES` out: with it, Paperless runs
+`apt-get install` for the extra Tesseract languages on every start and hangs
+without internet before the web server comes up. Only the extract container
+needs internet (for `apk`).
 
 ## 3. Restore etcd from a snapshot
 
@@ -259,6 +285,7 @@ October.
 | 2026-11-20 | `self-hosted/paperless-data-rwo` (20 GiB) | cluster (`dr-drill`) | 3,495 blocks, ~7 GiB | ~24 min | API up 75 s after apply; sanity checker 88 s | ok: 1,403 documents, 0 errors, 0 warnings |
 | 2026-11-20 | `home-automation/home-assistant-config` | no cluster | 4.6 GB downloaded | 407 s + 12 s extract | Docker `--network none`: up ~13 s after start | `e2fsck` clean; DB `integrity_check` ok in 83 s |
 | 2026-11-20 | `self-hosted/paperless-data-rwo` | no cluster | 7.2 GB downloaded | 481 s + 21 s extract | not booted | `e2fsck` clean; `db.sqlite3` integrity ok, 1,403 documents |
+| 2026-11-22 | `self-hosted/paperless-data-rwo` | no cluster | 3,326 unique blocks | 431 s + 30 s extract | Docker, internal network: API up 16 s after start; sanity checker 11 s | ok: 1,403 documents, 0 errors, 0 warnings |
 | 2026-11-22 | etcd snapshot | B2 read-only key | 165 MB | 21 s download, 1 s `age -d` | `etcdutl snapshot status` < 1 s | ok: 5,725 keys, revision 345720484; bucket holds 13 daily snapshots (11-10 to 11-22), so retention works |
 
 On 2026-11-20 both cluster restores and both Mac restores ran at the same time
