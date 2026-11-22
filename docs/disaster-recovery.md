@@ -8,7 +8,7 @@ production volumes.
 |---|---|---|
 | One app lost or broke its data, the cluster is fine | [1. Restore a volume in the cluster](#1-restore-a-volume-in-the-cluster) | ~20 min per 7 GiB volume, then under 2 min to boot |
 | The cluster is gone, I need the files | [2. Restore a volume without the cluster](#2-restore-a-volume-without-the-cluster) | ~7-8 min per 7 GiB volume on the Mac |
-| etcd lost quorum, the control plane won't come back | [3. Restore etcd from a snapshot](#3-restore-etcd-from-a-snapshot) | not drilled yet (needs a read key, see 3) |
+| etcd lost quorum, the control plane won't come back | [3. Restore etcd from a snapshot](#3-restore-etcd-from-a-snapshot) | ~25 s to download, decrypt and check the snapshot |
 | Nothing is broken, it's drill time | [4. Quarterly drill](#4-quarterly-drill) | about 1 hour |
 
 ## What you need
@@ -16,8 +16,8 @@ production volumes.
 - **age key**: Apple Passwords, entry with the `AGE-SECRET-KEY-...` for
   recipient `age1kesma5f5...`. It decrypts every `*.sops.yaml` in this repo
   (including the B2 keys) and the etcd snapshots.
-- **Backblaze account**: login in Apple Passwords. Needed for a read key to
-  `talos1018-etcd` (section 3), or if the Longhorn key was revoked.
+- **etcd read key** `talos1018-etcd-ro`: Apple Passwords, next to the age key.
+- **Backblaze account**: login in Apple Passwords, if a key was revoked.
 - A Mac with `brew install sops age rclone jq lz4 e2fsprogs` and, for etcd,
   `brew install etcd` (for `etcdutl`). Docker Desktop to boot an app outside
   the cluster.
@@ -208,27 +208,33 @@ comes up. For an offline start leave that variable out and set
 
 `talos-backup` uploads an age-encrypted snapshot to the B2 bucket
 `talos1018-etcd` every night at 02:30 UTC
-(`talos1018/talos1018-<timestamp>.snap.age`, about 164 MB). Its key can only
-**write**: it can't list or download, so a restore needs a separate key.
+(`talos1018/talos1018-<UTC time>.snap.age`, about 165-200 MB). Its own key can
+only **write** (reads get 403 "not entitled"), so restoring uses a separate
+read-only key.
 
-1. In Backblaze, create (or reuse) a **read-only** application key limited to
-   `talos1018-etcd`.
-2. Download the newest snapshot and decrypt it:
+1. Get the read-only key `talos1018-etcd-ro` from Apple Passwords (it is
+   limited to this bucket, no expiry). If it is gone, create a new one in
+   Backblaze: *Application Keys*, bucket `talos1018-etcd`, *Read Only*.
+2. Download the newest snapshot, decrypt and check it (about 25 s):
 
    ```bash
-   export RCLONE_CONFIG_ETCD_TYPE=s3 RCLONE_CONFIG_ETCD_PROVIDER=Other \
-     RCLONE_CONFIG_ETCD_ENDPOINT=<bucket S3 endpoint, shown in Backblaze> \
-     RCLONE_CONFIG_ETCD_ACCESS_KEY_ID=<keyID> RCLONE_CONFIG_ETCD_SECRET_ACCESS_KEY=<applicationKey>
-   rclone lsl etcd:talos1018-etcd/talos1018/ | sort -k2,3 | tail -3   # newest last
-   rclone copy etcd:talos1018-etcd/talos1018/<name>.snap.age .
-   age -d -i ~/Library/Application\ Support/sops/age/keys.txt -o db.snapshot <name>.snap.age
-   etcdutl snapshot status db.snapshot -w table
+   export RCLONE_CONFIG_E_TYPE=s3 RCLONE_CONFIG_E_PROVIDER=Other
+   export RCLONE_CONFIG_E_ACCESS_KEY_ID=<read-only keyID>
+   export RCLONE_CONFIG_E_SECRET_ACCESS_KEY=<read-only applicationKey>
+   # The bucket's S3 endpoint; without the repo, copy it from the bucket page in Backblaze
+   export RCLONE_CONFIG_E_ENDPOINT=$(sops -d --extract '["stringData"]["CUSTOM_S3_ENDPOINT"]' \
+     kubernetes/apps/talos1018/system-upgrade/talos-backup/app/b2-secret.sops.yaml)
+   rclone lsl e:talos1018-etcd | sort -k2,3 | tail -3   # newest last
+   rclone copyto e:talos1018-etcd/talos1018/talos1018-<time>.snap.age snap.age
+   age -d -i ~/Library/Application\ Support/sops/age/keys.txt -o db.snapshot snap.age
+   etcdutl snapshot status db.snapshot -w table          # hash, revision, keys, size
    ```
 
 3. Follow the Talos disaster recovery guide, then
    `talosctl -n <first control plane> bootstrap --recover-from=./db.snapshot`
    (see `talos/talos1018/README.md`).
-4. Delete `db.snapshot` afterwards: it holds every Secret in the cluster.
+4. `rm -f db.snapshot snap.age` afterwards: the snapshot holds every Secret in
+   the cluster.
 
 ## 4. Quarterly drill
 
@@ -253,7 +259,7 @@ October.
 | 2026-11-20 | `self-hosted/paperless-data-rwo` (20 GiB) | cluster (`dr-drill`) | 3,495 blocks, ~7 GiB | ~24 min | API up 75 s after apply; sanity checker 88 s | ok: 1,403 documents, 0 errors, 0 warnings |
 | 2026-11-20 | `home-automation/home-assistant-config` | no cluster | 4.6 GB downloaded | 407 s + 12 s extract | Docker `--network none`: up ~13 s after start | `e2fsck` clean; DB `integrity_check` ok in 83 s |
 | 2026-11-20 | `self-hosted/paperless-data-rwo` | no cluster | 7.2 GB downloaded | 481 s + 21 s extract | not booted | `e2fsck` clean; `db.sqlite3` integrity ok, 1,403 documents |
-| 2026-11-20 | etcd snapshot | - | - | - | - | blocked: backup key is write-only (403), see section 3 |
+| 2026-11-22 | etcd snapshot | B2 read-only key | 165 MB | 21 s download, 1 s `age -d` | `etcdutl snapshot status` < 1 s | ok: 5,725 keys, revision 345720484; bucket holds 13 daily snapshots (11-10 to 11-22), so retention works |
 
 On 2026-11-20 both cluster restores and both Mac restores ran at the same time
 and shared the uplink, so one restore on its own is faster. A first boot
