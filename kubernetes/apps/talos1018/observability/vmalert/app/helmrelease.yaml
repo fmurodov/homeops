@@ -432,8 +432,9 @@ spec:
             # ----------------------------------------------------------------
             - name: certificates
               rules:
+                # dn42 certs last ~32 days and renew with ~11 left; the 7-day alert covers them.
                 - alert: CertManagerCertExpiringSoon
-                  expr: 'certmanager_certificate_expiration_timestamp_seconds - time() < 21 * 24 * 3600'
+                  expr: 'certmanager_certificate_expiration_timestamp_seconds{issuer_name!="dn42"} - time() < 21 * 24 * 3600'
                   for: 1h
                   labels:
                     severity: warning
