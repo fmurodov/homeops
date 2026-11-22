@@ -37,7 +37,7 @@ spec:
               app.kubernetes.io/name: paperless-gotenberg
       containers:
         - name: paperless-gotenberg
-          image: docker.io/gotenberg/gotenberg:9.7.0@sha256:3f00eba12da1d3fc1795be0d3ba66e2e97b31087c92ae238ed23937441c7a941
+          image: docker.io/gotenberg/gotenberg:9.9.3@sha256:9731688d1b6290e4c04d9a47dbd5fb29f92aa0076feb6592c5c777525892cd72
           command:
             - gotenberg
             - --chromium-disable-javascript=true
