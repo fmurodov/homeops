@@ -9,7 +9,8 @@ spec:
   gatewayClassName: cilium
   infrastructure:
     annotations:
-      io.cilium/lb-ipam-ips: "fd6d:cefe:ddc3:5:3000::45,10.18.6.45"
+      # GUA is what DNS points at; ULA kept for anything using it directly.
+      io.cilium/lb-ipam-ips: "${IPV6_PREFIX_GUA}:5:3000::45,fd6d:cefe:ddc3:5:3000::45,10.18.6.45"
     labels:
       service.kubernetes.io/topology: internal
   listeners:
