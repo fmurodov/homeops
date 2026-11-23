@@ -97,6 +97,7 @@ spec:
 # The config must exist before a Gateway's Service is first created:
 # loadBalancerClass is immutable and the operator keeps whatever the Service
 # was created with. If the class is ever missing, delete the Service once.
+# The same goes for ipFamilies.
 # spec.telemetry is copied from gateway-access-logs by the replacement in
 # kustomization.yaml.
 apiVersion: cilium.io/v2alpha1
@@ -107,6 +108,10 @@ metadata:
 spec:
   service:
     loadBalancerClass: homeops/cluster-only
+    # cloudflared would pick the IPv4 ClusterIP over a ULA one (RFC 6724).
+    ipFamilyPolicy: SingleStack
+    ipFamilies:
+      - IPv6
     allocateLoadBalancerNodePorts: false
   telemetry: {}
 ---
