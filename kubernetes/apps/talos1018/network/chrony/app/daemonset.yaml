@@ -52,7 +52,7 @@ spec:
         # The exporter binds its reply socket next to chronyd.sock, so it runs
         # as the image's chrony user (uid 100) to write into /run/chrony (0750).
         - name: chrony-exporter
-          image: quay.io/superq/chrony-exporter:v0.15.0@sha256:43483aa041e874b9e6ba28bbe48c77177afcc068e5271ec87e50d3e05dd49b60
+          image: quay.io/superq/chrony-exporter:v0.16.0@sha256:ca3516cbeb14c11940753bd4e29cc71f6ee8bed32597295dd2e2ac3825e8c97e
           args:
             - --chrony.address=unix:///run/chrony/chronyd.sock
             - --collector.sources
