@@ -10,18 +10,14 @@ metadata:
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: CoreDNS
 spec:
-  # These are the .10 of each entry in the Talos serviceSubnets and must keep
-  # matching it — kubelet's clusterDNS is derived from the same source. IPv6
-  # stays first here; Talos would render this Service IPv4-primary, and both
-  # fields are immutable once the Service exists.
+  # The .10 of the IPv6 serviceSubnet, matching kubelet clusterDNS in the
+  # Talos patch. IPv6 only, so pods get one nameserver (homeops-project#162).
   clusterIP: fd00:1018:2000::a
   clusterIPs:
     - fd00:1018:2000::a
-    - 10.96.0.10
   ipFamilies:
     - IPv6
-    - IPv4
-  ipFamilyPolicy: PreferDualStack
+  ipFamilyPolicy: SingleStack
   selector:
     k8s-app: kube-dns
   ports:
