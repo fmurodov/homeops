@@ -91,6 +91,8 @@ spec:
             require_docker: true
             docker_timeout: 300s
             docker_host: unix:///run/user/1000/docker.sock
+            # Per-job networks get a ULA /64 from dockerd, NATed out (homeops-project#162).
+            enable_ipv6: true
             # Both are the defaults, written out so a change is a visible
             # decision: no job container may run privileged or mount a
             # path from the DinD host.
@@ -115,6 +117,9 @@ spec:
         extraEnvs:
           - name: DOCKER_TLS_CERTDIR
             value: ""
+          # slirp4netns has no IPv6 without it; jobs were IPv4 only.
+          - name: DOCKERD_ROOTLESS_ROOTLESSKIT_FLAGS
+            value: --ipv6
         extraVolumeMounts:
           # The parent of the docker dir: rootlesskit must own .../docker
           # itself, and can't chown a mount point.
