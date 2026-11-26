@@ -60,6 +60,9 @@ apiVersion: v1alpha1
 kind: KubeletConfig
 extraArgs:
   rotate-server-certificates: "true"
+# kube-dns is IPv6 only; the default would also list 10.96.0.10.
+clusterDNS:
+  - fd00:1018:2000::a
 # EPHEMERAL is a fixed 100 GiB holding little besides the image store.
 # GC starts below kubelet's imagefs eviction threshold (15% free), which
 # the default 85% would race.
