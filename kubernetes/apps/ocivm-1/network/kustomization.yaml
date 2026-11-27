@@ -6,3 +6,5 @@ resources:
   - ./namespace.yaml
   - ./chrony/ks.yaml
   - ./gateway-api/ks.yaml
+  - ./ifconfig/ks.yaml
+  - ./website/ks.yaml
