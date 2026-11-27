@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Ollama - local LLM inference server (OpenAI-compatible API)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: ollama
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: local-path-provisioner
+      namespace: flux-system
+  interval: 1h
+  retryInterval: 1m
+  # wait: true covers the Deployment, and a new image is a few GB.
+  timeout: 15m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  path: ./kubernetes/apps/ocivm-1/ai/ollama/app
+  prune: true
+  wait: true

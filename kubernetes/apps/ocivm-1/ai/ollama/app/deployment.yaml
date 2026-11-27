@@ -1,0 +1,125 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  labels:
+    app.kubernetes.io/name: ollama
+spec:
+  replicas: 1
+  # RWO volume: a surge pod could never attach it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ollama
+    spec:
+      automountServiceAccountToken: false
+      # Otherwise the "ollama" Service injects OLLAMA_* variables (OLLAMA_PORT etc.).
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ollama
+          # renovate: datasource=docker depName=ollama/ollama
+          image: ollama/ollama:0.40.17@sha256:ccc42bcd3d5fcf7ab0d532b300382154e1a4da56fc666bdb313b78ebdd912754
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: http
+              containerPort: 11434
+              protocol: TCP
+          env:
+            - name: OLLAMA_HOST
+              value: "[::]:11434"
+            - name: OLLAMA_MODELS
+              value: /data/models
+            - name: HOME
+              value: /data
+            - name: OLLAMA_KEEP_ALIVE
+              value: "-1"
+            - name: OLLAMA_MAX_LOADED_MODELS
+              value: "1"
+            - name: OLLAMA_NUM_PARALLEL
+              value: "1"
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 3Gi
+            limits:
+              memory: 5Gi
+          volumeMounts:
+            - name: models
+              mountPath: /data
+        # Pulls the model and keeps it loaded (OLLAMA_KEEP_ALIVE=-1): it is
+        # here to keep memory use above Oracle's idle-instance threshold.
+        - name: load-model
+          # renovate: datasource=docker depName=ollama/ollama
+          image: ollama/ollama:0.40.17@sha256:ccc42bcd3d5fcf7ab0d532b300382154e1a4da56fc666bdb313b78ebdd912754
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: OLLAMA_HOST
+              value: "http://[::1]:11434"
+            - name: HOME
+              value: /tmp
+            - name: MODEL
+              value: "llama3.2:3b"
+          command:
+            - /bin/sh
+            - -eu
+            - -c
+            - |
+              until ollama list >/dev/null 2>&1; do sleep 5; done
+              ollama pull "$MODEL"
+              ollama run "$MODEL" hi >/dev/null
+              echo "$MODEL loaded"
+              exec sleep infinity
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: ollama-models
