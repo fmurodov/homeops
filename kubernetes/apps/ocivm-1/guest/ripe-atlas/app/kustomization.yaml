@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# talos1018's probe, on local-path. Restore etc/probe_key before first start
+# to keep the old ocivm-1 probe ID.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../../talos1018/guest/ripe-atlas/app
+patches:
+  - target:
+      kind: PersistentVolumeClaim
+      name: ripe-atlas-data
+    patch: |
+      - op: replace
+        path: /spec/storageClassName
+        value: local-path
+      - op: remove
+        path: /metadata/labels

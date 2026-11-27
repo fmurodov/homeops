@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/gateway.networking.k8s.io/httproute_v1.json
+# Public. HSTS for this host only (kept from the old VM: browsers cache it).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: website
+spec:
+  parentRefs:
+    - name: internet-gateway
+      namespace: network
+      sectionName: https-external
+  hostnames:
+    - "ocivm-1.${DOMAIN}"
+  rules:
+    - filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Strict-Transport-Security
+                value: max-age=31536000
+      backendRefs:
+        - name: website
+          port: 80

@@ -1,0 +1,9 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: guest
+  labels:
+    # baseline would reject the probe: it doesn't allow adding NET_RAW
+    pod-security.kubernetes.io/enforce: privileged

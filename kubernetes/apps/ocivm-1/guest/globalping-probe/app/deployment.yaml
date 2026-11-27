@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: globalping-probe
+  labels:
+    app.kubernetes.io/name: globalping-probe
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: globalping-probe
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: globalping-probe
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      containers:
+        - name: globalping-probe
+          image: docker.io/globalping/globalping-probe:0.54.1@sha256:9e39cf36206b1071cd62dd0c1a01d76359cbf5fe8a3952ac8f53dcbd244f1f5d
+          env:
+            # Adopts the probe to the account; without it, adopt it by hand.
+            - name: GP_ADOPTION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: globalping-secret
+                  key: GP_ADOPTION_TOKEN
+                  optional: true
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_RAW
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: "1"
+              memory: 256Mi
