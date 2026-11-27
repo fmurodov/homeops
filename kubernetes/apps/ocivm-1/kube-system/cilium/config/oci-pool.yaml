@@ -14,4 +14,4 @@ spec:
     - cidr: "${OCI_IPV6_PREFIX}::30/128"
     - cidr: "10.254.0.10/32"
     # internal-gateway, reached over a NetBird route
-    - cidr: "fd6d:cefe:ddc3:1001::20/128"
+    - cidr: "fd19:7398:d4e5:1::20/128"

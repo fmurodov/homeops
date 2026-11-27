@@ -14,7 +14,7 @@ ingress:
   - subnet: fd49:a02e:1c7::/64
   - subnet: 100.104.0.0/16
   - subnet: ${OCI_IPV6_PREFIX}::10/128
-  - subnet: fd6d:cefe:ddc3:1100::/56
+  - subnet: fd19:7398:d4e5:100::/56
 ---
 apiVersion: v1alpha1
 kind: NetworkRuleConfig
@@ -28,7 +28,7 @@ ingress:
   - subnet: fd49:a02e:1c7::/64
   - subnet: 100.104.0.0/16
   - subnet: ${OCI_IPV6_PREFIX}::10/128
-  - subnet: fd6d:cefe:ddc3:1100::/56
+  - subnet: fd19:7398:d4e5:100::/56
   - subnet: 10.245.0.0/16
 ---
 # Node-local only: the node itself and its pods.
@@ -48,6 +48,6 @@ portSelector:
   protocol: tcp
 ingress:
   - subnet: ${OCI_IPV6_PREFIX}::10/128
-  - subnet: fd6d:cefe:ddc3:1100::/56
+  - subnet: fd19:7398:d4e5:100::/56
   - subnet: 10.245.0.0/16
   - subnet: 10.254.0.0/24

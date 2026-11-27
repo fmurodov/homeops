@@ -37,7 +37,7 @@ kind: KubeletConfig
 extraArgs:
   rotate-server-certificates: "true"
 clusterDNS:
-  - fd6d:cefe:ddc3:1200::a
+  - fd19:7398:d4e5:200::a
 config:
   imageGCHighThresholdPercent: 75
   imageGCLowThresholdPercent: 65
@@ -50,10 +50,10 @@ apiVersion: v1alpha1
 kind: KubeNetworkConfig
 dnsDomain: cluster.local
 podSubnets:
-  - fd6d:cefe:ddc3:1100::/56
+  - fd19:7398:d4e5:100::/56
   - 10.245.0.0/16
 serviceSubnets:
-  - fd6d:cefe:ddc3:1200::/108
+  - fd19:7398:d4e5:200::/108
   - 10.246.0.0/16
 ---
 apiVersion: v1alpha1
