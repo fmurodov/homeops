@@ -7,3 +7,4 @@ resources:
   - ./network
   - ./cert-manager/ks.yaml
   - ./observability
+  - ./ai
