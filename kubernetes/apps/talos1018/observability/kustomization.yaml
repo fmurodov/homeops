@@ -15,7 +15,6 @@ resources:
   - ./victoria-logs/ks.yaml
 
   # Alerting
-  - ./ntfy/ks.yaml
   - ./alertmanager/ks.yaml
   - ./vmalert/ks.yaml
   - ./flux-alerts/ks.yaml

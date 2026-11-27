@@ -54,7 +54,7 @@ spec:
       global:
         resolve_timeout: 5m
       route:
-        receiver: discord-warning
+        receiver: warning
         group_by:
           - alertname
           - namespace
@@ -79,27 +79,30 @@ spec:
             group_wait: 0s
           - matchers:
               - severity="critical"
-            receiver: discord-critical
+            receiver: critical
       receivers:
-        - name: discord-warning
+        # Pushover: one app for the user and family, outside the cluster.
+        # Warnings are quiet (priority -1), criticals use the high priority
+        # (1) that sounds through quiet hours. Swap the user key for a
+        # Pushover group key to reach more people.
+        - name: warning
           discord_configs:
             - webhook_url_file: /etc/alertmanager/secrets/discord-warning-url
               send_resolved: true
-        - name: discord-critical
+          pushover_configs:
+            - user_key_file: /etc/alertmanager/secrets/pushover-user-key
+              token_file: /etc/alertmanager/secrets/pushover-token
+              priority: "-1"
+              send_resolved: true
+        - name: critical
           discord_configs:
             - webhook_url_file: /etc/alertmanager/secrets/discord-critical-url
               send_resolved: true
-          webhook_configs:
-            # ntfy native alertmanager template (no bridge). Publish over the
-            # internal service; phone subscribes to the same topic externally.
-            # Kept alongside Discord: ntfy is self-hosted and still reaches the
-            # phone on LAN when the WAN or Discord itself is down.
-            - url: "http://ntfy.observability.svc/alerts?template=alertmanager"
+          pushover_configs:
+            - user_key_file: /etc/alertmanager/secrets/pushover-user-key
+              token_file: /etc/alertmanager/secrets/pushover-token
+              priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
               send_resolved: true
-              http_config:
-                authorization:
-                  type: Bearer
-                  credentials_file: /etc/alertmanager/secrets/ntfy-token
         - name: discord-heartbeat
           discord_configs:
             - webhook_url_file: /etc/alertmanager/secrets/discord-heartbeat-url
