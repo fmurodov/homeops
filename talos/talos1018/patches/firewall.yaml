@@ -25,7 +25,8 @@ ingress:
   - subnet: fd6d:cefe:ddc3:1::/64
   - subnet: fd6d:cefe:ddc3:5::/64
   - subnet: fd6d:cefe:ddc3:6::/64
-  # UniFi WireGuard wgsrv1; its clients use IPv4 until homeops-project#123
+  # UniFi WireGuard wgsrv1; v4 and ULA go once clients use :7 (homeops-project#123)
+  - subnet: ${IPV6_PREFIX_GUA}:7::/64
   - subnet: 10.18.201.0/24
   - subnet: fda3:972:16a0::/64
   # Nodes over IPv4
@@ -55,7 +56,8 @@ ingress:
   - subnet: fd6d:cefe:ddc3:1::/64
   - subnet: fd6d:cefe:ddc3:5::/64
   - subnet: fd6d:cefe:ddc3:6::/64
-  # UniFi WireGuard wgsrv1; its clients use IPv4 until homeops-project#123
+  # UniFi WireGuard wgsrv1; v4 and ULA go once clients use :7 (homeops-project#123)
+  - subnet: ${IPV6_PREFIX_GUA}:7::/64
   - subnet: 10.18.201.0/24
   - subnet: fda3:972:16a0::/64
   # Nodes over IPv4
