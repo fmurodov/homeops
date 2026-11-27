@@ -51,6 +51,7 @@ class Client:
     def __init__(self):
         self.sock = socket.create_connection((HOST, PORT), timeout=15)
         nonce = self.rpc("<auth1/>").findtext("nonce")
+        # BOINC's GUI RPC auth is md5(nonce + password); the protocol fixes it.
         digest = hashlib.md5((nonce + PASSWORD).encode()).hexdigest()
         if self.rpc(f"<auth2><nonce_hash>{digest}</nonce_hash></auth2>").find("authorized") is None:
             raise RuntimeError("GUI RPC authentication failed")
