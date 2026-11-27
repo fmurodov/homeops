@@ -1,0 +1,309 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics
+spec:
+  chart:
+    spec:
+      chart: victoria-metrics-single
+      sourceRef:
+        kind: HelmRepository
+        name: vm
+  interval: 1h0m0s
+  values:
+    rbac:
+      create: true
+    serviceAccount:
+      create: true
+    server:
+      enabled: true
+      extraArgs:
+        httpListenAddr: "[::]:8428"
+        enableTCP6: "true"
+        # The scrape config is read once at startup otherwise, so new jobs
+        # sit inert until the pod happens to restart.
+        promscrape.configCheckInterval: 1m
+      retentionPeriod: "30d"
+      persistentVolume:
+        enabled: true
+        existingClaim: victoria-metrics-data
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 2Gi
+      service:
+        clusterIP: ""
+      ingress:
+        enabled: false
+      # Built-in scraping (replaces separate vmagent)
+      scrape:
+        enabled: true
+        config:
+          global:
+            scrape_interval: 30s
+          scrape_configs:
+            # Kubernetes API server
+            - job_name: kubernetes-api-server
+              kubernetes_sd_configs:
+                - role: endpoints
+              scheme: https
+              tls_config:
+                insecure_skip_verify: true
+                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_namespace
+                    - __meta_kubernetes_service_name
+                    - __meta_kubernetes_endpoint_port_name
+                  regex: default;kubernetes;https
+                  action: keep
+
+            # Kubelet metrics
+            - job_name: kubernetes-kubelet
+              kubernetes_sd_configs:
+                - role: node
+              scheme: https
+              tls_config:
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:10250"
+
+            # cAdvisor (container metrics via kubelet)
+            - job_name: kubernetes-cadvisor
+              kubernetes_sd_configs:
+                - role: node
+              scheme: https
+              metrics_path: /metrics/cadvisor
+              tls_config:
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:10250"
+
+            # Pod autodiscovery via prometheus.io annotations
+            - job_name: kubernetes-pods
+              honor_labels: true
+              kubernetes_sd_configs:
+                - role: pod
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+                  action: keep
+                  regex: "true"
+                # Flux controllers are handled by the dedicated `flux` job below.
+                - source_labels:
+                    - __meta_kubernetes_namespace
+                    - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
+                  action: drop
+                  regex: flux-system;flux
+                - source_labels:
+                    - __meta_kubernetes_pod_annotation_prometheus_io_scheme
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                  replacement: $1
+                - source_labels:
+                    - __meta_kubernetes_pod_annotation_prometheus_io_path
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                  replacement: $1
+                # IPv4: 10.0.0.1(:port)?;annotation → 10.0.0.1:annotation
+                - source_labels:
+                    - __address__
+                    - __meta_kubernetes_pod_annotation_prometheus_io_port
+                  action: replace
+                  regex: (\d+\.\d+\.\d+\.\d+)(?::\d+)?;(\d+)
+                  target_label: __address__
+                  replacement: $1:$2
+                # IPv6 with brackets: [fd00::1](:port)?;annotation → [fd00::1]:annotation
+                - source_labels:
+                    - __address__
+                    - __meta_kubernetes_pod_annotation_prometheus_io_port
+                  action: replace
+                  regex: (\[.+?\])(?::\d+)?;(\d+)
+                  target_label: __address__
+                  replacement: $1:$2
+                # Bare IPv6: fd00::1;annotation → [fd00::1]:annotation
+                - source_labels:
+                    - __address__
+                    - __meta_kubernetes_pod_annotation_prometheus_io_port
+                  action: replace
+                  regex: ([0-9a-fA-F][0-9a-fA-F:]+);(\d+)
+                  target_label: __address__
+                  replacement: "[$1]:$2"
+                - action: labelmap
+                  regex: __meta_kubernetes_pod_label_(.+)
+                - source_labels:
+                    - __meta_kubernetes_namespace
+                  action: replace
+                  target_label: namespace
+                - source_labels:
+                    - __meta_kubernetes_pod_name
+                  action: replace
+                  target_label: pod
+
+            # Flux controllers — kept out of kubernetes-pods because its
+            # honor_labels lets the reconciled resource's own `namespace` label
+            # overwrite the pod's. The Flux dashboards need both: `namespace`
+            # for the controller pod (flux-system) and `exported_namespace` for
+            # the resource being reconciled.
+            - job_name: flux
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names:
+                      - flux-system
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
+                    - __meta_kubernetes_pod_container_port_name
+                  action: keep
+                  regex: flux;http-prom
+                - action: labelmap
+                  regex: __meta_kubernetes_pod_label_(.+)
+                - source_labels:
+                    - __meta_kubernetes_namespace
+                  action: replace
+                  target_label: namespace
+                - source_labels:
+                    - __meta_kubernetes_pod_name
+                  action: replace
+                  target_label: pod
+
+            # Node Exporter
+            - job_name: node-exporter
+              kubernetes_sd_configs:
+                - role: endpoints
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_name
+                  action: keep
+                  regex: prometheus-node-exporter
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+
+            # kube-state-metrics
+            - job_name: kube-state-metrics
+              kubernetes_sd_configs:
+                - role: endpoints
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_service_name
+                  action: keep
+                  regex: kube-state-metrics
+
+            # CoreDNS (kube-system) — metrics on :9153
+            - job_name: coredns
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names:
+                      - kube-system
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_label_k8s_app
+                  action: keep
+                  regex: kube-dns
+                - source_labels:
+                    - __meta_kubernetes_pod_container_port_number
+                  action: keep
+                  regex: "9153"
+
+            # Hubble (:9965). The agent's prometheus.io/port is 9962, so
+            # annotation discovery never reaches this port.
+            - job_name: hubble
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names:
+                      - kube-system
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_label_k8s_app
+                  action: keep
+                  regex: cilium
+                - source_labels:
+                    - __meta_kubernetes_pod_container_port_number
+                  action: keep
+                  regex: "9965"
+
+            # VictoriaMetrics single — self metrics (vm_*, up)
+            - job_name: victoria-metrics
+              static_configs:
+                - targets:
+                    - localhost:8428
+
+            # Control plane — requires the Talos bind-address / listen-metrics-urls
+            # change. The node is control plane, so the node role suffices.
+            - job_name: kube-controller-manager
+              scheme: https
+              kubernetes_sd_configs:
+                - role: node
+              tls_config:
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:10257"
+
+            - job_name: kube-scheduler
+              scheme: https
+              kubernetes_sd_configs:
+                - role: node
+              tls_config:
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:10259"
+
+            - job_name: etcd
+              scheme: http
+              kubernetes_sd_configs:
+                - role: node
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+                - source_labels:
+                    - __address__
+                  regex: (.+):(.+)
+                  target_label: __address__
+                  replacement: "$${1}:2381"
+      route:
+        enabled: false
+    # Standalone charts are used for these — disable the bundled ones
+    vmagent:
+      enabled: false
+    vmalert:
+      enabled: false
+    vmauth:
+      enabled: false

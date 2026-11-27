@@ -15,6 +15,8 @@ cluster:
   etcd:
     advertisedSubnets:
       - ${OCI_IPV6_PREFIX}::10/128
+    extraArgs:
+      listen-metrics-urls: "http://[::]:2381"
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
