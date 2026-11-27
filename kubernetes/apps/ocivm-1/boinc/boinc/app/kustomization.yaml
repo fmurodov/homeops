@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: boinc
+resources:
+  - ./boinc-secret.sops.yaml
+  - ./pvc.yaml
+  - ./deployment.yaml
+configMapGenerator:
+  - name: boinc
+    files:
+      - boinc_exporter.py
+      - global_prefs_override.xml

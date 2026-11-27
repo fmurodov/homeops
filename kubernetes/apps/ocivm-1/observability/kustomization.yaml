@@ -8,3 +8,4 @@ resources:
   - ./node-exporter/ks.yaml
   - ./victoria-metrics/ks.yaml
   - ./grafana/ks.yaml
+  - ./uptime-kuma/ks.yaml

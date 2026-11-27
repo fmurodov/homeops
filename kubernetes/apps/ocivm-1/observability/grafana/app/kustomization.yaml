@@ -13,6 +13,7 @@ configMapGenerator:
   - name: grafana-dashboards-custom
     files:
       - dashboards/chrony.json
+      - dashboards/boinc.json
     options:
       disableNameSuffixHash: true
       # Grafana's own $var refs would otherwise be eaten by Flux envsubst.
