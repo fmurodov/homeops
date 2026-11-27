@@ -27,8 +27,6 @@ data:
         service: https://cilium-gateway-internet-gateway.network.svc.cluster.local
       - hostname: "n8n-webhook.${DOMAIN}"
         service: https://cilium-gateway-internet-gateway.network.svc.cluster.local
-      - hostname: "ntfy.${DOMAIN}"
-        service: https://cilium-gateway-internet-gateway.network.svc.cluster.local
       - hostname: "pid.${DOMAIN}"
         service: https://cilium-gateway-internet-gateway.network.svc.cluster.local
       - hostname: "recipe.${DOMAIN}"
