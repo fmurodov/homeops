@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ntfy-config
+  labels:
+    app.kubernetes.io/name: ntfy
+data:
+  server.yml: |
+    base-url: "https://ntfy.${DOMAIN}"
+    listen-http: "[::]:8080"
+    auth-file: "/var/lib/ntfy/user.db"
+    auth-default-access: "deny-all"
+    cache-file: "/var/lib/ntfy/cache.db"
+    cache-duration: "12h"
+    behind-proxy: true
+    # The App Store iOS build is compiled against ntfy.sh's APNs certificate and
+    # cannot be woken by a self-hosted server. Forwarding a poll request upstream
+    # makes ntfy.sh send the APNs wake-up; the payload is only a SHA-256 of
+    # base-url+topic, and the app then fetches the message from here.
+    upstream-base-url: "https://ntfy.sh"

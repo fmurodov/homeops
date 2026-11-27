@@ -1,0 +1,60 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Public via the tunnel, so only the gateway and Alertmanager (which publishes
+# to the Service directly) may reach it, and it may only reach DNS and the
+# internet on 443 for upstream-base-url (homeops-project#132). Another
+# in-cluster publisher needs a rule here first.
+# kubelet probes come from the host, which Cilium allows by default.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ntfy
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: ntfy
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: observability
+            app.kubernetes.io/name: alertmanager
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Internet only, as in n8n: no private, ULA or home GUA ranges.
+    - toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+      toCIDRSet:
+        - cidr: "0.0.0.0/0"
+          except:
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+            - "192.168.0.0/16"
+            - "127.0.0.0/8"
+            - "169.254.0.0/16"
+        - cidr: "::/0"
+          except:
+            - "fc00::/7"
+            - "fe80::/10"
+            - "::1/128"
+            - "${IPV6_PREFIX_GUA}::/48"
