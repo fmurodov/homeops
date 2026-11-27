@@ -52,12 +52,6 @@ spec:
         - name: exporter
           image: docker.io/library/python:3.14-alpine@sha256:9e9fde4d32eedce0b661d9ab91e826b62dddf28e928c230ec55f1866cac66b01
           args: [python, /app/boinc_exporter.py]
-          env:
-            - name: BOINC_GUI_RPC_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: boinc-secret
-                  key: BOINC_GUI_RPC_PASSWORD
           ports:
             - name: metrics
               containerPort: 9101

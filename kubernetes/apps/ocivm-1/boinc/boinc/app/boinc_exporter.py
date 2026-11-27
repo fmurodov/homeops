@@ -3,7 +3,6 @@
 Reads BOINC's GUI RPC on each scrape.
 `python boinc_exporter.py --once` prints the metrics once instead.
 """
-import hashlib
 import os
 import socket
 import sys
@@ -13,7 +12,6 @@ from urllib.parse import urlparse
 
 HOST = os.environ.get("BOINC_HOST", "127.0.0.1")
 PORT = int(os.environ.get("BOINC_PORT", "31416"))
-PASSWORD = os.environ.get("BOINC_GUI_RPC_PASSWORD", "")
 LISTEN_PORT = int(os.environ.get("LISTEN_PORT", "9101"))
 
 # result.state from BOINC's lib/common_defs.h
@@ -50,11 +48,8 @@ HELP = {
 class Client:
     def __init__(self):
         self.sock = socket.create_connection((HOST, PORT), timeout=15)
-        nonce = self.rpc("<auth1/>").findtext("nonce")
-        # BOINC's GUI RPC auth is md5(nonce + password); the protocol fixes it.
-        digest = hashlib.md5((nonce + PASSWORD).encode()).hexdigest()
-        if self.rpc(f"<auth2><nonce_hash>{digest}</nonce_hash></auth2>").find("authorized") is None:
-            raise RuntimeError("GUI RPC authentication failed")
+        # get_state and get_cc_status are read-only: BOINC serves them to
+        # local connections without the GUI RPC password.
 
     def rpc(self, body):
         self.sock.sendall(f"<boinc_gui_rpc_request>\n{body}\n</boinc_gui_rpc_request>\n\003".encode())
