@@ -50,6 +50,9 @@ spec:
               command: [pg_isready, -U, skystats, -d, skystats_db]
             initialDelaySeconds: 30
             periodSeconds: 10
+            # 1s default killed postgres under CPU throttling (index builds)
+            timeoutSeconds: 5
+            failureThreshold: 6
           readinessProbe:
             exec:
               command: [pg_isready, -U, skystats, -d, skystats_db]
@@ -57,7 +60,7 @@ spec:
             periodSeconds: 5
           resources:
             limits:
-              cpu: "0.2"
+              cpu: "1"
               memory: "512Mi"
             requests:
               cpu: "0.02"
