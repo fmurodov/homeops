@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Upstream deploy/local-path-storage.yaml (v0.0.37), with pinned images, the
+# Talos user volume path and reclaimPolicy Retain.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./local-path-storage.yaml
+patches:
+  - target:
+      kind: Namespace
+      name: local-path-storage
+    patch: |
+      - op: add
+        path: /metadata/labels
+        value:
+          pod-security.kubernetes.io/enforce: privileged
+  - target:
+      kind: StorageClass
+      name: local-path
+    patch: |
+      - op: add
+        path: /metadata/annotations
+        value:
+          storageclass.kubernetes.io/is-default-class: "true"
