@@ -141,3 +141,9 @@ environment:
 apiVersion: v1alpha1
 kind: FilesystemTrimConfig
 interval: 168h0m0s
+---
+# PVs for local-path-provisioner, a directory on EPHEMERAL (/var/mnt/<name>)
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: local-path-provisioner
+volumeType: directory
