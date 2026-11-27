@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumloadbalancerippool_v2.json
+---
+# Each address is also assigned to the VNIC in fmurodov-tf: OCI only
+# delivers assigned /128s. Services pick theirs with lbipam.cilium.io/ips.
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: oci-pool
+spec:
+  blocks:
+    # internet-gateway
+    - cidr: "${OCI_IPV6_PREFIX}::20/128"
+    # ntp
+    - cidr: "${OCI_IPV6_PREFIX}::30/128"
+    # internal-gateway, reached over a NetBird route
+    - cidr: "${OCI_ULA_PREFIX}::20/128"

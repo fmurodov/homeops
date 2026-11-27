@@ -15,3 +15,5 @@ rules:
 ignore:
   - talos/talos1018/clusterconfig/
   - kubernetes/clusters/talos1018/flux-system/
+  - talos/ocivm-1/clusterconfig/
+  - kubernetes/clusters/ocivm-1/flux-system/

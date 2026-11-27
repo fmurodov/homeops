@@ -1,6 +1,13 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/sops
 creation_rules:
+  - path_regex: .*ocivm-1/.+\.sops\.yaml
+    encrypted_regex: ^(data|stringData)$
+    mac_only_encrypted: true
+    key_groups:
+      - age:
+          - age1xmem0rh8dcwd49l0d44fqnvxfjyj3uk65te0dzyertntxq62f42qn5t8v9
+          - age1kesma5f5dadlzdl5lzgrtxl6e8z8frf7njsfnlnprzan0lmzgdmstnd39u
   - path_regex: .+\.sops\.yaml
     encrypted_regex: ^(data|stringData)$
     mac_only_encrypted: true

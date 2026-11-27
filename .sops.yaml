@@ -5,6 +5,19 @@
 # already inside kubernetes/. These rules mirror it (and talos/talos1018) so the
 # same command works from the repo root. path_regex matches the resolved path.
 creation_rules:
+  # ocivm-1 has its own key; the admin key can still edit (first match wins).
+  - path_regex: talos/ocivm-1/.*\.sops\.yaml$
+    key_groups:
+      - age:
+          - age1xmem0rh8dcwd49l0d44fqnvxfjyj3uk65te0dzyertntxq62f42qn5t8v9
+          - age1kesma5f5dadlzdl5lzgrtxl6e8z8frf7njsfnlnprzan0lmzgdmstnd39u
+  - path_regex: kubernetes/.*ocivm-1/.*\.sops\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    mac_only_encrypted: true
+    key_groups:
+      - age:
+          - age1xmem0rh8dcwd49l0d44fqnvxfjyj3uk65te0dzyertntxq62f42qn5t8v9
+          - age1kesma5f5dadlzdl5lzgrtxl6e8z8frf7njsfnlnprzan0lmzgdmstnd39u
   - path_regex: talos/.*\.sops\.yaml$
     key_groups:
       - age:

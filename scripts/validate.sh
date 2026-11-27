@@ -64,6 +64,22 @@ if [ "$VALIDATE_TALOS" = true ]; then
             echo "❌ talos/talos1018/generate.sh failed"
             VALIDATION_FAILED=1
         fi
+
+        # ocivm-1, with documentation prefixes and a dummy domain
+        OCIVM_OUT="$TALOS_WORK/ocivm-1"
+        if SECRETS="$TALOS_WORK/secrets.yaml" OUTPUT="$OCIVM_OUT" OCI_IPV6_PREFIX=2001:db8:c1 \
+            HOME_IPV6_PREFIX=2001:db8:1018 CLUSTER_DOMAIN=example.org NB_SETUP_KEY=dummy \
+            talos/ocivm-1/generate.sh; then
+            if talosctl validate --mode cloud --strict --config "$OCIVM_OUT/controlplane.yaml" > /dev/null; then
+                echo "✅ ocivm-1 controlplane.yaml is valid"
+            else
+                echo "❌ ocivm-1 controlplane.yaml validation failed"
+                VALIDATION_FAILED=1
+            fi
+        else
+            echo "❌ talos/ocivm-1/generate.sh failed"
+            VALIDATION_FAILED=1
+        fi
     fi
     echo ""
 fi

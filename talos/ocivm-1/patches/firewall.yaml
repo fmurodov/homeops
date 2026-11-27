@@ -1,0 +1,53 @@
+# Host ingress firewall. The OCI NSG filters first (fmurodov-tf). As on
+# talos1018, the default stays accept and each rule drops new connections to
+# its ports from any source not listed.
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: talos-apid
+portSelector:
+  ports:
+    - 50000
+  protocol: tcp
+ingress:
+  # Home and NetBird
+  - subnet: ${HOME_IPV6_PREFIX}::/48
+  - subnet: fd49:a02e:1c7::/64
+  - subnet: 100.104.0.0/16
+  - subnet: ${OCI_IPV6_PREFIX}::10/128
+  - subnet: fd00:0c1:1000::/56
+---
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: kube-apiserver
+portSelector:
+  ports:
+    - 6443
+  protocol: tcp
+ingress:
+  - subnet: ${HOME_IPV6_PREFIX}::/48
+  - subnet: fd49:a02e:1c7::/64
+  - subnet: 100.104.0.0/16
+  - subnet: ${OCI_IPV6_PREFIX}::10/128
+  - subnet: fd00:0c1:1000::/56
+  - subnet: 10.245.0.0/16
+---
+# Node-local only: the node itself and its pods.
+apiVersion: v1alpha1
+kind: NetworkRuleConfig
+name: cluster-internal
+portSelector:
+  ports:
+    - 2379-2381
+    - 4244
+    - 9100
+    - 9962-9965
+    - 10250
+    - 10257
+    - 10259
+    - 50001
+  protocol: tcp
+ingress:
+  - subnet: ${OCI_IPV6_PREFIX}::10/128
+  - subnet: fd00:0c1:1000::/56
+  - subnet: 10.245.0.0/16
+  - subnet: 10.254.0.0/24
