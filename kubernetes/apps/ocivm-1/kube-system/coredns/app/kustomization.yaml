@@ -1,11 +1,21 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# talos1018's CoreDNS (same service range) without its dn42 forward.
+# talos1018's CoreDNS without its dn42 forward, on this cluster's service range.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../../../talos1018/kube-system/coredns/app
 patches:
+  - target:
+      kind: Service
+      name: kube-dns
+    patch: |
+      - op: replace
+        path: /spec/clusterIP
+        value: fd6d:cefe:ddc3:1200::a
+      - op: replace
+        path: /spec/clusterIPs/0
+        value: fd6d:cefe:ddc3:1200::a
   - target:
       kind: ConfigMap
       name: coredns
