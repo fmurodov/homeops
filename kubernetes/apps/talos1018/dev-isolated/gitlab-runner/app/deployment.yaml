@@ -35,7 +35,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: render-config
-          image: gitlab/gitlab-runner:v19.6.0@sha256:fb454a097fd26ea329b0234d6d82b53ae25f672bd625c278eaaee683a00f2507
+          image: gitlab/gitlab-runner:v19.6.1@sha256:d10e5671b9ab568128103a52337504e5a20ca1fa7b3978431bb4395590e5e2cf
           # Builds config.toml; the token can't live in the ConfigMap.
           command:
             - sh
@@ -63,7 +63,7 @@ spec:
       containers:
         - name: gitlab-runner
           # renovate: datasource=docker depName=gitlab/gitlab-runner
-          image: gitlab/gitlab-runner:v19.6.0@sha256:fb454a097fd26ea329b0234d6d82b53ae25f672bd625c278eaaee683a00f2507
+          image: gitlab/gitlab-runner:v19.6.1@sha256:d10e5671b9ab568128103a52337504e5a20ca1fa7b3978431bb4395590e5e2cf
           command:
             - gitlab-runner
           args:
