@@ -11,7 +11,7 @@ spec:
   gatewayClassName: cilium-ipv6-only
   infrastructure:
     annotations:
-      lbipam.cilium.io/ips: "${OCI_IPV6_PREFIX}::20"
+      io.cilium/lb-ipam-ips: "${OCI_IPV6_PREFIX}::20"
   listeners:
     - name: http
       protocol: HTTP
