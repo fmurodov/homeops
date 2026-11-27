@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# talos1018's chrony (pool member ams1). IPv4 is the node's own address,
+# reached through the reserved public IPv4; the pool uses both families.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../../talos1018/network/chrony/app
+patches:
+  - target:
+      kind: Service
+      name: chrony
+    patch: |
+      - op: replace
+        path: /metadata/annotations/io.cilium~1lb-ipam-ips
+        value: "${OCI_IPV6_PREFIX}::30,10.254.0.10"
+      - op: replace
+        path: /spec/ipFamilyPolicy
+        value: RequireDualStack
