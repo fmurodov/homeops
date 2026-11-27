@@ -96,8 +96,11 @@ echo "INFO - Checking for duplicate resources across app kustomizations"
 DUPES_FILE=$(mktemp)
 find . -path "*/app/$kustomize_config" -o -path "*/config/$kustomize_config" -o -path "*/networks/$kustomize_config" | \
   while IFS= read -r file; do
+    # Per cluster: ./apps/<cluster>/... (both clusters share names like cilium)
+    cluster="$(echo "$file" | cut -d/ -f3)"
     kustomize build "${file/%$kustomize_config}" "${kustomize_flags[@]}" 2>/dev/null | \
-      yq e -N '[.kind, .metadata.name, .metadata.namespace // "default"] | join("/")' - 2>/dev/null
+      yq e -N '[.kind, .metadata.name, .metadata.namespace // "default"] | join("/")' - 2>/dev/null | \
+      sed "s|^|$cluster: |"
 done | sort | uniq -d > "$DUPES_FILE"
 
 if [ -s "$DUPES_FILE" ]; then

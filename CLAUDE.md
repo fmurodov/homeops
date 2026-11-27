@@ -5,7 +5,7 @@ This document provides essential guidance for AI assistants working with this In
 ## Repository Overview
 
 **HomeOps** manages a home Kubernetes cluster using:
-- **Talos Linux** - Immutable Kubernetes OS (3-node cluster: talos1018)
+- **Talos Linux** - Immutable Kubernetes OS (3-node cluster talos1018; single-node ocivm-1 on Oracle Cloud, `talos/ocivm-1/`)
 - **Flux CD** - GitOps continuous deployment
 - **SOPS + age** - Secret encryption
 - **Renovate** - Automated dependency updates
@@ -147,6 +147,7 @@ fix(container): update image ghcr.io/esphome/esphome ( 2025.12.4 ➔ 2025.12.5 )
 4. **Don't hardcode values** - Use cluster-wide variables instead of IPs/domains
 5. **Don't modify Flux system files** - Files in `kubernetes/clusters/talos1018/flux-system/` are Flux-managed
 6. **Don't break dependencies** - Check Flux Kustomization dependencies before changes
+7. **Don't mix up the clusters** - For ocivm-1 always pass `--talosconfig ~/.talos/ocivm-1` / `--kubeconfig ~/.kube/ocivm-1`, never the default context
 
 ## Common Tasks
 

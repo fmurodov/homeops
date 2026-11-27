@@ -1,0 +1,26 @@
+---
+# IPv6-only gateway Services (both gateways here).
+apiVersion: cilium.io/v2alpha1
+kind: CiliumGatewayClassConfig
+metadata:
+  name: gateway-ipv6-only
+  namespace: kube-system
+spec:
+  service:
+    ipFamilyPolicy: SingleStack
+    ipFamilies:
+      - IPv6
+    allocateLoadBalancerNodePorts: false
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: cilium-ipv6-only
+spec:
+  controllerName: io.cilium/gateway-controller
+  description: Cilium gateways with an IPv6-only LoadBalancer Service
+  parametersRef:
+    group: cilium.io
+    kind: CiliumGatewayClassConfig
+    name: gateway-ipv6-only
+    namespace: kube-system

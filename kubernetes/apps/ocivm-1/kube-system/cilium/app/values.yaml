@@ -1,0 +1,93 @@
+# Single node on OCI. Differences from talos1018: IPv6 primary, pods on ULAs
+# with masquerade (OCI routes no prefix to the VM), one operator.
+ipam:
+  mode: kubernetes
+
+l2announcements:
+  enabled: true
+
+kubeProxyReplacement: true
+
+# wt0 is NetBird: the internal gateway's address is reached through it.
+devices:
+  - enp+
+  - wt+
+
+k8sServiceHost: 127.0.0.1
+k8sServicePort: 7445
+
+gatewayAPI:
+  enabled: true
+
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 384Mi
+
+cni:
+  exclusive: false
+
+ipv4:
+  enabled: true
+ipv6:
+  enabled: true
+
+routingMode: native
+ipv4NativeRoutingCIDR: 10.245.0.0/16
+ipv6NativeRoutingCIDR: fd00:0c1:1000::/56
+enableIPv4Masquerade: true
+enableIPv6Masquerade: true
+
+prometheus:
+  enabled: true
+
+operator:
+  replicas: 1
+  prometheus:
+    enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 96Mi
+
+hubble:
+  enabled: true
+  tls:
+    auto:
+      method: cronJob
+  relay:
+    enabled: true
+  ui:
+    enabled: false
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - icmp
+      - http

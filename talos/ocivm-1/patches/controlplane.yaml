@@ -1,0 +1,143 @@
+# Single node on Oracle Cloud (homeops-project#90). ${...} are filled in by
+# generate.sh. Addresses must also be assigned to the VNIC in fmurodov-tf.
+machine:
+  certSANs:
+    - ${OCI_IPV6_PREFIX}::10
+    - vm-1.${CLUSTER_DOMAIN}
+    - ::1
+    - 127.0.0.1
+  features:
+    rbac: true
+    apidCheckExtKeyUsage: true
+    diskQuotaSupport: true
+
+cluster:
+  etcd:
+    advertisedSubnets:
+      - ${OCI_IPV6_PREFIX}::10/128
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: "off"
+hostname: ocivm-1
+---
+# Static, so DNS and the firewall can name it. The default route comes from
+# router advertisements. Only the node address goes here: LB addresses are
+# Cilium's.
+apiVersion: v1alpha1
+kind: LinkConfig
+name: enp0s6
+addresses:
+  - address: ${OCI_IPV6_PREFIX}::10/128
+---
+apiVersion: v1alpha1
+kind: KubeletConfig
+extraArgs:
+  rotate-server-certificates: "true"
+clusterDNS:
+  - fd00:1018:2000::a
+config:
+  imageGCHighThresholdPercent: 75
+  imageGCLowThresholdPercent: 65
+  imageMaximumGCAge: 168h
+---
+# IPv6 first; IPv4 only because GitHub and ghcr.io have no IPv6. OCI routes no
+# prefix to the VM, so pods use ULAs and are masqueraded. Service ranges as on
+# talos1018, so the CoreDNS manifests are shared.
+apiVersion: v1alpha1
+kind: KubeNetworkConfig
+dnsDomain: cluster.local
+podSubnets:
+  - fd00:0c1:1000::/56
+  - 10.245.0.0/16
+serviceSubnets:
+  - fd00:1018:2000::/108
+  - 10.96.0.0/12
+---
+apiVersion: v1alpha1
+kind: KubeControllerManagerConfig
+extraArgs:
+  bind-address: "::"
+---
+apiVersion: v1alpha1
+kind: KubeSchedulerConfig
+extraArgs:
+  bind-address: "::"
+---
+apiVersion: v1alpha1
+kind: KubeAuthenticationConfig
+configuration:
+  anonymous:
+    enabled: true
+    conditions:
+      - path: /livez
+      - path: /readyz
+      - path: /healthz
+  jwt: []
+---
+# Cilium (Flux) instead of Flannel and kube-proxy; Flux owns CoreDNS, as on
+# talos1018.
+apiVersion: v1alpha1
+kind: KubeFlannelCNIConfig
+$patch: delete
+---
+apiVersion: v1alpha1
+kind: KubeProxyConfig
+enabled: false
+---
+apiVersion: v1alpha1
+kind: KubeCoreDNSConfig
+enabled: false
+---
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+nodeIP:
+  validSubnets:
+    - ${OCI_IPV6_PREFIX}::10/128
+    - 10.0.0.0/8
+labels:
+  node-role.kubernetes.io/control-plane: ""
+taints:
+  $patch: delete
+---
+apiVersion: v1alpha1
+kind: KubeExternalManifestConfig
+name: kubelet-serving-cert-approver
+url: https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.12.1/deploy/standalone-install.yaml
+---
+apiVersion: v1alpha1
+kind: KubeExternalManifestConfig
+name: metrics-server
+url: https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.9.1/components.yaml
+---
+apiVersion: v1alpha1
+kind: ResolverConfig
+hostDNS:
+  enabled: true
+  forwardKubeDNSToHost: true
+---
+apiVersion: v1alpha1
+kind: KubePrismConfig
+port: 7445
+---
+apiVersion: v1alpha1
+kind: TimeSyncConfig
+bootTimeout: 2m0s
+ntp:
+  servers:
+    - time.cloudflare.com
+    - time.apple.com
+    - 2.pool.ntp.org
+---
+# The NetBird extension, for talosctl/kubectl and the internal gateway route.
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: netbird
+environment:
+  - NB_SETUP_KEY=${NB_SETUP_KEY}
+  - NB_HOSTNAME=ocivm-1
+  - NB_DISABLE_DNS=true
+---
+apiVersion: v1alpha1
+kind: FilesystemTrimConfig
+interval: 168h0m0s

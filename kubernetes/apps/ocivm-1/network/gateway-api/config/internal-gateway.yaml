@@ -1,0 +1,32 @@
+---
+# On a ULA from the subnet's ULA /64: unreachable from the internet. NetBird
+# clients get it through a NetBird network route via the ocivm-1 peer.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: internal-gateway
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  gatewayClassName: cilium-ipv6-only
+  infrastructure:
+    annotations:
+      lbipam.cilium.io/ips: "${OCI_ULA_PREFIX}::20"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-internal
+      hostname: "*.${CLUSTER_DOMAIN}"
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: internal-gateway-tls
+      allowedRoutes:
+        namespaces:
+          from: All
