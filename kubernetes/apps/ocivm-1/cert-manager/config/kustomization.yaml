@@ -5,5 +5,6 @@ kind: Kustomization
 resources:
   - ./clusterissuer-staging.yaml
   - ./clusterissuer.yaml
+  - ./cloudflare-api-secret.sops.yaml
 
 namespace: cert-manager
