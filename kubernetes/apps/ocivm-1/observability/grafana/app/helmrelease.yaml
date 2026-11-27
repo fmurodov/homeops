@@ -1,0 +1,138 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.bjw-s.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana
+spec:
+  chart:
+    spec:
+      chart: grafana
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+  interval: 1h0m0s
+  values:
+    deploymentStrategy:
+      type: Recreate
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+    # Password login only; no SSO on this cluster
+    admin:
+      existingSecret: grafana-secret
+      userKey: admin-user
+      passwordKey: admin-password
+
+    # Persistence via pre-created PVC
+    persistence:
+      enabled: true
+      existingClaim: grafana-data
+
+    grafana.ini:
+      server:
+        root_url: https://grafana.${CLUSTER_DOMAIN}
+
+    # Datasources
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: VictoriaMetrics
+            type: prometheus
+            url: http://victoria-metrics-victoria-metrics-single-server:8428
+            isDefault: true
+            jsonData:
+              timeInterval: "30s"
+
+    # Dashboards
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: "default"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+          # dashboardsConfigMaps collides with dashboards on the volume name.
+          - name: "custom"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/custom
+    # Dashboards kept in git (from the old ocivm-1 repo)
+    dashboardsConfigMaps:
+      custom: grafana-dashboards-custom
+    dashboards:
+      default:
+        node-exporter-full:
+          gnetId: 1860
+          revision: 37
+          datasource: VictoriaMetrics
+        kubernetes-views-global:
+          gnetId: 15757
+          revision: 43
+          datasource: VictoriaMetrics
+        kubernetes-views-pods:
+          gnetId: 15760
+          revision: 36
+          datasource: VictoriaMetrics
+        kubernetes-views-namespaces:
+          gnetId: 15758
+          revision: 42
+          datasource: VictoriaMetrics
+        cert-manager:
+          gnetId: 20842
+          revision: 3
+          datasource: VictoriaMetrics
+        cilium-agent:
+          gnetId: 16611
+          revision: 1
+          datasource: VictoriaMetrics
+        cilium-hubble:
+          gnetId: 16613
+          revision: 1
+          datasource: VictoriaMetrics
+        kubernetes-system-coredns:
+          gnetId: 15762
+          revision: 22
+          datasource: VictoriaMetrics
+        kubernetes-system-apiserver:
+          gnetId: 15761
+          revision: 21
+          datasource: VictoriaMetrics
+        victoriametrics-single:
+          gnetId: 10229
+          revision: 56
+          datasource: VictoriaMetrics
+        etcd:
+          gnetId: 3070
+          revision: 3
+          datasource:
+            - name: DS_PROMETHEUS
+              value: VictoriaMetrics
+        # Pulled from upstream rather than grafana.com: the only Flux2 entry
+        # there (16714) is still at revision 1 and predates gotk_resource_info.
+        # Pinned to a commit so a pod restart cannot change the dashboard.
+        # Both carry a DS_PROMETHEUS *template variable* rather than a
+        # __inputs block, so the chart's datasource: override does not apply —
+        # they fall back to the default datasource, VictoriaMetrics.
+        flux-cluster:
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/14129216b7e43db91c49bf0cd6b588360e4aa953/monitoring/configs/dashboards/cluster.json
+        flux-control-plane:
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/14129216b7e43db91c49bf0cd6b588360e4aa953/monitoring/configs/dashboards/control-plane.json
+
+    ingress:
+      enabled: false
