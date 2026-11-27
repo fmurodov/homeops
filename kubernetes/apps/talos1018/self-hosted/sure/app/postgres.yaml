@@ -29,7 +29,7 @@ spec:
       containers:
         - name: sure-postgres
           # renovate: datasource=docker depName=postgres
-          image: postgres:16@sha256:3950ad7c3148ca2175ef1b6c36c9efbf78957ae8fbe8b3a5d7c35af50500382f
+          image: postgres:19@sha256:4ea94de574c17f0372722806c949757050fbb1cd7648410fe45d6bba275cc00e
           ports:
             - name: postgres
               containerPort: 5432
@@ -40,7 +40,7 @@ spec:
             - name: POSTGRES_DB
               value: sure_production
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              value: /var/lib/postgresql/data/pg19
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
