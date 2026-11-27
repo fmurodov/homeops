@@ -12,10 +12,10 @@ patches:
     patch: |
       - op: replace
         path: /spec/clusterIP
-        value: fd6d:cefe:ddc3:1200::a
+        value: fd19:7398:d4e5:200::a
       - op: replace
         path: /spec/clusterIPs/0
-        value: fd6d:cefe:ddc3:1200::a
+        value: fd19:7398:d4e5:200::a
   - target:
       kind: ConfigMap
       name: coredns
