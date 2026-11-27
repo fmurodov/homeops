@@ -1,0 +1,29 @@
+<!--
+  Local computing preferences; they take precedence over the ones set on the project website.
+  This VM is a server that nobody uses interactively, and BOINC already runs its tasks at the
+  lowest CPU priority, so tasks use whatever CPU is idle rather than pausing when other services
+  are busy. The niu_* ("not in use") values apply because a container never sees keyboard input.
+-->
+<global_preferences>
+  <run_if_user_active>1</run_if_user_active>
+  <run_on_batteries>1</run_on_batteries>
+  <max_ncpus_pct>100</max_ncpus_pct>
+  <niu_max_ncpus_pct>100</niu_max_ncpus_pct>
+  <!-- Both CPUs, but tasks are paused/resumed so they get ~75% of the time, leaving headroom. -->
+  <cpu_usage_limit>75</cpu_usage_limit>
+  <niu_cpu_usage_limit>75</niu_cpu_usage_limit>
+  <!-- 0 = never pause because of non-BOINC CPU load. -->
+  <suspend_cpu_usage>0</suspend_cpu_usage>
+  <niu_suspend_cpu_usage>0</niu_suspend_cpu_usage>
+
+  <!-- 12 GB RAM shared with ollama (model stays loaded) and the rest of the cluster. -->
+  <ram_max_used_busy_pct>30</ram_max_used_busy_pct>
+  <ram_max_used_idle_pct>30</ram_max_used_idle_pct>
+
+  <disk_max_used_gb>5</disk_max_used_gb>
+  <disk_min_free_gb>3</disk_min_free_gb>
+  <disk_max_used_pct>90</disk_max_used_pct>
+
+  <work_buf_min_days>0.1</work_buf_min_days>
+  <work_buf_additional_days>0.25</work_buf_additional_days>
+</global_preferences>

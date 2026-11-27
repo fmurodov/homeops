@@ -9,3 +9,4 @@ resources:
   - ./observability
   - ./ai
   - ./guest
+  - ./boinc

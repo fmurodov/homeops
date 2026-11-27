@@ -1,0 +1,91 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+# Projects are attached in the client's state on the volume, not here:
+#   kubectl --kubeconfig ~/.kube/ocivm-1 -n boinc exec deploy/boinc -c boinc -- \
+#     boinccmd --passwd "$PW" --project_attach <url> <account key>
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boinc
+  labels:
+    app.kubernetes.io/name: boinc
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: boinc
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: boinc
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9101"
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      # Let tasks checkpoint before the pod goes.
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: boinc
+          image: docker.io/boinc/client:arm64v8@sha256:2031746369792456c0cb03809a4f10d019c516504e23b1ccb649ba518261e0b4
+          env:
+            - name: BOINC_GUI_RPC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: boinc-secret
+                  key: BOINC_GUI_RPC_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 4Gi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/boinc
+            - name: config
+              mountPath: /var/lib/boinc/global_prefs_override.xml
+              subPath: global_prefs_override.xml
+        - name: exporter
+          image: docker.io/library/python:3.14-alpine@sha256:9e9fde4d32eedce0b661d9ab91e826b62dddf28e928c230ec55f1866cac66b01
+          args: [python, /app/boinc_exporter.py]
+          env:
+            - name: BOINC_GUI_RPC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: boinc-secret
+                  key: BOINC_GUI_RPC_PASSWORD
+          ports:
+            - name: metrics
+              containerPort: 9101
+              protocol: TCP
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: config
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: boinc-data
+        - name: config
+          configMap:
+            name: boinc
