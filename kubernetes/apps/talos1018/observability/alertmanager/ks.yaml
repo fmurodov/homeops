@@ -16,7 +16,6 @@ spec:
     - name: longhorn-config
       namespace: flux-system
     - name: kube-state-metrics
-    - name: ntfy
   interval: 1h
   retryInterval: 1m
   timeout: 5m
