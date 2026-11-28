@@ -28,9 +28,15 @@ hostname: ocivm-1
 # Cilium's.
 apiVersion: v1alpha1
 kind: LinkConfig
-name: enp0s6
+name: eth0
 addresses:
   - address: ${OCI_IPV6_PREFIX}::10/128
+---
+# A configured link gets no DHCP by default; IPv4 (and Oracle's DNS at
+# 169.254.169.254) comes from DHCP.
+apiVersion: v1alpha1
+kind: DHCPv4Config
+name: eth0
 ---
 apiVersion: v1alpha1
 kind: KubeletConfig
