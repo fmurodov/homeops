@@ -50,7 +50,7 @@ spec:
               mountPath: /var/lib/boinc/global_prefs_override.xml
               subPath: global_prefs_override.xml
         - name: exporter
-          image: docker.io/library/python:3.14-alpine@sha256:9e9fde4d32eedce0b661d9ab91e826b62dddf28e928c230ec55f1866cac66b01
+          image: docker.io/library/python:3.15-alpine@sha256:0f9552bb28711333da16915ec146f5e6bb44a7fdac9ced15dc17c2e0206346dd
           args: [python, /app/boinc_exporter.py]
           ports:
             - name: metrics
