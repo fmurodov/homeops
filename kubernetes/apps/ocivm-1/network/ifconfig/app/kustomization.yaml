@@ -29,6 +29,15 @@ patches:
           name: internal-gateway
           namespace: network
           sectionName: http
+      - op: add
+        path: /metadata/annotations
+        value:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Network
+          gethomepage.dev/icon: mdi-ip-network
+          gethomepage.dev/name: What is my IP
+          gethomepage.dev/app: ifconfig
+          gethomepage.dev/description: Echoes the requesting IP
   - patch: |
       $patch: delete
       apiVersion: policy/v1

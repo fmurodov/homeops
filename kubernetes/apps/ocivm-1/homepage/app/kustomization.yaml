@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# talos1018's homepage without OIDC (no Pocket ID client here; NetBird only)
+# and without widget API keys; own config in configmap.yaml.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../talos1018/homepage/app
+patches:
+  - path: configmap.yaml
+  - target:
+      kind: Deployment
+      name: homepage
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: HOMEPAGE_ALLOWED_HOSTS
+            value: home.${CLUSTER_DOMAIN}
+      - op: remove
+        path: /spec/template/spec/containers/0/envFrom
+  - patch: |
+      $patch: delete
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: homepage-secret
+        namespace: homepage
