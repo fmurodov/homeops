@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# talos1018's ifconfig, one replica, internal only.
+# talos1018's ifconfig, one replica, internal only; plain HTTP too, for curl.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: network
@@ -19,6 +19,16 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
         value: "ip.${CLUSTER_DOMAIN}"
+  - target:
+      kind: HTTPRoute
+      name: ifconfig-internal
+    patch: |
+      - op: add
+        path: /spec/parentRefs/-
+        value:
+          name: internal-gateway
+          namespace: network
+          sectionName: http
   - patch: |
       $patch: delete
       apiVersion: policy/v1
