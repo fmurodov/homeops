@@ -10,3 +10,4 @@ resources:
   - ./ai
   - ./guest
   - ./boinc
+  - ./homepage/ks.yaml

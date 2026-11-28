@@ -1,0 +1,65 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  namespace: homepage
+data:
+  bookmarks.yaml: |
+    - IaC:
+      - HomeOps:
+        - icon: sh-github.svg
+          description: HomeOps repo
+          href: https://github.com/fmurodov/homeops
+      - fmurodov-tf:
+        - icon: sh-gitlab.svg
+          description: OpenTofu pipeline
+          href: https://gitlab.com/fmurodov/fmurodov-tf
+    - Cloud:
+      - Oracle Cloud:
+        - icon: sh-oracle-cloud.svg
+          description: OCI console
+          href: https://cloud.oracle.com
+      - Cloudflare:
+        - icon: sh-cloudflare.svg
+          description: DNS and zone settings
+          href: https://dash.cloudflare.com
+      - NetBird:
+        - icon: sh-netbird.svg
+          description: Peers and routes
+          href: https://app.netbird.io
+      - Talos Factory:
+        - icon: talos.svg
+          description: Image schematics
+          href: https://factory.talos.dev
+  services.yaml: |
+    []
+  settings.yaml: |
+    title: ocivm-1
+    layout:
+      Observability:
+        style: row
+        columns: 4
+      Network:
+        style: row
+        columns: 3
+      Apps:
+        style: row
+        columns: 4
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          cpu: true
+          label: ocivm-1
+          memory: true
+          show: true
+          showLabel: true
+        nodes:
+          cpu: true
+          memory: true
+          show: true
+          showLabel: true
+    - search:
+        provider: duckduckgo
+        target: _blank

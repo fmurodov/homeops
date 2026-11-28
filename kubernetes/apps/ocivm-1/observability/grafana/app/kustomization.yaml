@@ -12,7 +12,7 @@ resources:
 configMapGenerator:
   - name: grafana-dashboards-custom
     files:
-      - dashboards/chrony.json
+      - dashboards/ntp.json
       - dashboards/boinc.json
     options:
       disableNameSuffixHash: true
