@@ -132,9 +132,10 @@ spec:
                   annotations:
                     summary: "Node {{ $labels.instance }} disk {{ $labels.mountpoint }} usage above 85%"
 
-                # Extrapolate free space; fires if a filesystem trends to full within 24h
+                # Extrapolate free space; fires if a filesystem trends to full within 24h.
+                # Below 25% free only: one big image pull on /var otherwise extrapolates to full.
                 - alert: NodeDiskWillFillIn24h
-                  expr: 'predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}[6h], 24 * 3600) < 0'
+                  expr: 'predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}[6h], 24 * 3600) < 0 and node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} < 0.25'
                   for: 1h
                   labels:
                     severity: warning
